@@ -1,0 +1,92 @@
+#  Spec vs Status and condition management
+
+= Spec vs. Status and Condition Management
+
+In the Kubernetes Resource Model, the separation of concerns between what a user wants and what the system is currently doing is fundamental to the declarative nature of the platform. Understanding the relationship between `spec`, `status`, and `conditions` is critical for building robust, idempotent controllers.
+
+== The Core Distinction
+
+=== Spec (The Desired State)
+The `spec` defines the **intent**. It is the source of truth provided by the user (via YAML/JSON) or another controller.
+*   **Immutability:** While not strictly enforced by the schema, the `spec` should generally be treated as read-only by the controller.
+*   **Controller's Role:** Your controller monitors the `spec` and works to ensure the actual state of the cluster matches this definition.
+
+=== Status (The Observed State)
+The `status` represents the **observed state** of the resource. It is the controller’s feedback loop to the user.
+*   **Source of Truth:** Only the controller (or the system) should update the `status`. 
+*   **Transient Nature:** If a controller is deleted, the `spec` remains, but the `status` may become stale. It is intended to reflect the result of the controller's reconciliation efforts.
+
+== Condition Management
+Conditions provide a structured, machine-readable way to report the progress and health of a resource. Rather than just a raw string, a `Condition` allows users to understand *why* a resource might not be ready.
+
+A typical `Condition` structure includes:
+*   **Type:** The specific state being reported (e.g., `Available`, `Progressing`, `Degraded`).
+*   **Status:** The current state of that type (`True`, `False`, or `Unknown`).
+*   **Reason:** A CamelCase machine-readable identifier for the current state.
+*   **Message:** A human-readable explanation of the state.
+*   **ObservedGeneration:** A critical field that links the condition to a specific version of the `spec`.
+
+[IMPORTANT]
+====
+Always compare `metadata.generation` with `status.conditions[].observedGeneration`. If they do not match, the controller is still processing a change, and the status does not yet reflect the current `spec`.
+====
+
+== Hands-on Activity: Implementing Status Conditions
+
+In this activity, we will use the `controller-runtime` library to update a status condition.
+
+=== Prerequisites
+*   A project scaffolded with `kubebuilder`.
+*   A defined API struct with a `status` field.
+
+=== Step 1: Update the Status Struct
+Ensure your `types.go` file includes a slice of `metav1.Condition`.
+
+[source,go]
+----
+type MyResourceStatus struct {
+    // +patchMergeKey=type
+    // +patchStrategy=merge
+    // +listType=map
+    // +listMapKey=type
+    Conditions []metav1.Condition `json:"conditions,omitempty"`
+}
+----
+
+=== Step 2: Implement the Reconcile Logic
+In your `Reconcile` function, use the `meta` library to update the conditions cleanly.
+
+[source,go]
+----
+import (
+    "k8s.io/apimachinery/pkg/api/meta"
+    metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+)
+
+func (r *MyReconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctrl.Result, error) {
+    // 1. Fetch the object
+    // 2. Perform logic...
+    
+    // 3. Update Condition if ready
+    condition := metav1.Condition{
+        Type:               "Ready",
+        Status:             metav1.ConditionTrue,
+        Reason:             "ReconciliationSucceeded",
+        Message:            "The resource is fully operational",
+        ObservedGeneration: myObj.Generation,
+    }
+
+    meta.SetStatusCondition(&myObj.Status.Conditions, condition)
+
+    // 4. Persist changes to the API server
+    err := r.Status().Update(ctx, &myObj)
+    return ctrl.Result{}, err
+}
+----
+
+== Gotchas and Best Practices
+
+*   **Avoid "Status-in-Spec":** Never mirror status information back into the `spec`. This creates infinite loops where the controller triggers its own reconciliation.
+*   **Patch vs. Update:** Use `Status().Update()` for simple changes. If you are dealing with high-concurrency environments or complex field merging, consider `Status().Patch()`.
+*   **Idempotency:** Your reconciliation logic must be idempotent. Every time the loop runs, calculate the *desired* status based on the current world state, then apply it. Do not "increment" values in status; "set" them.
+*   **Generation Tracking:** Always check if the resource has been updated by comparing `metadata.generation` to your last recorded `observedGeneration` to prevent unnecessary status updates.

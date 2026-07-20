@@ -1,0 +1,83 @@
+#  Distributed system principles for high availability
+
+= Distributed System Principles for High Availability in Kubernetes
+
+In a Kubernetes environment, high availability (HA) is not merely a feature; it is an architectural requirement. As we scale controllers and custom operators, we move from simple automation to distributed systems engineering. This section covers the fundamental principles of building resilient, concurrent control loops.
+
+== The Challenge of Distributed State
+When multiple controller instances run across a cluster, they must operate on shared state without causing corruption or "split-brain" scenarios. Kubernetes relies on **eventual consistency**, where the system continuously drives the actual state toward the desired state defined in the API.
+
+To achieve this in distributed controllers, we must master:
+*   **Idempotency:** The ability of an operation to be applied multiple times without changing the result beyond the initial application.
+*   **Optimistic Concurrency:** Using `resourceVersion` to prevent "lost updates" where one controller overwrites changes made by another.
+*   **Leader Election:** Ensuring that for a specific set of resources, only one controller instance is actively performing the reconciliation loop.
+
+== Mechanisms for Coordination
+
+=== Locks and Leases
+Kubernetes provides the `Lease` API (under `coordination.k8s.io`) to manage distributed locks. A lease acts as a heartbeat mechanism: if a controller holds the lease, it is the designated leader. If the heartbeat stops (e.g., the pod crashes), the lease expires, and another instance can acquire it.
+
+=== Controller Sharding
+For high-scale environments (like the OpenShift Ingress Controller), running a single controller instance may become a bottleneck. Sharding allows you to partition the workload. 
+*   **Consistent Hashing:** Distributing work based on resource names or IDs.
+*   **Workqueues with Partitioning:** Controllers only process items they "own" based on specific labels or annotations.
+
+== Hands-on Activity: Implementing Leader Election
+This exercise demonstrates how to ensure only one instance of your controller performs critical tasks.
+
+[IMPORTANT]
+====
+Ensure your ServiceAccount has `get`, `create`, and `update` permissions on the `leases` resource in the `coordination.k8s.io` group.
+====
+
+. **Step 1: Initialize the Leaderelection Config**
+Using `client-go`, create a `LeaderElectionConfig`:
+
+[source,go]
+----
+import "k8s.io/client-go/tools/leaderelection"
+
+config := leaderelection.LeaderElectionConfig{
+    Lock:            lock, // An instance of resourcelock.LeaseLock
+    ReleaseOnCancel: true,
+    LeaseDuration:   15 * time.Second,
+    RenewDeadline:   10 * time.Second,
+    RetryPeriod:     2 * time.Second,
+    Callbacks: leaderelection.LeaderCallbacks{
+        OnStartedLeading: func(ctx context.Context) {
+            // Run your controller logic here
+            runController(ctx)
+        },
+        OnStoppedLeading: func() {
+            log.Fatalf("Lost leadership")
+        },
+    },
+}
+----
+
+. **Step 2: Start the Election**
+Invoke the `RunOrDie` method to block until the leader election is complete:
+
+[source,go]
+----
+leaderelection.RunOrDie(ctx, config)
+----
+
+. **Step 3: Verification**
+Deploy two replicas of your controller. Observe the `Lease` object in the namespace:
+[source,bash]
+----
+kubectl get lease -n <your-namespace>
+kubectl describe lease <lease-name>
+----
+*You will see the `HolderIdentity` field reflecting which pod currently holds the lock.*
+
+== Best Practices for Distributed Controllers
+*   **Avoid "Thundering Herd":** Use jitter in your requeue intervals to prevent all controller instances from slamming the `kube-apiserver` at the exact same millisecond.
+*   **Always use Informer Caches:** Never query the API server directly in your reconcile loop; always use the local cache provided by `client-go` Informers to reduce load.
+*   **Fail Fast:** If your controller cannot satisfy its preconditions, requeue the object and move to the next, rather than blocking the entire queue.
+
+[TIP]
+====
+For deeper architectural patterns, consult *Designing Distributed Systems* by Brendan Burns. It provides the foundational logic for the sidecar and controller patterns we utilize in Kubernetes today.
+====

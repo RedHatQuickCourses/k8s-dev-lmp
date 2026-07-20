@@ -1,0 +1,10 @@
+#  Week 4.2 — Ubiquitous topics!
+
+== Week 4.2 — Ubiquitous topics!
+
+This module explores diverse control plane architectures and platform form factors designed to support specific operational requirements, from enterprise cloud environments to resource-constrained edge devices.
+
+*   **Control Plane Architectures:** Examination of alternative Kubernetes control plane implementations and models.
+*   **HyperShift:** An architectural approach for running hosted OpenShift control planes (nested clusters) to improve scalability and lifecycle management.
+*   **kcp:** A Kubernetes-like control plane optimized for multi-cluster management and alternative use cases.
+*   **Edge Form Factors:** Implementation of enterprise-grade Kubernetes on small-scale hardware using solutions such as MicroShift, k0s, and microk8s.

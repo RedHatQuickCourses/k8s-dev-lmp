@@ -1,0 +1,80 @@
+#  Error handling and requeue strategies
+
+= Week 1.2: Error Handling and Requeue Strategies in Controllers
+
+In a distributed system like Kubernetes, a controller cannot assume that every operation will succeed on the first attempt. Network partitions, transient API errors, or conflicting states are expected realities. Robust controllers must implement sophisticated error handling and requeue strategies to ensure **eventual consistency**.
+
+== The Anatomy of a Requeue
+When a `Reconcile` function encounters an error, it should not simply crash the process. Instead, it must signal to the controller's workqueue that the item failed and requires processing again later.
+
+The workqueue acts as a buffer between the `Informer` (which watches for changes) and the `Reconciler` (which acts on them). When processing an item fails, the standard pattern involves:
+
+1.  **Logging the error:** Provide context for observability.
+2.  **Evaluating the error type:** Determine if the error is transient (e.g., API server timeout) or permanent (e.g., invalid resource configuration).
+3.  **Re-adding to the queue:** Using a rate-limiting mechanism to avoid hammering the API server during recovery.
+
+=== Rate Limiting and Backoff
+If a controller fails to process a resource, retrying immediately can exacerbate issues (a "thundering herd" effect). We use rate limiters to implement exponential backoff:
+
+*   **Linear Backoff:** Retrying at fixed intervals.
+*   **Exponential Backoff:** Increasing the delay between retries (e.g., 1s, 2s, 4s, 8s...).
+
+[TIP]
+====
+In `client-go` and `controller-runtime`, never use `time.Sleep()` inside your reconcile loop. This blocks the entire worker thread. Always return an error to the reconciler, which then utilizes the workqueue's `AddRateLimited()` method.
+====
+
+== Hands-on Activity: Implementing Resilient Requeues
+
+This activity demonstrates how to handle errors within a reconcile loop using `controller-runtime` patterns.
+
+=== Prerequisites
+*   A scaffolded project using `kubebuilder` or a basic controller setup.
+*   Access to a Kubernetes cluster (or `kind`).
+
+=== Step 1: Update the Reconcile Logic
+Modify your controller's `Reconcile` function to return an error when your logic fails.
+
+[source,go]
+----
+func (r *MyReconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctrl.Result, error) {
+    // 1. Fetch the object
+    obj := &myappv1.MyResource{}
+    if err := r.Get(ctx, req.NamespacedName, obj); err != nil {
+        return ctrl.Result{}, client.IgnoreNotFound(err)
+    }
+
+    // 2. Perform business logic
+    if err := r.doSomething(obj); err != nil {
+        // Log the error and return it to trigger a requeue
+        log.Log.Error(err, "Failed to reconcile MyResource")
+        return ctrl.Result{}, err 
+    }
+
+    return ctrl.Result{}, nil
+}
+----
+
+=== Step 2: Customizing Requeue Intervals
+Sometimes you don't have an error, but you need to check the status again after a specific duration (e.g., waiting for a dependent resource to become ready).
+
+[source,go]
+----
+import "time"
+
+// Inside Reconcile...
+if !obj.Status.Ready {
+    // Requeue after 30 seconds to check again
+    return ctrl.Result{RequeueAfter: time.Second * 30}, nil
+}
+----
+
+=== Step 3: Best Practices for Error Handling
+*   **IgnoreNotFound:** Always use `client.IgnoreNotFound(err)` when fetching objects. If the object is deleted while in the queue, you should stop processing, not return an error.
+*   **Don't Requeue Invalid Configs:** If a user provides an invalid spec (e.g., a field that fails validation), retrying will never succeed. Update the object's `Status` to reflect a "Failed" condition and stop returning the error.
+*   **Use Conditions:** Represent the state of the controller in the `Status` field using `metav1.Condition`. This allows users to see *why* the controller is stuck without checking logs.
+
+== Summary
+*   **Queues are FIFO:** Remember that order matters; ensure your logic is idempotent.
+*   **Never Block:** Use `ctrl.Result{RequeueAfter: ...}` instead of sleeping.
+*   **Rate Limit:** Allow your controller to back off from failing resources to protect the `kube-apiserver`.

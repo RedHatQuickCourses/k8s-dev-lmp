@@ -1,0 +1,13 @@
+#  Week 2.1 — Controllers contd.
+
+= Week 2.1 — Controllers contd.
+
+This module focuses on developing robust Kubernetes controllers using the `controller-runtime` abstraction and `kubebuilder` framework. It emphasizes the practical implementation of the reconciliation loop to manage the lifecycle of custom resources.
+
+Key topics include:
+
+*   **Spec vs. Status:** Managing the delta between desired state (Spec) and actual state (Status) via conditions.
+*   **API Lifecycle:** Implementing comprehensive CRUD operations using `get`, `list`, `watch`, `create`, `delete`, `update`, and `patch` semantics.
+*   **Best Practices:** Differentiating between `Apply`, `Patch`, and `Update` operations.
+*   **Validation:** Ensuring API integrity using `kube-api-linter` (KAL) and built-in validation rules.
+*   **Tooling:** Using `kubebuilder` to scaffold and streamline the development of production-ready controllers.

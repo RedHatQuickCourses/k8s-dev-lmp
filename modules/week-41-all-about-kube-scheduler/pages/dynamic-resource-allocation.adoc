@@ -1,0 +1,94 @@
+#  Dynamic Resource Allocation
+
+= Dynamic Resource Allocation (DRA)
+
+In traditional Kubernetes scheduling, the `kube-scheduler` makes placement decisions based primarily on CPU and memory requests defined in a Pod's specification. However, as cluster workloads become increasingly specialized—relying on hardware accelerators like GPUs, FPGAs, or high-performance NICs—the static nature of resources becomes a bottleneck.
+
+**Dynamic Resource Allocation (DRA)** is a Kubernetes API designed to extend the resource model, allowing third-party drivers to manage the lifecycle of complex, non-standard hardware resources.
+
+== Why do we need DRA?
+
+Historically, Kubernetes managed specialized hardware using the `Device Plugin` framework. While effective for simple "pass-through" scenarios, Device Plugins suffer from several limitations:
+
+*   **Inflexible Allocation:** Device plugins operate at the node level. The scheduler has limited visibility into the specific state of the hardware.
+*   **Static Resource Requests:** It is difficult to model resources that can be partitioned or shared dynamically (e.g., slicing a GPU into smaller virtual instances).
+*   **No "Pre-allocation" Logic:** With standard plugins, the resource is often allocated only when the Pod is scheduled to the node, leaving little room for complex pre-provisioning requirements.
+
+DRA shifts this by introducing a **claim-based** model, where the scheduler interacts with a Resource Driver to determine if and how a specific piece of hardware can be assigned to a Pod.
+
+== Core Concepts
+
+DRA introduces three primary custom resources:
+
+*   **`ResourceClass`**: Defines the "policy" for how a resource should be allocated. It acts as the interface between the cluster administrator's intent and the specific driver.
+*   **`ResourceClaim`**: A request for resources made by a user or an application. The claim acts as the binding between the Pod and the actual hardware.
+*   **`ResourceClaimTemplate`**: Used within a Pod template to allow for the automatic creation of `ResourceClaims` when a Pod is instantiated (similar to how a `PersistentVolumeClaim` works with a `PersistentVolume`).
+
+== Hands-on Activity: Configuring a Resource Claim
+
+In this exercise, you will create a `ResourceClaim` to request a specialized resource managed by a DRA-compliant driver.
+
+[IMPORTANT]
+====
+This activity assumes your cluster has a DRA-compatible driver installed (e.g., the official Kubernetes DRA dummy driver or a vendor-specific GPU driver).
+====
+
+=== Step 1: Create a Resource Class
+Define the class that dictates which driver handles the request.
+
+[source,yaml]
+----
+apiVersion: resource.k8s.io/v1alpha2
+kind: ResourceClass
+metadata:
+  name: gpu-class
+driverName: my-vendor.com/gpu-driver
+----
+
+=== Step 2: Define the Pod with a Resource Claim
+Instead of hardcoding resource requests in the container spec, use a `ResourceClaimTemplate` to request resources dynamically.
+
+[source,yaml]
+----
+apiVersion: v1
+kind: Pod
+metadata:
+  name: gpu-workload
+spec:
+  containers:
+  - name: worker
+    image: alpine
+    command: ["sleep", "infinity"]
+  resourceClaims:
+  - name: my-gpu
+    source:
+      resourceClaimTemplateName: gpu-template
+---
+apiVersion: resource.k8s.io/v1alpha2
+kind: ResourceClaimTemplate
+metadata:
+  name: gpu-template
+spec:
+  spec:
+    resourceClassName: gpu-class
+----
+
+=== Step 3: Verify Allocation
+Once the Pod is created, the scheduler triggers the DRA controller to fulfill the claim. Check the status of your claim:
+
+[source,bash]
+----
+kubectl get resourceclaim
+kubectl describe resourceclaim <claim-name>
+----
+
+The `status` field will show whether the resource has been allocated and which node it has been bound to.
+
+== Troubleshooting DRA
+
+If your Pod remains in `Pending` state with DRA:
+
+1.  **Check Driver Logs:** Ensure your vendor-specific DRA driver is running in the `kube-system` namespace.
+2.  **Inspect ResourceClaim Events:** Run `kubectl describe resourceclaim <name>` to check for allocation failures.
+3.  **Validate ResourceClass:** Verify that the `driverName` in your `ResourceClass` matches the driver installed on your nodes.
+4.  **Scheduler Awareness:** Ensure your control plane is running a version of `kube-scheduler` that supports the `DynamicResourceAllocation` feature gate (enabled by default in modern Kubernetes versions).

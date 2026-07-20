@@ -1,0 +1,12 @@
+#  Week 2.2 — Going distributed: locks, leases, ownership, eventual consistency
+
+= Week 2.2 — Going distributed: locks, leases, ownership, eventual consistency
+
+This module focuses on the challenges of operating multiple controllers in a distributed environment. It emphasizes building resilient, eventually consistent state machines by applying foundational distributed system principles to prevent conflicts and ensure reliable orchestration.
+
+Key concepts include:
+
+*   **Idempotency:** Designing state machines that ensure multiple executions lead to the same result without side effects.
+*   **Synchronization Mechanisms:** Utilizing locks and Leases to manage access to shared resources and coordinate activities.
+*   **Leader Election:** Implementing patterns to ensure that only one controller instance performs a specific task at a given time.
+*   **Controller Sharding:** Distributing workload across multiple controller instances to improve scalability, utilizing strategies like resource sharding to handle large-scale clusters.

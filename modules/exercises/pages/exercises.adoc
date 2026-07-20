@@ -1,0 +1,9 @@
+#  Exercises
+
+== Exercises
+
+The practical curriculum focuses on applying advanced Kubernetes concepts through hands-on development:
+
+*   **Controller Implementation:** Build a custom controller from the ground up using `client-go` to understand resource synchronization.
+*   **Distributed Systems Logic:** Implement optimistic locking and leader election mechanisms using the `Lease` API to ensure high availability.
+*   **Admission Control:** Develop and deploy a custom validating webhook to enforce container registry policies within the cluster.

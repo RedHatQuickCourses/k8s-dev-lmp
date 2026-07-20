@@ -1,0 +1,43 @@
+#  Recommended prerequisites: Basic distributed systems knowledge
+
+= Recommended Prerequisites: Mastering Distributed Foundations
+
+To succeed in this Kubernetes Developer Learning Path, you must bridge the gap between container orchestration and the underlying principles of distributed systems. Because Kubernetes is, at its core, a distributed system platform, your ability to reason about the cluster’s behavior relies on your understanding of how independent, networked components maintain state and consistency.
+
+== Understanding the Baseline
+While basic container knowledge (Docker/Podman) is a foundational requirement, this course moves beyond the lifecycle of a single pod. You are expected to have:
+
+*   **Experience with Container Orchestration:** Familiarity with concepts like Pods, Deployments, and Services. If you hold a **CKAD certification** or have completed the **Red Hat DO-180 and DO-280** tracks, you possess the ideal baseline.
+*   **Systems Programming Awareness:** Experience with at least one language commonly used in Kubernetes development, preferably **Go (Golang)**, as it is the language of the Kubernetes control plane and `client-go`.
+
+== Why Distributed Systems Knowledge Matters
+Kubernetes operates on an **eventual consistency** model rather than a strict transactional one. Before diving into `client-go` informers or writing custom controllers, you should be comfortable with the following core distributed concepts:
+
+=== 1. State Reconciliation vs. Imperative Execution
+Unlike a script that executes commands sequentially, Kubernetes controllers operate on a control loop (reconcile loop). You must understand the transition from *imperative* actions ("do this now") to *declarative* state management ("make sure the world looks like this").
+
+=== 2. The CAP Theorem and Consistency
+In a distributed environment, you are balancing Consistency, Availability, and Partition Tolerance. Kubernetes prioritizes consistency at the storage layer (`etcd`) while providing high availability through replication. You will be interacting with systems where:
+*   **Network partitions occur:** How does your controller react when the API server is unreachable?
+*   **Optimistic Concurrency:** Kubernetes uses resource versioning (`metadata.resourceVersion`) to handle concurrent updates rather than traditional database locking.
+
+=== 3. Idempotency
+In a system where controllers may crash and restart, or where network events trigger multiple reconciliations, every action your code takes must be **idempotent**. 
+*   *Definition:* An operation is idempotent if it can be performed multiple times without changing the result beyond the initial application.
+*   *Relevance:* You will learn to design state machines that calculate the "delta" between the current state and the desired state, rather than blindly executing commands.
+
+=== 4. Handling Concurrency and Synchronization
+When managing cluster-wide state, you must ensure that only one "source of truth" acts on a resource at a time. This involves understanding:
+*   **Leader Election:** Utilizing the `Lease` API to ensure only one controller instance is active in a high-availability deployment.
+*   **Distributed Locking:** Using Kubernetes primitives to prevent race conditions when multiple controllers or processes compete for the same resource.
+
+== Recommended Pre-study Resources
+To prepare for the advanced architectural topics in this path, we recommend reviewing the following conceptual frameworks:
+
+*   **Brendan Burns, *Designing Distributed Systems*:** Focus on the "Sidecar," "Ambassador," and "Work Queue" patterns. These patterns form the structural backbone of how we design Kubernetes-native applications.
+*   **The Go Concurrency Model:** Review goroutines, channels, and the `context` package. `client-go` relies heavily on these to manage the lifecycle of informers and asynchronous event handling.
+
+[TIP]
+====
+If you feel your distributed systems foundation is shaky, focus on the "Reconciliation Loop" pattern first. This is the single most important mental model for a Kubernetes Developer. Everything else—from `client-go` informers to Custom Resource Definitions (CRDs)—is built to support or leverage this loop.
+====

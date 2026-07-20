@@ -1,0 +1,11 @@
+#  Week 4.1 — All about kube-scheduler
+
+== Week 4.1 — All about kube-scheduler
+
+The `kube-scheduler` serves as the core component responsible for workload placement within a Kubernetes cluster. It evaluates node capacity and constraints to determine the optimal host for each pod.
+
+Key concepts include:
+
+* **Pod Scheduling & Lifecycle:** Managing the placement of pods, including de-scheduling tasks and integration with auto-scaling mechanisms.
+* **Resource Management:** Enforcing container-level resource Requests and Limits to ensure efficient hardware utilization and cluster stability.
+* **Dynamic Resource Allocation:** Providing advanced scheduling control for specialized hardware (e.g., GPUs) through dynamic resource slicing and allocation patterns.

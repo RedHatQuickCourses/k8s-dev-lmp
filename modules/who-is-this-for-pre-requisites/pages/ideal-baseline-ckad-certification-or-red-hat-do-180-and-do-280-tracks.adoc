@@ -1,0 +1,46 @@
+#  Ideal baseline: CKAD certification, or Red Hat DO-180 and DO-280 tracks
+
+= Recommended Prerequisites: Building Your Foundation
+
+To successfully navigate this Kubernetes Developer Learning Path, it is essential to establish a solid foundation in container orchestration and Kubernetes primitives. This program assumes you are moving beyond basic usage and are preparing to engineer custom extensions, controllers, and complex system architectures.
+
+== The Ideal Baseline
+We recommend that participants possess a baseline of knowledge equivalent to one of the following industry-recognized certification tracks. These paths ensure you are comfortable with the core API objects (Pods, Deployments, Services) and the imperative vs. declarative workflows before we dive into the internal mechanics of the control plane.
+
+=== Option 1: CKAD (Certified Kubernetes Application Developer)
+The **CKAD** certification confirms your ability to design, build, and deploy cloud-native applications for Kubernetes.
+*   **Why this helps:** The exam focuses on application lifecycle management, configuration, multi-container pods, and observability.
+*   **Key competencies acquired:**
+    *   Proficiency with `kubectl` and manifest management.
+    *   Understanding of ConfigMaps, Secrets, and persistent volumes.
+    *   Practical experience in application troubleshooting within a cluster environment.
+
+=== Option 2: Red Hat Training Tracks (DO-180 & DO-280)
+If you prefer a structured, vendor-aligned approach, the Red Hat curriculum provides a deep dive into OpenShift (Kubernetes) internals.
+
+*   **DO-180: Introduction to Containers, Kubernetes, and Red Hat OpenShift**
+    *   This is the entry point for understanding the container runtime, image creation, and basic pod deployment. It provides the "how-it-works" for containerization that is prerequisite to understanding how Kubernetes manages those containers at scale.
+
+*   **DO-280: Red Hat OpenShift Administration II: Operating a Production Kubernetes Cluster**
+    *   This track transitions from application development to platform operations. It covers crucial topics such as:
+        *   Advanced routing and ingress management.
+        *   Resource quotas and limits.
+        *   Cluster security, including Role-Based Access Control (RBAC).
+        *   Troubleshooting the platform rather than just the application.
+
+== Skillset Gap Analysis
+Before beginning this course, ensure you can comfortably answer "Yes" to the following:
+
+[cols="1,1"]
+|===
+| Competency | Requirement
+| *Containerization* | Can you build, tag, and push a container image (OCI-compliant) to a registry?
+| *Manifests* | Are you comfortable writing YAML manifests for standard K8s resources from scratch?
+| *Observability* | Can you interpret application logs and `kubectl describe` outputs to debug a crash-looping pod?
+| *Networking* | Do you understand the relationship between a Service (ClusterIP/NodePort) and its underlying Pod endpoints?
+|===
+
+[NOTE]
+====
+If you feel your knowledge is limited to "running" applications but you are unfamiliar with the *lifecycle* of a resource, we highly recommend reviewing the *Kubernetes.io* documentation on "API Concepts" and "Workloads" before starting the Week 0 modules.
+====

@@ -1,0 +1,91 @@
+#  Reconcile loop and controller-runtime abstraction
+
+= Reconcile Loop and controller-runtime Abstraction
+
+In Kubernetes, the control plane is a collection of "control loops." Instead of imperative commands, Kubernetes relies on a **declarative model** where controllers continuously work to drive the actual state of the system toward the desired state defined in the object's specification.
+
+== The Reconcile Loop Explained
+
+The heart of any Kubernetes controller is the **Reconcile Loop**. It is a control loop that constantly observes the current state of a resource and performs the necessary actions to achieve the desired state.
+
+The reconcile process follows three core steps:
+
+1. **Observe:** Retrieve the current state of the resource from the Kubernetes API server (often via a cached lister).
+2. **Analyze:** Compare the current state (the `Status`) against the desired state (the `Spec`).
+3. **Act:** Perform operations (create, update, delete, or patch) to synchronize the system to match the `Spec`.
+
+=== The controller-runtime Abstraction
+
+While writing controllers using raw `client-go` is possible, it involves significant boilerplate (handling informers, workqueues, and cache synchronization). **`controller-runtime`** is the standard library used by the community to abstract these complexities.
+
+Key benefits of `controller-runtime` include:
+* **Manager:** Orchestrates all controllers in the process, handling shared caches and leader election.
+* **Reconciler Interface:** Provides a simple `Reconcile(ctx, request)` signature that hides the underlying queue management.
+* **Event Filters:** Allows you to filter events (e.g., ignore status updates) to prevent unnecessary reconciliation cycles.
+
+== Spec vs. Status: The Truth of State
+
+Understanding the separation of concerns between `Spec` and `Status` is critical for building idempotent controllers:
+
+*   **`Spec` (Desired State):** The definition of what the user wants. The controller must treat this as "read-only" and authoritative.
+*   **`Status` (Actual State):** A reflection of the current reality. The controller is responsible for updating this field based on the work it performs.
+
+[NOTE]
+====
+Never modify the `Spec` from within your controller's reconcile loop. Modifying the `Spec` causes an infinite reconciliation loop, as the controller will detect a change in the desired state and trigger itself again.
+====
+
+== Hands-on Activity: Defining the Reconciler
+
+In this activity, we will define a basic reconciler structure using `controller-runtime`.
+
+=== Prerequisites
+* Go installed (version 1.21+)
+* `kubebuilder` initialized project
+
+=== Step 1: Define the Reconciler Struct
+In your `internal/controller/` directory, define your reconciler.
+
+[source,go]
+----
+type MyResourceReconciler struct {
+    client.Client
+    Scheme *runtime.Scheme
+}
+
+// Reconcile is the main logic loop
+func (r *MyResourceReconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctrl.Result, error) {
+    // 1. Fetch the object
+    var myObj myv1.MyResource
+    if err := r.Get(ctx, req.NamespacedName, &myObj); err != nil {
+        return ctrl.Result{}, client.IgnoreNotFound(err)
+    }
+
+    // 2. Add your logic here (e.g., checking Spec vs Status)
+    
+    // 3. Update the Status
+    return ctrl.Result{}, nil
+}
+----
+
+=== Step 2: Set up the Manager
+Register your controller with the Manager in `main.go`. The manager handles the orchestration of the cache and ensures the Reconcile loop is triggered whenever the watched resource changes.
+
+[source,go]
+----
+if err = (&controller.MyResourceReconciler{
+    Client: mgr.GetClient(),
+    Scheme: mgr.GetScheme(),
+}).SetupWithManager(mgr); err != nil {
+    os.Exit(1)
+}
+----
+
+=== Step 3: Implement Idempotency
+To ensure your controller is safe, always ensure your logic is idempotent:
+*   **Check before creating:** Use `client.Get` to see if a resource exists before attempting a `client.Create`.
+*   **Use Patch over Update:** `Update` performs a full object overwrite, which is prone to conflicts. `Patch` allows for surgical updates to specific fields, reducing the likelihood of resource version conflicts.
+
+== Troubleshooting Tips
+*   **Requeueing:** If a resource is not yet ready, return `ctrl.Result{RequeueAfter: time.Second * 5}, nil` to trigger a re-check later rather than failing the reconcile.
+*   **Logging:** Use `log.FromContext(ctx)` provided by `controller-runtime` to keep consistent audit logs across your control plane.

@@ -1,0 +1,75 @@
+#  API discovery and Aggregation Layer
+
+= API Discovery and the API Aggregation Layer
+
+In the Kubernetes ecosystem, the `kube-apiserver` acts as the single point of entry. However, as the cluster grows in complexity, there is often a need to extend the API surface beyond native resources and Custom Resource Definitions (CRDs). This is achieved through **API Discovery** and the **API Aggregation Layer**.
+
+== API Discovery
+
+The Discovery API allows clients (like `kubectl` or custom controllers) to understand what resources are available in the cluster, what operations are supported, and which API groups are exposed.
+
+### How it Works
+When you run `kubectl api-resources`, your client is interacting with the Discovery endpoints. Historically, this was a large, monolithic response. Modern Kubernetes has evolved toward **Aggregated Discovery**, which provides more efficient, scalable discovery information, especially in clusters with many CRDs or aggregated APIs.
+
+*   **Standard Discovery:** Accessed via `/api` and `/apis`.
+*   **Aggregated Discovery:** Uses the `apidiscovery.k8s.io` group to serve discovery information in a more structured, granular manner, reducing the payload size for large clusters.
+
+[TIP]
+====
+To inspect aggregated discovery responses using `kubectl proxy`, you can fetch the discovery list with the appropriate headers:
+
+[source,bash]
+----
+oc proxy &
+curl -v http://127.0.0.1:8001/api \
+  -H "Accept: application/json;v=v2;g=apidiscovery.k8s.io;as=APIGroupDiscoveryList"
+----
+====
+
+== The API Aggregation Layer
+
+The API Aggregation Layer allows you to extend the Kubernetes API by running your own specialized API server alongside the primary `kube-apiserver`. This is essentially "hosting" your own API inside the Kubernetes ecosystem.
+
+### Why use the Aggregation Layer?
+While CRDs are excellent for managing simple stateful resources, they have limitations regarding complex validation, custom storage backends, or existing API implementations. The Aggregation Layer provides:
+
+1.  **Custom Storage:** Unlike CRDs (which always store in `etcd`), an aggregated API server can store data in any backend (e.g., a SQL database or a third-party service).
+2.  **Advanced Logic:** It allows for custom endpoints that don't fit the standard `GET/POST/PUT/DELETE` paradigm of Kubernetes resources.
+3.  **API Versioning:** Full control over version conversion and complex API machinery.
+
+### How it works
+The `kube-apiserver` acts as a proxy. When a request hits the master API server:
+1.  The `kube-apiserver` checks its internal routing table.
+2.  If the requested path belongs to an `APIService` object (which defines the custom API), the request is forwarded to your specific API server.
+3.  Your server handles the logic and returns the response back to the user through the `kube-apiserver`.
+
+== Hands-on Activity: Exploring APIServices
+
+In this activity, we will list the current registered API services in your cluster to see how the aggregation layer is currently utilized.
+
+### Prerequisites
+*   An active Kubernetes or OpenShift cluster.
+*   `kubectl` or `oc` CLI tool configured.
+
+### Steps
+
+1.  **List existing APIServices:**
+    The aggregation layer registers custom APIs via `APIService` objects. View them using:
+    [source,bash]
+    ----
+    kubectl get apiservices
+    ----
+
+2.  **Inspect a specific service:**
+    Look at the output of a core-managed service, such as `v1beta1.metrics.k8s.io`:
+    [source,bash]
+    ----
+    kubectl get apiservice v1beta1.metrics.k8s.io -o yaml
+    ----
+    *Note the `spec.service` field. This points to the namespace and name of the internal Service that acts as the "backend" for this API.*
+
+3.  **Understand the Routing:**
+    Observe the `status` section. The `Available` condition indicates whether the `kube-apiserver` can successfully communicate with your custom backend. If this status is `False`, the API aggregation layer will fail to route requests to that extension.
+
+== Further Learning
+To implement your own API server using the aggregation layer, refer to the [kubernetes/sample-apiserver](https://github.com/kubernetes/sample-apiserver) repository. It provides the standard framework for building a server that satisfies the `k8s.io/apiserver` library requirements.

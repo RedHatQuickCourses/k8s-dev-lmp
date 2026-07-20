@@ -1,0 +1,59 @@
+#  Kubernetes Security and Observability (Creane, Gupta)
+
+= Kubernetes Security and Observability
+
+In the context of the Kubernetes Developer Learning Path, understanding how to secure and monitor your custom resources and controllers is as critical as writing the code itself. As outlined by Creane and Gupta in *Kubernetes Security and Observability*, the transition from managing standard resources to building custom extensions requires a shift in how we perceive the "trusted" boundaries of the cluster.
+
+== The Security-Observability Intersection
+
+When developing custom controllers or admission webhooks, you are effectively expanding the control plane's surface area. According to Creane and Gupta, security in Kubernetes is not just about perimeter defense; it is about *defense-in-depth* within the API lifecycle.
+
+=== Key Security Principles for Developers
+* **Least Privilege for Controllers:** A controller requires a `ServiceAccount` with RBAC permissions. Developers must follow the principle of least privilege, granting only the specific `verbs` (get, list, watch, create, update, patch) on the specific resources required by the operator.
+* **Admission Control as a Security Gate:** As we will explore in Week 3.1, `Validating` and `Mutating` webhooks are your first line of defense. They ensure that custom resources meet security policies (e.g., preventing the use of privileged containers) before they ever reach `etcd`.
+* **Securing the API Server:** Since the `kube-apiserver` acts as the single point of entry for all modifications, securing its communication via TLS and ensuring proper `Authentication` and `Authorization` modules are enabled is paramount.
+
+=== Observability: The Feedback Loop
+Observability is the "eyes" for your distributed system. For a developer building controllers, observability is defined by three pillars:
+1. **Metrics:** Exposing controller health via Prometheus endpoints. Are your workqueues backing up? How long does the `Reconcile` loop take?
+2. **Logging:** Structured logs allow you to trace the lifecycle of a resource through the API request/response flow.
+3. **Tracing:** Distributed tracing (e.g., Jaeger) is essential when a request triggers multiple webhooks or cross-controller interactions, helping you identify where an "event propagation" delay might be occurring.
+
+== Practical Activity: Securing a Custom Controller
+
+In this activity, we will define a `ClusterRole` to ensure our controller adheres to the principle of least privilege.
+
+[source,yaml]
+----
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRole
+metadata:
+  name: my-custom-controller-role
+rules:
+- apiGroups: ["my.domain.com"]
+  resources: ["customresources"]
+  verbs: ["get", "list", "watch", "update", "patch"]
+- apiGroups: [""] # Core API group
+  resources: ["events"] # Required for logging controller actions
+  verbs: ["create", "patch"]
+----
+
+=== Step-by-Step Instructions
+
+1.  **Define the Scope:** Identify the exact resources your controller needs to reconcile. Avoid using wildcard (`*`) verbs.
+2.  **Audit the RBAC:** Before deploying, use `kubectl auth can-i` to verify the permissions of your controller's ServiceAccount:
++
+[source,bash]
+----
+kubectl auth can-i update customresources --as=system:serviceaccount:default:my-controller
+----
+3.  **Implement Logging:** Ensure your controller logs the `UID` and `Generation` of the resource it is reconciling. This provides the audit trail required for observability.
+
+== Troubleshooting Guidance
+* **Unauthorized Errors:** If your controller fails to reconcile, check the `kube-apiserver` audit logs. It will show the specific `ServiceAccount` attempting an action and the denied `verb` or `resource`.
+* **Performance Bottlenecks:** If your controller logs suggest a backlog in the workqueue, check your `Informers`. Excessive `resync` periods can lead to unnecessary API pressure, which can be identified by monitoring the `controller_runtime_reconcile_time_seconds` metric.
+
+[TIP]
+====
+For further study, refer to *Kubernetes Security and Observability* (Creane, Gupta) to understand how to map these concepts to the broader cluster infrastructure, particularly regarding OpenShift-specific hardening techniques discussed in Week 3.2.
+====

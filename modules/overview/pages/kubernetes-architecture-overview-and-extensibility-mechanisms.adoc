@@ -1,0 +1,68 @@
+#  Kubernetes architecture overview and extensibility mechanisms
+
+= Kubernetes Architecture Overview and Extensibility Mechanisms
+
+Kubernetes is not just a container orchestrator; it is a highly extensible, API-driven distributed operating system. Understanding its architecture requires shifting your perspective from "command-execution" to "state-reconciliation."
+
+== The Control Plane: The Brain of the Cluster
+At the heart of every Kubernetes cluster lies the **Control Plane**. Its primary role is to maintain the desired state of the cluster by processing API requests and orchestrating changes across worker nodes.
+
+The Control Plane consists of four primary components:
+
+*   **kube-apiserver:** The front door to the cluster. Every action in Kubernetes—whether from `kubectl`, a controller, or an external tool—must pass through the API server.
+*   **etcd:** The consistent and highly-available key-value store used as Kubernetes' backing store for all cluster data.
+*   **kube-scheduler:** Watches for newly created Pods with no assigned node and selects a node for them to run on.
+*   **kube-controller-manager:** Runs controller processes that regulate the state of the cluster (e.g., node controllers, job controllers, and endpoint controllers).
+
+== The Declarative Model
+Kubernetes operates on a **declarative configuration model**. Instead of telling the system *how* to perform a task (imperative), you tell the system *what* you want the state to be (declarative).
+
+1.  **Intent:** You submit a YAML/JSON manifest to the `kube-apiserver`.
+2.  **Storage:** The API server validates the object and persists it in `etcd`.
+3.  **Observation:** Controllers watch `etcd` for changes.
+4.  **Action:** Controllers perform actions to bridge the gap between the "Current State" and your "Desired State."
+
+== Extensibility Mechanisms: Making Kubernetes Your Own
+The true power of Kubernetes lies in its extensibility. You are not limited to the built-in resources like `Pod` or `Service`. You can extend the API to handle custom logic through several mechanisms:
+
+=== 1. Custom Resource Definitions (CRDs)
+CRDs allow you to define your own API objects. If you want to manage a "Database" or "MessageQueue" as a native Kubernetes object, you define a CRD. Once created, the `kube-apiserver` treats your custom resource as a first-class citizen, allowing you to use `kubectl` to manage them.
+
+=== 2. Controllers and Operators
+A **Controller** is a control loop that watches the state of your cluster and makes changes to move the current state closer to the desired state. An **Operator** is a specialized controller that encodes operational knowledge (like how to back up or upgrade a database) into the controller's logic, automating complex day-two operations.
+
+=== 3. Admission Webhooks
+These allow you to intercept requests to the `kube-apiserver` before they are persisted.
+*   **Validating Webhooks:** Ensure a request meets your security or compliance standards (e.g., "All pods must have a resource limit").
+*   **Mutating Webhooks:** Modify the object before it is stored (e.g., "Automatically inject a sidecar container for logging").
+
+=== 4. API Aggregation
+For advanced use cases, you can run your own API server alongside the `kube-apiserver`. The aggregation layer allows you to route requests to your custom server, enabling you to build fully independent APIs that leverage Kubernetes authentication and authorization.
+
+== Hands-on Activity: Observing the API Lifecycle
+In this exercise, we will interact with the `kube-apiserver` to observe how declarative state is processed.
+
+[source,bash]
+----
+# 1. Create a simple declarative manifest
+cat <<EOF > nginx-pod.yaml
+apiVersion: v1
+kind: Pod
+metadata:
+  name: nginx-demo
+spec:
+  containers:
+  - name: nginx
+    image: nginx:latest
+EOF
+
+# 2. Submit the intent to the API server
+kubectl apply -f nginx-pod.yaml
+
+# 3. Observe the server's response lifecycle via logs (if you have cluster access)
+# Note how the request passes through admission controllers before being persisted
+kubectl get pod nginx-demo -o yaml
+----
+
+**Challenge:** 
+Try deleting the `nginx-demo` pod and notice that you are not "killing the process" directly; you are submitting a request to the API server to *remove the intent* of that resource from `etcd`. The controller then observes this deletion and coordinates the cleanup across the nodes.

@@ -1,0 +1,6 @@
+* xref:week-21-controllers-contd.adoc[]
+** xref:reconcile-loop-and-controller-runtime-abstraction.adoc[]
+** xref:scaffolding-with-kubebuilder.adoc[]
+** xref:spec-vs-status-and-condition-management.adoc[]
+** xref:api-validation-and-linting.adoc[]
+** xref:crud-operations-and-applypatchupdate-semantics.adoc[]

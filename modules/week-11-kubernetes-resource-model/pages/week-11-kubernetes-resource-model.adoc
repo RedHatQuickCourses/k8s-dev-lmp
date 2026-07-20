@@ -1,0 +1,12 @@
+#  Week 1.1 — Kubernetes Resource Model
+
+= Week 1.1 — Kubernetes Resource Model
+
+The Kubernetes Resource Model centers on declarative configuration management, where users define the desired state of the system rather than the steps to achieve it. This module explores the foundational mechanics of how the `kube-apiserver` processes these intent-based requests.
+
+Key concepts include:
+
+*   **Declarative Intent:** The core principle of defining the target state, which the system continuously reconciles.
+*   **Request Lifecycle:** A deep dive into the plugin layers within the `kube-apiserver`, including authentication, authorization, audit, and admission control.
+*   **Write Operations:** Understanding how mutation and validation webhooks intercept `CREATE` and `UPDATE` calls to enforce policies or modify objects.
+*   **Control Plane Scaling:** Emphasis on vertical scaling strategies for `etcd` and the `kube-apiserver` to ensure cluster stability.

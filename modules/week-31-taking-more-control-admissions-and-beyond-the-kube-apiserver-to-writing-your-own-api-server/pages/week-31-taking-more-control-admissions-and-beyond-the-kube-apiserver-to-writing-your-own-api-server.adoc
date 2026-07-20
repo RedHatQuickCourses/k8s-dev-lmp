@@ -1,0 +1,11 @@
+#  Week 3.1 — Taking more control: Admissions and beyond the kube-apiserver to writing your own API Server
+
+== Week 3.1 — Taking more control: Admissions and beyond the kube-apiserver to writing your own API Server
+
+This module focuses on advanced Kubernetes extensibility, moving beyond basic Custom Resource Definitions (CRDs) to implement deep integration with the cluster control plane.
+
+*   **Admission Control:** Implementing Validating and Mutating webhooks to intercept, inspect, and modify API requests before they are persisted.
+*   **Policy Enforcement:** Understanding the functional distinctions between native admission webhooks and dedicated policy engines.
+*   **API Aggregation Layer:** Utilizing the aggregation layer to register custom API servers, allowing them to serve their own API groups alongside the core Kubernetes APIs.
+*   **API Discovery:** Managing and exposing API metadata to ensure clients can discover and interact with custom resources effectively.
+*   **Custom API Server Implementation:** Best practices for building independent API servers that integrate seamlessly with the Kubernetes ecosystem, supported by practical case studies like the OLM package-manager.

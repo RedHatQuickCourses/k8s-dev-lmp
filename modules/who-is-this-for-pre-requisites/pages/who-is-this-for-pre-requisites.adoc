@@ -1,0 +1,10 @@
+#  Who is this for? pre-requisites.
+
+= Who is this for? Pre-requisites
+
+This learning path is designed for engineers, system administrators, and developers who already possess practical experience working with containerized environments.
+
+To ensure success, participants should have:
+
+* **Recommended background:** Basic knowledge of distributed systems principles.
+* **Baseline competency:** Proficiency equivalent to the Certified Kubernetes Application Developer (CKAD) certification, or completion of Red Hat DO-180 and DO-280 training tracks.

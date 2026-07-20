@@ -1,0 +1,81 @@
+#  Advanced networking: Ingress and Gateway API
+
+= Advanced Networking: Ingress and Gateway API
+
+In the Kubernetes ecosystem, managing external access to services is a critical architectural requirement. While early implementations relied on simple port-mapping and NodePorts, the evolution of traffic management has moved toward sophisticated, API-driven models.
+
+== From Ingress to Gateway API
+
+=== The Ingress API
+The `Ingress` resource has served as the standard for exposing HTTP and HTTPS routes from outside the cluster to services within the cluster for many years. 
+
+*   **Function:** It acts as a collection of rules that allow inbound connections to reach the cluster services.
+*   **Limitation:** The Ingress specification is relatively narrow, focusing primarily on L7 (HTTP/S) traffic. This forced developers to rely heavily on vendor-specific annotations (e.g., `nginx.ingress.kubernetes.io/rewrite-target`) to achieve advanced routing, resulting in fragmented configurations that were difficult to port between different Ingress Controllers.
+
+=== The Gateway API
+The **Gateway API** is an evolution of Kubernetes networking designed to address the shortcomings of the Ingress API. It is an open-source project managed by the Kubernetes Networking Special Interest Group (SIG-Network).
+
+*   **Role-Oriented Design:** Unlike Ingress, which is a single, monolithic resource, the Gateway API uses a set of hierarchical resources:
+    *   **GatewayClass:** Defines a type of load balancer (e.g., a specific cloud provider's LB or an NGINX implementation).
+    *   **Gateway:** Represents an instance of a load balancer, requesting specific ports and protocols.
+    *   **HTTPRoute/GRPCRoute:** Defines the actual routing rules (matching criteria and backends) that attach to a `Gateway`.
+*   **Expressiveness:** It supports advanced features natively, such as weighted traffic splitting, header-based routing, and cross-namespace references, without requiring custom annotations.
+
+== Hands-on Activity: Deploying a Gateway API Route
+
+This exercise demonstrates how to route traffic to a service using the Gateway API rather than the legacy Ingress resource.
+
+=== Prerequisites
+*   A Kubernetes cluster (e.g., OpenShift or Minikube).
+*   The Gateway API CRDs installed on your cluster.
+*   A Gateway-compatible controller (e.g., Gateway API for Istio or an Ingress controller supporting the API).
+
+=== Step 1: Define a Gateway
+The `Gateway` resource creates the entry point into your cluster.
+
+[source,yaml]
+----
+apiVersion: gateway.networking.k8s.io/v1
+kind: Gateway
+metadata:
+  name: external-gateway
+  namespace: default
+spec:
+  gatewayClassName: istio # Or your chosen provider
+  listeners:
+  - name: http
+    protocol: HTTP
+    port: 80
+----
+
+=== Step 2: Define the HTTPRoute
+Instead of embedding rules in an Ingress, we create an `HTTPRoute` that links the `Gateway` to a specific `Service`.
+
+[source,yaml]
+----
+apiVersion: gateway.networking.k8s.io/v1
+kind: HTTPRoute
+metadata:
+  name: my-app-route
+spec:
+  parentRefs:
+  - name: external-gateway
+  rules:
+  - matches:
+    - path:
+        type: PathPrefix
+        value: /api
+    backendRefs:
+    - name: my-service
+      port: 8080
+----
+
+=== Key Takeaways for Developers
+*   **Portability:** By using the Gateway API, your routing configurations are standardized, reducing dependency on vendor-specific "magic" annotations.
+*   **Decoupling:** Gateway API separates the *Infrastructure* (Gateway) from the *Application* (HTTPRoute), allowing platform teams to manage load balancers while developers manage their own application routing.
+*   **Extensibility:** The API is designed to support not just HTTP, but also TCP, UDP, and gRPC traffic, providing a unified interface for cluster networking.
+
+[TIP]
+====
+For deep dives into advanced traffic management, refer to the https://gateway-api.sigs.k8s.io/[official Gateway API documentation]. When implementing service-to-service communication within the cluster, consider exploring the https://gateway-api.sigs.k8s.io/mesh/[GAMMA initiative], which bridges the gap between traditional Gateway traffic management and Service Mesh capabilities.
+====

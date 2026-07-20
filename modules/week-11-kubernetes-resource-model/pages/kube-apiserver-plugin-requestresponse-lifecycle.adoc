@@ -1,0 +1,78 @@
+#  kube-apiserver plugin request/response lifecycle
+
+= Understanding the `kube-apiserver` Request/Response Lifecycle
+
+The `kube-apiserver` serves as the central nervous system of a Kubernetes cluster. Every interaction—whether from a `kubectl` command, an internal controller, or an external operator—passes through the API server's request pipeline. Understanding this lifecycle is critical for building secure, efficient, and extension-ready Kubernetes applications.
+
+== The Plugin Pipeline
+
+When a request enters the `kube-apiserver`, it does not immediately interact with the storage layer (`etcd`). Instead, it traverses a sophisticated chain of plugins. These plugins act as filters, ensuring that the request is legitimate, authorized, and compliant with cluster policies.
+
+The lifecycle follows this logical flow:
+
+[source,text]
+----
+[Client Request]
+      │
+      ▼
+1. Authentication (Who are you?)
+2. Audit (Logging the request)
+3. Impersonation (Are you acting for someone else?)
+4. Priority & Fairness (Should this request wait?)
+5. Authorization (Are you allowed to do this?)
+6. Admission (Is this request valid/mutated?)
+7. Storage (Persistence in etcd)
+      │
+      ▼
+[Response]
+----
+
+=== Step-by-Step Breakdown
+
+*   **Authentication:** The server verifies the identity of the requester using certificates, tokens, or OIDC. If authentication fails, the request is rejected with a `401 Unauthorized`.
+*   **Audit:** Every request is logged to track cluster activity. This is essential for compliance and security auditing.
+*   **Impersonation:** Enables admins to act on behalf of another user. The plugin checks if the caller has the authority to impersonate the target user.
+*   **Priority & Fairness (APF):** Prevents the API server from being overwhelmed. It categorizes requests (e.g., leader election vs. background listing) and applies rate limits to ensure cluster stability.
+*   **Authorization:** Checks if the authenticated user has the RBAC permissions to perform the requested verb (GET, POST, DELETE) on the specific resource.
+*   **Admission:** This is the most extensible layer. 
+    *   **Mutating:** Modify the object (e.g., injecting sidecars).
+    *   **Validating:** Enforce business logic or security constraints (e.g., rejecting pods that run as root).
+*   **Storage:** If all plugins pass, the state is serialized and written to `etcd`.
+
+== Practical Exploration: Investigating API Discovery
+
+To understand how the API server presents its capabilities, we can inspect the API discovery endpoint. This is a great way to see how the server negotiates content types and versions.
+
+[NOTE]
+====
+Ensure you have `oc` (or `kubectl`) configured to access your cluster, and use `oc proxy` to securely reach the API server.
+====
+
+=== Hands-on Activity: Probing the API Server
+
+1. **Start the proxy:**
++
+[source,bash]
+----
+oc proxy --port=8001 &
+----
+
+2. **Query the API discovery endpoint:**
++
+Use the following command to retrieve the discovery information. The specific headers are required to get the current `v2` discovery format.
++
+[source,bash]
+----
+curl -v http://127.0.0.1:8001/api \
+  -H "Accept: application/json;v=v2;g=apidiscovery.k8s.io;as=APIGroupDiscoveryList"
+----
+
+3. **Analyze the response:**
++
+You will receive a JSON payload detailing the resources available in the core API group. This response confirms that your request successfully passed the authentication and authorization filters defined in the lifecycle above.
+
+== Key Takeaways for Developers
+
+*   **Order Matters:** Admission webhooks occur *after* authentication and authorization. You don't need to check user identity inside a webhook; the `kube-apiserver` has already validated the user.
+*   **Performance Impact:** Excessive complexity in Mutating or Validating webhooks adds latency to every single API operation. Keep your webhooks lean.
+*   **Observability:** If your requests are being rejected, check your RBAC (Authorization) first, followed by your Admission Webhook configurations.

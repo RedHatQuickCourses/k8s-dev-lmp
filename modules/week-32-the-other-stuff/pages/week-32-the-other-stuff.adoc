@@ -1,0 +1,9 @@
+#  Week 3.2 — The other stuff
+
+= Week 3.2 — The other stuff
+
+This module addresses the essential ecosystem components that complement the core Kubernetes control plane, focusing on traffic management, identity, and cluster-level security.
+
+*   **Advanced Networking:** Examines the evolution of traffic management from Ingress to the modern Gateway API, alongside an introduction to Service Mesh concepts.
+*   **Authentication and Authorization:** Explores AuthN/AuthZ mechanisms, including RBAC, Node Authorizers, and custom authorization webhooks.
+*   **Cluster Security and Hardening:** Covers security implementation strategies such as OpenShift Security Context Constraints (SCC), native Kubernetes `SecurityContext`, SELinux, and seccomp profiles to enforce granular workload isolation.

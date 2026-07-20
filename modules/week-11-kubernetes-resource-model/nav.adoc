@@ -1,0 +1,3 @@
+* xref:week-11-kubernetes-resource-model.adoc[]
+** xref:the-declarative-intent-of-kubernetes-resources.adoc[]
+** xref:kube-apiserver-plugin-requestresponse-lifecycle.adoc[]

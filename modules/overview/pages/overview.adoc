@@ -1,0 +1,11 @@
+#  Overview
+
+= Overview
+
+The Kubernetes Developer Learning Path provides a deep dive into the architecture and extensibility of Kubernetes, focusing on moving beyond basic usage to platform-level development. Key areas of focus include:
+
+* **Control Plane Internals:** Understanding the API server lifecycle, authentication, authorization, and the role of the etcd persistence layer.
+* **Platform Automation:** Mastering the creation of custom resources and operators using controller patterns, informers, and `client-go`.
+* **Distributed System Design:** Implementing high-availability strategies, including leader election, locking, leasing, and idempotent state machines.
+* **Advanced Architecture:** Exploring traffic management through the Gateway API, service meshes, and custom API server aggregation.
+* **Operational Security & Scheduling:** Advanced cluster hardening, admission control webhooks, and the mechanics of the `kube-scheduler`.

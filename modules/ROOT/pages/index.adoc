@@ -1,22 +1,47 @@
-= An Example Quick Course
+=  Kubernetes Developer Learning Path
 :navtitle: Home
 
 == Introduction
 
-Course Title: Course title FIXME
+Course Title:  Kubernetes Developer Learning Path
 
 Description:
 Course description FIXME
 
-Duration: pass:[<span class="course-total-duration" aria-live="polite">…</span>]
+Duration: FIXME hours
 
-== Objectives
+== Topics covered in this course
 
-On completing this course, you should be able to:
 
-* Observable, measurable objective...
-* Observable, measurable objective...
-* Observable, measurable objective...
+*  Overview
+
+*  Who is this for? pre-requisites.
+
+*  Week 0 — Familiarizing with koo·br·neh·teez
+
+*  Week 1.1 — Kubernetes Resource Model
+
+*  Week 1.2 — Controllers, informers, client-go
+
+*  Week 2.1 — Controllers contd.
+
+*  Week 2.2 — Going distributed: locks, leases, ownership, eventual consistency
+
+*  Week 3.1 — Taking more control: Admissions and beyond the kube-apiserver to writing your own API Server
+
+*  Week 3.2 — The other stuff
+
+*  Week 4.1 — All about kube-scheduler
+
+*  Week 4.2 — Ubiquitous topics!
+
+*  Exercises
+
+*  Recommended Reading
+
+*  Suggested Reading
+
+
 
 == Prerequisites
 

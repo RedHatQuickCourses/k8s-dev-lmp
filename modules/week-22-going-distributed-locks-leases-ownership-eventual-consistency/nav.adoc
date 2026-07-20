@@ -1,0 +1,5 @@
+* xref:week-22-going-distributed-locks-leases-ownership-eventual-consistency.adoc[]
+** xref:designing-idempotent-state-machines.adoc[]
+** xref:locks-and-leases-for-synchronization.adoc[]
+** xref:leader-election-mechanisms.adoc[]
+** xref:controller-sharding-strategies.adoc[]

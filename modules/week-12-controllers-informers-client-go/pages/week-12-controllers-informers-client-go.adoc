@@ -1,0 +1,14 @@
+#  Week 1.2 — Controllers, informers, client-go
+
+= Week 1.2 — Controllers, informers, client-go
+
+This module covers the fundamental building blocks of Kubernetes operators and resource synchronization. It focuses on the mechanics of how custom controllers observe state and ensure the cluster converges toward a desired configuration.
+
+Key components include:
+
+*   **client-go Architecture**: The official Go client library for interacting with the Kubernetes API.
+*   **Informers**: Act as the "eyes" of the controller, watching for cluster events and maintaining a local cache to minimize API server load.
+*   **Listers**: Provide read-only access to the local cache, allowing controllers to retrieve resource states efficiently.
+*   **Workqueues**: Serve as buffers for processing events; they implement FIFO (First-In-First-Out) logic to ensure reliable task management.
+*   **Event Propagation**: Understanding how changes in the API server flow through caches to trigger controller logic.
+*   **Operational Patterns**: Best practices for error handling, effective requeue strategies, and managing concurrency within reconciliation loops.

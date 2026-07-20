@@ -1,0 +1,84 @@
+#  Platform automation through custom resources and operators
+
+= Platform Automation: Custom Resources and Operators
+
+In the Kubernetes ecosystem, "Platform Automation" refers to the ability to extend the platform's native capabilities to manage domain-specific applications and infrastructure. Instead of manually orchestrating complex systems, we encode operational knowledge into software using Custom Resources (CRDs) and Controllers (Operators).
+
+== The Kubernetes Extension Pattern
+
+Kubernetes is built on the philosophy that everything is an API object. When the standard set of resources (Pods, Deployments, Services) is insufficient for your business logic, you can extend the API.
+
+*   **Custom Resource Definition (CRD):** Defines the "schema" or the *Desired State* for your custom objects.
+*   **Controller/Operator:** The "brain" that constantly watches the state of the cluster and performs actions to align the *Actual State* with the *Desired State*.
+
+An **Operator** is a specialized controller that automates the lifecycle of complex, stateful applications (e.g., databases, message queues) by embedding human operational knowledge—such as backups, upgrades, and scaling policies—directly into the reconciliation loop.
+
+== Reconciliation: The Heart of Automation
+
+The core of every operator is the **Reconciliation Loop**. Unlike imperative scripts that run once and finish, a controller follows a declarative, asynchronous pattern:
+
+1.  **Observe:** Get the state of the resource from the `kube-apiserver` (via caches/informers).
+2.  **Analyze:** Compare the current cluster state against the `spec` defined in the custom resource.
+3.  **Act:** Perform the necessary operations (CRUD) to reach the desired state.
+4.  **Repeat:** Wait for the next event or requeue based on a change.
+
+== Hands-On Activity: Scaffolding an Operator
+
+In this activity, we will use `kubebuilder` to scaffold the foundation of an operator.
+
+=== Prerequisites
+*   `go` (v1.20+)
+*   `docker` or `podman`
+*   `kubectl`
+*   `kubebuilder` installed
+
+=== Step 1: Initialize the Project
+Create a new directory and initialize your project:
+
+[source,bash]
+----
+mkdir my-operator
+cd my-operator
+kubebuilder init --domain example.com --repo github.com/example/my-operator
+----
+
+=== Step 2: Create a Custom API
+Define a new resource named `DatabaseBackup` to automate backup tasks:
+
+[source,bash]
+----
+kubebuilder create api --group storage --version v1alpha1 --kind DatabaseBackup
+----
+
+This command generates:
+*   `api/v1alpha1/databasebackup_types.go`: Where you define the schema (`Spec` and `Status`).
+*   `internal/controller/databasebackup_controller.go`: Where the reconciliation logic resides.
+
+=== Step 3: Implement the Reconcile Logic
+Open `internal/controller/databasebackup_controller.go` and locate the `Reconcile` function. This is where you write your automation logic:
+
+[source,go]
+----
+func (r *DatabaseBackupReconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctrl.Result, error) {
+    // 1. Fetch the DatabaseBackup instance
+    // 2. Add logic to trigger backup (e.g., executing a command or API call)
+    // 3. Update Status field with success/failure
+    return ctrl.Result{}, nil
+}
+----
+
+=== Step 4: Deploy and Test
+1.  **Install CRDs:** `make install`
+2.  **Run the controller locally:** `make run`
+3.  **Apply a sample resource:** Create `config/samples/storage_v1alpha1_databasebackup.yaml` and run `kubectl apply -f config/samples/...`
+
+== Best Practices for Operators
+*   **Idempotency:** Always ensure your reconcile function can run multiple times without causing side effects.
+*   **Spec vs Status:** Never let the controller update the `Spec`. The user owns the `Spec`; the controller owns the `Status`.
+*   **Events:** Use `record.EventRecorder` to emit Kubernetes events so users can see what the operator is doing via `kubectl describe`.
+*   **Lease/Locking:** When running multiple replicas of an operator, use `leader election` (via `client-go` Leases) to ensure only one instance reconciles a specific resource at a time.
+
+== Further Learning
+For deep dives into operator architecture, refer to:
+*   *Kubernetes Operators* by Dobies & Wood.
+*   The [CNCF Operator Whitepaper](https://tag-app-delivery.cncf.io/whitepapers/operator/).

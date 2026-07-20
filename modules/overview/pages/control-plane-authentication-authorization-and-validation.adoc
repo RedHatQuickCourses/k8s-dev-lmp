@@ -1,0 +1,92 @@
+#  Control plane authentication, authorization, and validation
+
+= Control Plane Authentication, Authorization, and Validation
+
+In a Kubernetes cluster, the `kube-apiserver` acts as the single entry point for all administrative, user, and controller-initiated requests. Ensuring that these requests are secure and valid is the primary function of the API server’s request pipeline.
+
+== The API Request Lifecycle
+When a request hits the `kube-apiserver`, it passes through three distinct phases:
+
+1.  **Authentication:** Identifying who is making the request.
+2.  **Authorization:** Determining what the identified user is allowed to do.
+3.  **Admission Control:** Validating or mutating the request content before it is persisted in `etcd`.
+
+=== 1. Authentication
+The API server uses multiple authentication modules to verify identity. If a module succeeds, it returns a `User` object (including username, UID, and groups). If multiple modules are configured, the first to succeed wins.
+
+*   **X.509 Client Certs:** Used for inter-component communication (e.g., Kubelet to API server).
+*   **Static Token Files:** Simple, non-recommended for production.
+*   **OpenID Connect (OIDC):** Integration with identity providers (e.g., Keycloak, Dex, Okta).
+*   **Service Account Tokens:** JWT tokens assigned to Pods, used for cluster-internal communication.
+
+=== 2. Authorization
+Once authenticated, the system checks if the user has permission to perform the requested action (Verb: `get`, `list`, `create`, `delete`, etc.) on a specific Resource/Subresource.
+
+*   **RBAC (Role-Based Access Control):** The standard mechanism using `Roles/ClusterRoles` and `RoleBindings/ClusterRoleBindings`.
+*   **ABAC (Attribute-Based Access Control):** Policy-based, configured via local files.
+*   **Webhook Authorization:** The API server delegates the decision to an external service via a POST request.
+
+=== 3. Admission Control
+Admission controllers are code modules that intercept requests *after* they are authenticated and authorized, but *before* the object is persisted.
+
+*   **Mutating Admission Controllers:** Can modify the content of the request (e.g., injecting sidecars or default labels).
+*   **Validating Admission Controllers:** Can reject a request if it violates cluster policies (e.g., "all images must come from our internal registry").
+
+---
+
+== Hands-on Activity: Configuring RBAC and Validation
+In this exercise, you will create a restricted ServiceAccount and attempt to enforce a simple check.
+
+=== Step 1: Create a restricted ServiceAccount
+Create a ServiceAccount that has limited permissions to list pods in a specific namespace.
+
+[source,yaml]
+----
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: pod-lister
+  namespace: default
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: Role
+metadata:
+  name: pod-reader
+rules:
+- apiGroups: [""]
+  resources: ["pods"]
+  verbs: ["get", "list"]
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: RoleBinding
+metadata:
+  name: read-pods
+subjects:
+- kind: ServiceAccount
+  name: pod-lister
+roleRef:
+  kind: Role
+  name: pod-reader
+  apiGroup: rbac.authorization.k8s.io
+----
+
+=== Step 2: Test Authorization
+Use the `auth can-i` command to verify the permissions of your new ServiceAccount:
+
+[source,bash]
+----
+kubectl auth can-i list pods --as=system:serviceaccount:default:pod-lister
+# Expected output: yes
+kubectl auth can-i delete pods --as=system:serviceaccount:default:pod-lister
+# Expected output: no
+----
+
+=== Step 3: Discussion on Validation
+In a production scenario, RBAC is not enough. If you wanted to prevent users from creating Pods that use the `latest` image tag, you would implement a **Validating Admission Webhook**. 
+
+*   *Why use a Webhook instead of RBAC?* RBAC controls *who* can do something; Admission Webhooks control *what* is valid within the object schema.
+
+[NOTE]
+====
+For further exploration, refer to the *Kubernetes Security and Observability* guide provided in the recommended reading list to understand how to audit these control plane requests effectively.
+====

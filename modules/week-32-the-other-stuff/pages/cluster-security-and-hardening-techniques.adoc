@@ -1,0 +1,92 @@
+#  Cluster security and hardening techniques
+
+= Cluster Security and Hardening Techniques
+
+In a distributed system as complex as Kubernetes, security cannot be an afterthought. Hardening your cluster requires a defense-in-depth approach, ensuring that even if one layer is compromised, the blast radius remains contained.
+
+This section covers the critical components of securing a Kubernetes environment, with a specific focus on the nuances found in OpenShift.
+
+== The Defense-in-Depth Model
+
+Securing a cluster involves controlling three primary vectors:
+1. **Identity and Access:** Who can access the API? (AuthN/AuthZ)
+2. **Workload Isolation:** What can the container do? (SCCs, Seccomp, AppArmor)
+3. **Cluster Perimeter:** How is traffic flowing into the cluster? (Network Policies, Ingress)
+
+== Identity and Access Control
+
+### Fine-Grained RBAC
+Kubernetes Role-Based Access Control (RBAC) follows the principle of least privilege. Instead of broad `cluster-admin` access, use granular Roles and ClusterRoles.
+
+*   **Verbs:** Limit permissions to the specific actions required (`get`, `list`, `watch`) rather than `*`.
+*   **Resources:** Scope roles to specific namespaces to prevent cross-namespace privilege escalation.
+
+### AuthN/AuthZ in OpenShift
+OpenShift extends Kubernetes security by integrating a centralized identity provider with the platform. 
+*   **Groups and Roles:** OpenShift uses native `Groups` objects that map to your corporate directory, allowing you to bind roles to entire teams rather than individual users.
+*   **Cluster Roles:** OpenShift provides pre-defined cluster roles (e.g., `edit`, `view`, `admin`) that are fine-tuned for developer workflows.
+
+== Workload Hardening
+
+Standard Kubernetes allows containers to run with significant privileges by default. Hardening involves restricting these capabilities.
+
+### Security Context Constraints (SCC)
+OpenShift uses **Security Context Constraints (SCCs)** to control the permissions of pods. Unlike standard Kubernetes Pod Security Admissions (PSA), SCCs are highly granular.
+
+*   **Restricted SCC:** The default for most workloads. It prevents pods from running as root, prevents host path mounting, and limits Linux capabilities.
+*   **Privileged SCC:** Reserved for infrastructure components like CNI plugins or storage drivers.
+
+### Seccomp and Capabilities
+*   **Seccomp (Secure Computing Mode):** Filters the syscalls a process can make to the Linux kernel. A hardened profile denies dangerous calls like `reboot` or `mount`.
+*   **Linux Capabilities:** By default, Docker/CRI-O gives containers a subset of root capabilities. You should explicitly drop all capabilities and only add back the ones strictly required by your application.
+
+== Hands-on Activity: Enforcing Security Policies
+
+In this activity, you will define a Pod that adheres to the principle of least privilege using a Security Context.
+
+[source,yaml]
+----
+apiVersion: v1
+kind: Pod
+metadata:
+  name: hardened-pod
+spec:
+  securityContext:
+    runAsNonRoot: true
+    runAsUser: 1000
+    fsGroup: 2000
+  containers:
+  - name: app
+    image: nginx
+    securityContext:
+      allowPrivilegeEscalation: false
+      capabilities:
+        drop:
+          - ALL
+      readOnlyRootFilesystem: true
+----
+
+=== Step-by-Step Instructions
+
+1. **Verify the Context:** Deploy the manifest above to your cluster.
+2. **Observe Constraints:** Attempt to execute a shell inside the pod (`oc exec -it hardened-pod -- /bin/bash`). 
+3. **Analyze Failure:** Observe how `readOnlyRootFilesystem: true` prevents the application from writing to the file system, thereby mitigating potential post-exploitation activity.
+4. **SCC Check:** If you are on OpenShift, check which SCC your pod is using:
++
+[source,bash]
+----
+oc get pod hardened-pod -o jsonpath='{.metadata.annotations.openshift\.io/scc}'
+----
+
+== Summary Checklist for Hardening
+
+* [ ] **Network Policies:** Implement a "Default Deny All" policy for all namespaces.
+* [ ] **API Security:** Ensure your `kube-apiserver` is not exposed to the public internet.
+* [ ] **Image Security:** Use signed images and scan them for vulnerabilities during the CI/CD phase.
+* [ ] **Audit Logging:** Enable Kubernetes audit logs to track who performed what action and when.
+* [ ] **Secret Management:** Never store raw secrets in Git; utilize external Vault providers or OpenShift Secrets with encryption-at-rest.
+
+[TIP]
+====
+Refer to *Kubernetes Security and Observability* by Creane and Gupta for deep dives into runtime security monitoring and eBPF-based defense mechanisms.
+====

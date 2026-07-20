@@ -1,0 +1,8 @@
+#  Suggested Reading
+
+= Suggested Reading
+
+To deepen your understanding of Kubernetes internals, distributed systems design, and cluster security, refer to the following curated resources:
+
+* *Kubernetes Security and Observability* (Creane & Gupta, 2021): A practical guide for implementing robust security postures and effective monitoring strategies.
+* *Designing Distributed Systems* (Burns, 2024): An exploration of reusable software patterns and paradigms for building scalable and reliable systems on Kubernetes.

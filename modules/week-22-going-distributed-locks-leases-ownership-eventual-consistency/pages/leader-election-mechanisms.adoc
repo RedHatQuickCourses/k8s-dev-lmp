@@ -1,0 +1,86 @@
+#  Leader election mechanisms
+
+= Leader Election Mechanisms in Kubernetes Controllers
+
+In a distributed system, running multiple instances of a controller is often necessary for high availability (HA). However, if multiple controllers attempt to perform the same reconciliation logic simultaneously, they can cause race conditions, duplicate operations, or inconsistent state in the target resources. 
+
+To prevent this, Kubernetes uses **Leader Election**, a mechanism that ensures only one instance of a controller (the "leader") is actively managing the workload, while others remain in a standby state.
+
+== Distributed Locking via Leases
+
+Kubernetes implements leader election using the `coordination.k8s.io/v1` API, specifically through **Lease** objects. A Lease is a lightweight resource that acts as a distributed lock.
+
+=== How Leader Election Works
+1. **Contention:** Multiple controller instances attempt to acquire or renew a Lease object.
+2. **Atomic Updates:** Using optimistic locking, only one controller can successfully update the Lease object's `holderIdentity` and `leaseDurationSeconds` fields at a time.
+3. **Heartbeating:** The leader periodically updates the `renewTime` in the Lease. 
+4. **Failsafe:** If the leader crashes or becomes network-partitioned, it stops updating the Lease. Once the `leaseDurationSeconds` expires, other waiting instances perceive the leader as "dead" and attempt to acquire the lock themselves.
+
+== Implementing Leader Election with `client-go`
+
+The `k8s.io/client-go/tools/leaderelection` package provides the standard tooling to integrate leader election into your custom controllers.
+
+=== Prerequisites
+Ensure your controller has the necessary RBAC permissions to create and update Leases:
+
+[source,yaml]
+----
+rules:
+- apiGroups: ["coordination.k8s.io"]
+  resources: ["leases"]
+  verbs: ["get", "create", "update", "patch"]
+----
+
+=== Step-by-Step Implementation
+
+To implement leader election, you must wrap your controller's main loop in a `leaderelection.LeaderElector` configuration.
+
+1. **Initialize the Resource Lock:** Create a lock object (usually a Lease) that the instances will fight over.
+2. **Define Callbacks:** Use the `LeaderCallbacks` struct to define what happens when an instance becomes the leader or loses leadership.
+
+[source,go]
+----
+import (
+	"k8s.io/client-go/tools/leaderelection"
+	"k8s.io/client-go/tools/leaderelection/resourcelock"
+)
+
+// Define the lock
+lock := &resourcelock.LeaseLock{
+    LeaseMeta: metav1.ObjectMeta{Name: "my-controller-lock", Namespace: "kube-system"},
+    Client:    clientSet.CoordinationV1(),
+    LockConfig: resourcelock.ResourceLockConfig{Identity: podName},
+}
+
+// Start the election
+leaderelection.RunOrDie(ctx, leaderelection.LeaderElectionConfig{
+    Lock:            lock,
+    ReleaseOnCancel: true,
+    LeaseDuration:   15 * time.Second,
+    RenewDeadline:   10 * time.Second,
+    RetryPeriod:     2 * time.Second,
+    Callbacks: leaderelection.LeaderCallbacks{
+        OnStartedLeading: func(ctx context.Context) {
+            // Start your controller's Run loop here
+            runController(ctx)
+        },
+        OnStoppedLeading: func() {
+            log.Info("Leader lost")
+        },
+    },
+})
+----
+
+== Key Design Considerations
+
+*   **Idempotency:** Even with leader election, your reconciliation logic must be idempotent. External factors (such as network jitter or race conditions during the handover) can occasionally result in two controllers "thinking" they are leaders for a brief moment.
+*   **Lease Duration:** Setting the `LeaseDuration` too short can lead to "flapping," where the leader is constantly changed due to minor network delays. Setting it too long increases the recovery time during an actual controller crash.
+*   **Eventual Consistency:** Leader election provides *mutual exclusion*, but it does not replace the requirement for eventual consistency. The controller should always verify the state of the world before applying changes.
+
+== Hands-on Activity: Observing Leader Election
+
+1. **Deploy the Controller:** Deploy two replicas of your controller pod into the cluster.
+2. **Verify Lock:** Use `kubectl get lease -n kube-system` to see the `my-controller-lock` resource.
+3. **Check Holder:** Note the `holderIdentity` in the lease description.
+4. **Simulate Failure:** Delete the pod currently holding the lease.
+5. **Observe Handover:** Watch the logs of the second pod. It will automatically detect the loss of the leader, wait for the lease to expire, and promote itself to the new leader.

@@ -1,0 +1,11 @@
+#  Week 0 — Familiarizing with koo·br·neh·teez
+
+= Week 0 — Familiarizing with Kubernetes
+
+This foundational phase introduces the core architectural principles that govern Kubernetes. Participants learn how the system leverages an API-centric, declarative configuration model to manage infrastructure state.
+
+Key concepts include:
+
+*   **Kubernetes Control Plane:** Understanding the role of the API server as the central hub for cluster communication and coordination.
+*   **Persistence Layer:** Exploring `etcd` as the primary key-value store for maintaining cluster state.
+*   **Asynchronous Reconciliation:** An introduction to the control loop pattern, where the system continuously observes and adjusts the current state to match the declared desired state.

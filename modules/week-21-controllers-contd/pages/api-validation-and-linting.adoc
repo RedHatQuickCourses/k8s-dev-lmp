@@ -1,0 +1,88 @@
+#  API validation and linting
+
+= API Validation and Linting
+
+In the Kubernetes Resource Model, ensuring the integrity and quality of your Custom Resource Definitions (CRDs) is paramount. Because Kubernetes relies on declarative state, "bad" API definitions can lead to fragmented control planes, broken reconciliation loops, and unpredictable cluster behavior.
+
+API validation and linting ensure that your CRDs adhere to community standards, follow best practices for API design, and minimize runtime errors.
+
+== Why Validation and Linting Matter
+
+1.  **Semantic Consistency:** Ensuring that `Spec` fields follow standard naming conventions (e.g., camelCase) and type definitions.
+2.  **Structural Integrity:** Verifying that required fields are present and that optional fields have appropriate default values.
+3.  **Performance:** Well-defined schemas allow the `kube-apiserver` to perform efficient validation without needing to invoke external webhooks for simple type checking.
+4.  **Developer Experience:** Catching errors at development time (CI/CD) rather than at runtime when a user attempts to apply a YAML manifest.
+
+== Common Validation Approaches
+
+### 1. OpenAPIV3Schema
+The primary method for validating Kubernetes resources is through the `validation` block in your CRD manifest. By defining an `OpenAPIV3Schema`, you provide the `kube-apiserver` with the constraints necessary to reject invalid requests before they reach your controller.
+
+[source,yaml]
+----
+spec:
+  validation:
+    openAPIV3Schema:
+      type: object
+      properties:
+        spec:
+          type: object
+          properties:
+            replicas:
+              type: integer
+              minimum: 1
+              maximum: 10
+            image:
+              type: string
+              pattern: '^registry\.example\.com/.*'
+----
+
+### 2. Kube-API-Linter (KAL)
+The Kubernetes API Linter (KAL) acts as a static analysis tool for your API definitions. It checks your CRD Go structs or manifests against a set of rules (e.g., `names-must-match`, `no-empty-fields`).
+
+*   **Rule Enforcement:** Ensures that API groups follow the `v1alpha1` -> `v1beta1` -> `v1` progression.
+*   **Best Practices:** Flags common mistakes, such as missing `json` tags in Go structs or missing `DeepCopy` methods.
+
+== Hands-on Activity: Integrating Linting in Kubebuilder
+
+In this activity, we will integrate linting practices into your `kubebuilder` workflow to ensure your API remains clean and production-ready.
+
+### Prerequisites
+*   Ensure `kubebuilder` is installed.
+*   An existing project scaffolded with `kubebuilder`.
+
+### Step 1: Annotating Go Structs
+Validation is not just about YAML; it is about Go code. Use `controller-gen` markers to enforce validation rules directly in your Go source code.
+
+Open your `api/v1/myresource_types.go` file and add validation markers:
+
+[source,go]
+----
+type MyResourceSpec struct {
+    // +kubebuilder:validation:Minimum=1
+    // +kubebuilder:validation:Maximum=10
+    Replicas int32 `json:"replicas,omitempty"`
+
+    // +kubebuilder:validation:Pattern=`^registry\.example\.com/.*`
+    Image string `json:"image,omitempty"`
+}
+----
+
+### Step 2: Running the Linting Pipeline
+Before building your manifests, run the generation tool to verify your changes:
+
+[source,bash]
+----
+# Run controller-gen to update CRD manifests with the validation markers
+make manifests
+
+# Verify that the generated config/crd/bases file contains the 
+# OpenAPIV3Schema constraints you defined in Go.
+cat config/crd/bases/mygroup.example.com_myresources.yaml
+----
+
+### Step 3: Best Practice Tip
+Always integrate `make manifests` into your CI pipeline. If a developer attempts to submit a PR that changes the API without satisfying the linting/validation criteria, the pipeline should fail before the code is ever merged into the main branch.
+
+== Summary
+While `OpenAPIV3Schema` handles runtime validation at the `kube-apiserver` level, tools like `kube-api-linter` ensure your codebase remains maintainable. Use these tools in tandem to shift left your validation process, catching API design flaws before they reach the cluster.

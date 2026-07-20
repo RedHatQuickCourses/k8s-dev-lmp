@@ -1,0 +1,109 @@
+#  Week 1: Build a controller using client-go from scratch
+
+= Week 1 Exercise: Building a Kubernetes Controller from Scratch
+
+In this exercise, you will move beyond the `kubectl` CLI and interact directly with the Kubernetes API using `client-go`. By the end of this lab, you will have built a basic controller that "watches" for resources and logs their state, providing a foundational understanding of the `client-go` event propagation loop.
+
+== Objective
+Create a Go application that utilizes `client-go` to:
+1. Initialize a connection to the Kubernetes API.
+2. Setup an **Informer** to watch for Pod creation events.
+3. Use a **Workqueue** to process those events reliably.
+
+== Prerequisites
+* Go 1.22+ installed.
+* Access to a Kubernetes cluster (e.g., Minikube, Kind, or OpenShift Local).
+* `kubeconfig` configured to point to your cluster.
+
+== Part 1: The client-go Architecture
+Before coding, understand the core components we are implementing:
+
+* **Informers:** These maintain a local cache of objects. Instead of polling the API server, they use a `watch` stream to keep the cache in sync.
+* **Listers:** Provide a read-only interface to the local cache maintained by the Informer.
+* **Workqueue:** A queue that decouples the event detection (the informer) from the processing logic (the reconciler). It helps handle retries and deduplication.
+
+== Part 2: Step-by-Step Implementation
+
+=== Step 1: Initialize the Project
+Create your project directory and initialize the Go module:
+
+[source,bash]
+----
+mkdir k8s-controller-lab
+cd k8s-controller-lab
+go mod init k8s-controller-lab
+go get k8s.io/client-go@latest
+go get k8s.io/apimachinery@latest
+----
+
+=== Step 2: Boilerplate and Configuration
+Use `client-go` to connect to your cluster using the standard `kubeconfig` lookup.
+
+[source,go]
+----
+// main.go
+package main
+
+import (
+    "flag"
+    "path/filepath"
+    "k8s.io/client-go/tools/clientcmd"
+    "k8s.io/client-go/util/homedir"
+)
+
+func main() {
+    var kubeconfig *string
+    if home := homedir.HomeDir(); home != "" {
+        kubeconfig = flag.String("kubeconfig", filepath.Join(home, ".kube", "config"), "path to kubeconfig file")
+    }
+    flag.Parse()
+
+    config, _ := clientcmd.BuildConfigFromFlags("", *kubeconfig)
+    // ClientSet allows interaction with standard resources
+    clientset, _ := kubernetes.NewForConfig(config)
+    
+    // ... logic continues to setup Informer
+}
+----
+
+=== Step 3: Setting up the Informer
+The Informer is the heartbeat of your controller. We attach event handlers (Add, Update, Delete) to it.
+
+[source,go]
+----
+import (
+    "k8s.io/client-go/informers"
+    "k8s.io/client-go/tools/cache"
+)
+
+// Inside main()
+factory := informers.NewSharedInformerFactory(clientset, 10*time.Minute)
+podInformer := factory.Core().V1().Pods().Informer()
+
+podInformer.AddEventHandler(cache.ResourceEventHandlerFuncs{
+    AddFunc: func(obj interface{}) {
+        fmt.Println("Pod added!")
+    },
+})
+
+// Start the factory
+stopCh := make(chan struct{})
+defer close(stopCh)
+factory.Start(stopCh)
+cache.WaitForCacheSync(stopCh, podInformer.HasSynced)
+----
+
+== Part 3: Adding Resilience
+In a production controller, you never process items directly in the `EventHandler`. If your logic fails, the event is lost. 
+
+1. **Workqueue Implementation:** Modify the `AddFunc` to push the resource `Key` (namespace/name) into a `workqueue.RateLimitingInterface`.
+2. **Reconcile Loop:** Create a worker function that loops indefinitely, reads from the queue, and processes the logic.
+3. **Error Handling:** If your logic fails to process a Pod, call `queue.AddRateLimited(key)` to try again with exponential backoff.
+
+== Troubleshooting Tips
+* **Cache Latency:** Remember that Informers are eventually consistent. If you create a Pod and immediately try to list it from the cache, it may not be there yet.
+* **Syncing:** Always use `cache.WaitForCacheSync` at startup. If your controller logic starts before the cache is warmed up, you will miss resources.
+* **Resource Leaks:** If your code stops, ensure you close the `stopCh` to prevent goroutine leaks in your local environment.
+
+== Exercise Challenge
+Extend the logic: Instead of just printing "Pod added!", check the Pod's status. If the Pod does not have any labels, log a warning stating: *"Pod {Name} is missing required labels!"*
