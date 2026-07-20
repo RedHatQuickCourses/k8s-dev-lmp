@@ -1,0 +1,261 @@
+{
+  "totalSeconds": 5634,
+  "pageCount": 51,
+  "pages": [
+    {
+      "module": "ROOT",
+      "page": "index.adoc",
+      "seconds": 75
+    },
+    {
+      "module": "LABENV",
+      "page": "index.adoc",
+      "seconds": 4
+    },
+    {
+      "module": "overview",
+      "page": "overview.adoc",
+      "seconds": 72
+    },
+    {
+      "module": "who-is-this-for-pre-requisites",
+      "page": "who-is-this-for-pre-requisites.adoc",
+      "seconds": 68
+    },
+    {
+      "module": "week-0-familiarizing-with-koobrnehteez",
+      "page": "week-0-familiarizing-with-koobrnehteez.adoc",
+      "seconds": 20
+    },
+    {
+      "module": "week-0-familiarizing-with-koobrnehteez",
+      "page": "what-kubernetes-really-is.adoc",
+      "seconds": 109
+    },
+    {
+      "module": "week-0-familiarizing-with-koobrnehteez",
+      "page": "control-plane-architecture-primer.adoc",
+      "seconds": 73
+    },
+    {
+      "module": "week-11-kubernetes-resource-model",
+      "page": "week-11-kubernetes-resource-model.adoc",
+      "seconds": 41
+    },
+    {
+      "module": "week-11-kubernetes-resource-model",
+      "page": "the-kubernetes-resource-model.adoc",
+      "seconds": 242
+    },
+    {
+      "module": "week-11-kubernetes-resource-model",
+      "page": "api-request-lifecycle.adoc",
+      "seconds": 71
+    },
+    {
+      "module": "week-11-kubernetes-resource-model",
+      "page": "declarative-configuration-layers.adoc",
+      "seconds": 230
+    },
+    {
+      "module": "week-12-controllers-informers-client-go",
+      "page": "week-12-controllers-informers-client-go.adoc",
+      "seconds": 35
+    },
+    {
+      "module": "week-12-controllers-informers-client-go",
+      "page": "client-go-architecture.adoc",
+      "seconds": 168
+    },
+    {
+      "module": "week-12-controllers-informers-client-go",
+      "page": "informers-listers-workqueues.adoc",
+      "seconds": 100
+    },
+    {
+      "module": "week-12-controllers-informers-client-go",
+      "page": "sample-controller-walkthrough.adoc",
+      "seconds": 144
+    },
+    {
+      "module": "week-12-controllers-informers-client-go",
+      "page": "informer-pitfalls-and-error-handling.adoc",
+      "seconds": 229
+    },
+    {
+      "module": "week-21-controllers-contd",
+      "page": "week-21-controllers-contd.adoc",
+      "seconds": 35
+    },
+    {
+      "module": "week-21-controllers-contd",
+      "page": "gvk-gvr-and-api-terminology.adoc",
+      "seconds": 134
+    },
+    {
+      "module": "week-21-controllers-contd",
+      "page": "controller-runtime-and-kubebuilder.adoc",
+      "seconds": 118
+    },
+    {
+      "module": "week-21-controllers-contd",
+      "page": "spec-status-and-conditions.adoc",
+      "seconds": 143
+    },
+    {
+      "module": "week-21-controllers-contd",
+      "page": "api-validation-and-linting.adoc",
+      "seconds": 65
+    },
+    {
+      "module": "week-21-controllers-contd",
+      "page": "update-patch-and-server-side-apply.adoc",
+      "seconds": 206
+    },
+    {
+      "module": "week-22-going-distributed-locks-leases-ownership-eventual-consistency",
+      "page": "week-22-going-distributed-locks-leases-ownership-eventual-consistency.adoc",
+      "seconds": 32
+    },
+    {
+      "module": "week-22-going-distributed-locks-leases-ownership-eventual-consistency",
+      "page": "idempotent-reconciliation.adoc",
+      "seconds": 47
+    },
+    {
+      "module": "week-22-going-distributed-locks-leases-ownership-eventual-consistency",
+      "page": "distributed-locking-theory.adoc",
+      "seconds": 105
+    },
+    {
+      "module": "week-22-going-distributed-locks-leases-ownership-eventual-consistency",
+      "page": "leader-election-in-kubernetes.adoc",
+      "seconds": 74
+    },
+    {
+      "module": "week-22-going-distributed-locks-leases-ownership-eventual-consistency",
+      "page": "controller-sharding.adoc",
+      "seconds": 105
+    },
+    {
+      "module": "week-31-taking-more-control-admissions-and-beyond-the-kube-apiserver-to-writing-your-own-api-server",
+      "page": "week-31-taking-more-control-admissions-and-beyond-the-kube-apiserver-to-writing-your-own-api-server.adoc",
+      "seconds": 29
+    },
+    {
+      "module": "week-31-taking-more-control-admissions-and-beyond-the-kube-apiserver-to-writing-your-own-api-server",
+      "page": "admission-control-webhooks.adoc",
+      "seconds": 146
+    },
+    {
+      "module": "week-31-taking-more-control-admissions-and-beyond-the-kube-apiserver-to-writing-your-own-api-server",
+      "page": "policy-engines-and-gatekeeper.adoc",
+      "seconds": 137
+    },
+    {
+      "module": "week-31-taking-more-control-admissions-and-beyond-the-kube-apiserver-to-writing-your-own-api-server",
+      "page": "api-discovery-and-aggregation.adoc",
+      "seconds": 146
+    },
+    {
+      "module": "week-31-taking-more-control-admissions-and-beyond-the-kube-apiserver-to-writing-your-own-api-server",
+      "page": "custom-api-servers.adoc",
+      "seconds": 153
+    },
+    {
+      "module": "week-32-the-other-stuff",
+      "page": "week-32-the-other-stuff.adoc",
+      "seconds": 34
+    },
+    {
+      "module": "week-32-the-other-stuff",
+      "page": "ingress-and-gateway-api.adoc",
+      "seconds": 66
+    },
+    {
+      "module": "week-32-the-other-stuff",
+      "page": "service-mesh-fundamentals.adoc",
+      "seconds": 135
+    },
+    {
+      "module": "week-32-the-other-stuff",
+      "page": "authentication-and-authorization.adoc",
+      "seconds": 194
+    },
+    {
+      "module": "week-32-the-other-stuff",
+      "page": "security-context-and-hardening.adoc",
+      "seconds": 158
+    },
+    {
+      "module": "week-41-all-about-kube-scheduler",
+      "page": "week-41-all-about-kube-scheduler.adoc",
+      "seconds": 26
+    },
+    {
+      "module": "week-41-all-about-kube-scheduler",
+      "page": "how-the-scheduler-works.adoc",
+      "seconds": 189
+    },
+    {
+      "module": "week-41-all-about-kube-scheduler",
+      "page": "resource-management.adoc",
+      "seconds": 179
+    },
+    {
+      "module": "week-41-all-about-kube-scheduler",
+      "page": "dynamic-resource-allocation.adoc",
+      "seconds": 186
+    },
+    {
+      "module": "week-42-ubiquitous-topics",
+      "page": "week-42-ubiquitous-topics.adoc",
+      "seconds": 24
+    },
+    {
+      "module": "week-42-ubiquitous-topics",
+      "page": "operator-landscape.adoc",
+      "seconds": 249
+    },
+    {
+      "module": "week-42-ubiquitous-topics",
+      "page": "alternative-control-planes-and-form-factors.adoc",
+      "seconds": 269
+    },
+    {
+      "module": "exercises",
+      "page": "exercises.adoc",
+      "seconds": 16
+    },
+    {
+      "module": "exercises",
+      "page": "week-1-build-a-controller-using-client-go-from-scratch.adoc",
+      "seconds": 72
+    },
+    {
+      "module": "exercises",
+      "page": "week-2-implement-optimistic-locking-and-leader-election-via-lease.adoc",
+      "seconds": 73
+    },
+    {
+      "module": "exercises",
+      "page": "week-3-develop-a-custom-validating-webhook-for-container-registry-enforcement.adoc",
+      "seconds": 74
+    },
+    {
+      "module": "recommended-reading",
+      "page": "recommended-reading.adoc",
+      "seconds": 63
+    },
+    {
+      "module": "suggested-reading",
+      "page": "suggested-reading.adoc",
+      "seconds": 38
+    },
+    {
+      "module": "appendix",
+      "page": "appendix.adoc",
+      "seconds": 233
+    }
+  ]
+}
