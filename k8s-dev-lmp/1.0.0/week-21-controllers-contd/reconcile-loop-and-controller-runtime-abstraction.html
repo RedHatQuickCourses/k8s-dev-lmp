@@ -1,0 +1,567 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width,initial-scale=1">
+    <title>Reconcile loop and controller-runtime abstraction :: Kubernetes Developer Learning Path</title>
+    <link rel="prev" href="week-21-controllers-contd.html">
+    <link rel="next" href="scaffolding-with-kubebuilder.html">
+    <meta name="generator" content="Antora 3.2.0-alpha.12">
+    <link rel="stylesheet" href="../../../_/css/site.css">
+    <link rel="stylesheet" href="../../../_/css/vendor/tabs.css">
+    <link rel="stylesheet" href="../../../_/css/vendor/collapsible.css">
+    <link rel="stylesheet" href="../../../_/css/vendor/reading-time.css">
+    <link rel="stylesheet" href="../../../_/css/vendor/audio-transcript.css">
+    <script>var uiRootPath = '../../../_'</script>
+  </head>
+  <body class="article">
+<header class="header">
+  <nav class="navbar">
+    <div class="navbar-brand">
+      <a class="navbar-item" href="https://www.redhat.com" target="_blank"><img src="../../../_/img/redhat-logo.png" height="40px" alt="Red Hat"></a>
+      <a class="navbar-item" style="font-size: 24px; color: white" href="../../..">Kubernetes Developer Learning Path</a>
+      <button class="navbar-burger" data-target="topbar-nav">
+        <span></span>
+        <span></span>
+        <span></span>
+      </button>
+    </div>
+    <div id="topbar-nav" class="navbar-menu">
+      <div class="navbar-end">
+        <a class="navbar-item" href="https://github.com/RedHatQuickCourses/REPLACEREPONAME/issues" target="_blank">Report Issues</a>
+      </div>
+    </div>
+  </nav>
+</header>
+<div class="body">
+<div class="nav-container" data-component="k8s-dev-lmp" data-version="1.0.0">
+  <aside class="nav">
+    <div class="panels">
+<div class="nav-panel-menu is-active" data-panel="menu">
+  <nav class="nav-menu">
+    <h3 class="title"><a href="../index.html">Kubernetes Developer Learning Path</a></h3>
+<ul class="nav-list">
+  <li class="nav-item" data-depth="0">
+<ul class="nav-list">
+  <li class="nav-item" data-depth="1">
+    <a class="nav-link" href="../index.html">Home</a>
+  </li>
+</ul>
+  </li>
+  <li class="nav-item" data-depth="0">
+<ul class="nav-list">
+  <li class="nav-item" data-depth="1">
+    <a class="nav-link" href="../LABENV/index.html">Lab Environment</a>
+  </li>
+</ul>
+  </li>
+  <li class="nav-item" data-depth="0">
+<ul class="nav-list">
+  <li class="nav-item" data-depth="1">
+    <button class="nav-item-toggle"></button>
+    <a class="nav-link" href="../overview/overview.html">Overview</a>
+<ul class="nav-list">
+  <li class="nav-item" data-depth="2">
+    <a class="nav-link" href="../overview/kubernetes-architecture-overview-and-extensibility-mechanisms.html">Kubernetes architecture overview and extensibility mechanisms</a>
+  </li>
+  <li class="nav-item" data-depth="2">
+    <a class="nav-link" href="../overview/control-plane-authentication-authorization-and-validation.html">Control plane authentication, authorization, and validation</a>
+  </li>
+  <li class="nav-item" data-depth="2">
+    <a class="nav-link" href="../overview/platform-automation-through-custom-resources-and-operators.html">Platform automation through custom resources and operators</a>
+  </li>
+  <li class="nav-item" data-depth="2">
+    <a class="nav-link" href="../overview/distributed-system-principles-for-high-availability.html">Distributed system principles for high availability</a>
+  </li>
+  <li class="nav-item" data-depth="2">
+    <a class="nav-link" href="../overview/advanced-networking-traffic-management-and-control-plane-architectures.html">Advanced networking, traffic management, and control plane architectures</a>
+  </li>
+</ul>
+  </li>
+</ul>
+  </li>
+  <li class="nav-item" data-depth="0">
+<ul class="nav-list">
+  <li class="nav-item" data-depth="1">
+    <button class="nav-item-toggle"></button>
+    <a class="nav-link" href="../who-is-this-for-pre-requisites/who-is-this-for-pre-requisites.html">Who is this for? pre-requisites.</a>
+<ul class="nav-list">
+  <li class="nav-item" data-depth="2">
+    <a class="nav-link" href="../who-is-this-for-pre-requisites/target-audience-engineers-sys-admins-and-developers-with-container-experience.html">Target audience: Engineers, sys admins, and developers with container experience</a>
+  </li>
+  <li class="nav-item" data-depth="2">
+    <a class="nav-link" href="../who-is-this-for-pre-requisites/recommended-prerequisites-basic-distributed-systems-knowledge.html">Recommended prerequisites: Basic distributed systems knowledge</a>
+  </li>
+  <li class="nav-item" data-depth="2">
+    <a class="nav-link" href="../who-is-this-for-pre-requisites/ideal-baseline-ckad-certification-or-red-hat-do-180-and-do-280-tracks.html">Ideal baseline: CKAD certification, or Red Hat DO-180 and DO-280 tracks</a>
+  </li>
+</ul>
+  </li>
+</ul>
+  </li>
+  <li class="nav-item" data-depth="0">
+<ul class="nav-list">
+  <li class="nav-item" data-depth="1">
+    <button class="nav-item-toggle"></button>
+    <a class="nav-link" href="../week-0-familiarizing-with-koobrnehteez/week-0-familiarizing-with-koobrnehteez.html">Week 0 — Familiarizing with koo·br·neh·teez</a>
+<ul class="nav-list">
+  <li class="nav-item" data-depth="2">
+    <a class="nav-link" href="../week-0-familiarizing-with-koobrnehteez/api-centric-declarative-configuration-management.html">API-centric declarative configuration management</a>
+  </li>
+  <li class="nav-item" data-depth="2">
+    <a class="nav-link" href="../week-0-familiarizing-with-koobrnehteez/kubernetes-control-plane-and-api-server-role.html">Kubernetes control plane and API server role</a>
+  </li>
+  <li class="nav-item" data-depth="2">
+    <a class="nav-link" href="../week-0-familiarizing-with-koobrnehteez/persistence-layer-etcd-key-value-store.html">Persistence layer: etcd key-value store</a>
+  </li>
+  <li class="nav-item" data-depth="2">
+    <a class="nav-link" href="../week-0-familiarizing-with-koobrnehteez/asynchronous-controller-reconciliation-patterns.html">Asynchronous controller reconciliation patterns</a>
+  </li>
+</ul>
+  </li>
+</ul>
+  </li>
+  <li class="nav-item" data-depth="0">
+<ul class="nav-list">
+  <li class="nav-item" data-depth="1">
+    <button class="nav-item-toggle"></button>
+    <a class="nav-link" href="../week-11-kubernetes-resource-model/week-11-kubernetes-resource-model.html">Week 1.1 — Kubernetes Resource Model</a>
+<ul class="nav-list">
+  <li class="nav-item" data-depth="2">
+    <a class="nav-link" href="../week-11-kubernetes-resource-model/the-declarative-intent-of-kubernetes-resources.html">The declarative intent of Kubernetes Resources</a>
+  </li>
+  <li class="nav-item" data-depth="2">
+    <a class="nav-link" href="../week-11-kubernetes-resource-model/kube-apiserver-plugin-requestresponse-lifecycle.html">kube-apiserver plugin request/response lifecycle</a>
+  </li>
+</ul>
+  </li>
+</ul>
+  </li>
+  <li class="nav-item" data-depth="0">
+<ul class="nav-list">
+  <li class="nav-item" data-depth="1">
+    <button class="nav-item-toggle"></button>
+    <a class="nav-link" href="../week-12-controllers-informers-client-go/week-12-controllers-informers-client-go.html">Week 1.2 — Controllers, informers, client-go</a>
+<ul class="nav-list">
+  <li class="nav-item" data-depth="2">
+    <a class="nav-link" href="../week-12-controllers-informers-client-go/client-go-architecture-fundamentals.html">client-go architecture fundamentals</a>
+  </li>
+  <li class="nav-item" data-depth="2">
+    <a class="nav-link" href="../week-12-controllers-informers-client-go/informers-listers-and-workqueues.html">Informers, listers, and workqueues</a>
+  </li>
+  <li class="nav-item" data-depth="2">
+    <a class="nav-link" href="../week-12-controllers-informers-client-go/cache-mechanisms-and-event-propagation.html">Cache mechanisms and event propagation</a>
+  </li>
+  <li class="nav-item" data-depth="2">
+    <a class="nav-link" href="../week-12-controllers-informers-client-go/error-handling-and-requeue-strategies.html">Error handling and requeue strategies</a>
+  </li>
+</ul>
+  </li>
+</ul>
+  </li>
+  <li class="nav-item" data-depth="0">
+<ul class="nav-list">
+  <li class="nav-item" data-depth="1">
+    <button class="nav-item-toggle"></button>
+    <a class="nav-link" href="week-21-controllers-contd.html">Week 2.1 — Controllers contd.</a>
+<ul class="nav-list">
+  <li class="nav-item is-current-page" data-depth="2">
+    <a class="nav-link" href="reconcile-loop-and-controller-runtime-abstraction.html">Reconcile loop and controller-runtime abstraction</a>
+  </li>
+  <li class="nav-item" data-depth="2">
+    <a class="nav-link" href="scaffolding-with-kubebuilder.html">Scaffolding with kubebuilder</a>
+  </li>
+  <li class="nav-item" data-depth="2">
+    <a class="nav-link" href="spec-vs-status-and-condition-management.html">Spec vs Status and condition management</a>
+  </li>
+  <li class="nav-item" data-depth="2">
+    <a class="nav-link" href="api-validation-and-linting.html">API validation and linting</a>
+  </li>
+  <li class="nav-item" data-depth="2">
+    <a class="nav-link" href="crud-operations-and-applypatchupdate-semantics.html">CRUD operations and apply/patch/update semantics</a>
+  </li>
+</ul>
+  </li>
+</ul>
+  </li>
+  <li class="nav-item" data-depth="0">
+<ul class="nav-list">
+  <li class="nav-item" data-depth="1">
+    <button class="nav-item-toggle"></button>
+    <a class="nav-link" href="../week-22-going-distributed-locks-leases-ownership-eventual-consistency/week-22-going-distributed-locks-leases-ownership-eventual-consistency.html">Week 2.2 — Going distributed: locks, leases, ownership, eventual consistency</a>
+<ul class="nav-list">
+  <li class="nav-item" data-depth="2">
+    <a class="nav-link" href="../week-22-going-distributed-locks-leases-ownership-eventual-consistency/designing-idempotent-state-machines.html">Designing idempotent state machines</a>
+  </li>
+  <li class="nav-item" data-depth="2">
+    <a class="nav-link" href="../week-22-going-distributed-locks-leases-ownership-eventual-consistency/locks-and-leases-for-synchronization.html">Locks and Leases for synchronization</a>
+  </li>
+  <li class="nav-item" data-depth="2">
+    <a class="nav-link" href="../week-22-going-distributed-locks-leases-ownership-eventual-consistency/leader-election-mechanisms.html">Leader election mechanisms</a>
+  </li>
+  <li class="nav-item" data-depth="2">
+    <a class="nav-link" href="../week-22-going-distributed-locks-leases-ownership-eventual-consistency/controller-sharding-strategies.html">Controller sharding strategies</a>
+  </li>
+</ul>
+  </li>
+</ul>
+  </li>
+  <li class="nav-item" data-depth="0">
+<ul class="nav-list">
+  <li class="nav-item" data-depth="1">
+    <button class="nav-item-toggle"></button>
+    <a class="nav-link" href="../week-31-taking-more-control-admissions-and-beyond-the-kube-apiserver-to-writing-your-own-api-server/week-31-taking-more-control-admissions-and-beyond-the-kube-apiserver-to-writing-your-own-api-server.html">Week 3.1 — Taking more control: Admissions and beyond the kube-apiserver to writing your own API Server</a>
+<ul class="nav-list">
+  <li class="nav-item" data-depth="2">
+    <a class="nav-link" href="../week-31-taking-more-control-admissions-and-beyond-the-kube-apiserver-to-writing-your-own-api-server/admission-control-webhooks-validating-and-mutating.html">Admission control webhooks (Validating and Mutating)</a>
+  </li>
+  <li class="nav-item" data-depth="2">
+    <a class="nav-link" href="../week-31-taking-more-control-admissions-and-beyond-the-kube-apiserver-to-writing-your-own-api-server/differences-between-webhooks-and-policy-engines.html">Differences between webhooks and Policy Engines</a>
+  </li>
+  <li class="nav-item" data-depth="2">
+    <a class="nav-link" href="../week-31-taking-more-control-admissions-and-beyond-the-kube-apiserver-to-writing-your-own-api-server/api-discovery-and-aggregation-layer.html">API discovery and Aggregation Layer</a>
+  </li>
+  <li class="nav-item" data-depth="2">
+    <a class="nav-link" href="../week-31-taking-more-control-admissions-and-beyond-the-kube-apiserver-to-writing-your-own-api-server/implementing-custom-api-servers.html">Implementing custom API servers</a>
+  </li>
+</ul>
+  </li>
+</ul>
+  </li>
+  <li class="nav-item" data-depth="0">
+<ul class="nav-list">
+  <li class="nav-item" data-depth="1">
+    <button class="nav-item-toggle"></button>
+    <a class="nav-link" href="../week-32-the-other-stuff/week-32-the-other-stuff.html">Week 3.2 — The other stuff</a>
+<ul class="nav-list">
+  <li class="nav-item" data-depth="2">
+    <a class="nav-link" href="../week-32-the-other-stuff/advanced-networking-ingress-and-gateway-api.html">Advanced networking: Ingress and Gateway API</a>
+  </li>
+  <li class="nav-item" data-depth="2">
+    <a class="nav-link" href="../week-32-the-other-stuff/service-mesh-concepts.html">Service Mesh concepts</a>
+  </li>
+  <li class="nav-item" data-depth="2">
+    <a class="nav-link" href="../week-32-the-other-stuff/authnauthz-in-openshift.html">AuthN/AuthZ in OpenShift</a>
+  </li>
+  <li class="nav-item" data-depth="2">
+    <a class="nav-link" href="../week-32-the-other-stuff/cluster-security-and-hardening-techniques.html">Cluster security and hardening techniques</a>
+  </li>
+</ul>
+  </li>
+</ul>
+  </li>
+  <li class="nav-item" data-depth="0">
+<ul class="nav-list">
+  <li class="nav-item" data-depth="1">
+    <button class="nav-item-toggle"></button>
+    <a class="nav-link" href="../week-41-all-about-kube-scheduler/week-41-all-about-kube-scheduler.html">Week 4.1 — All about kube-scheduler</a>
+<ul class="nav-list">
+  <li class="nav-item" data-depth="2">
+    <a class="nav-link" href="../week-41-all-about-kube-scheduler/pod-scheduling-de-scheduling-and-auto-scaling.html">Pod scheduling, de-scheduling, and auto-scaling</a>
+  </li>
+  <li class="nav-item" data-depth="2">
+    <a class="nav-link" href="../week-41-all-about-kube-scheduler/managing-resource-requests-and-limits.html">Managing resource Requests and Limits</a>
+  </li>
+  <li class="nav-item" data-depth="2">
+    <a class="nav-link" href="../week-41-all-about-kube-scheduler/dynamic-resource-allocation.html">Dynamic Resource Allocation</a>
+  </li>
+</ul>
+  </li>
+</ul>
+  </li>
+  <li class="nav-item" data-depth="0">
+<ul class="nav-list">
+  <li class="nav-item" data-depth="1">
+    <button class="nav-item-toggle"></button>
+    <a class="nav-link" href="../week-42-ubiquitous-topics/week-42-ubiquitous-topics.html">Week 4.2 — Ubiquitous topics!</a>
+<ul class="nav-list">
+  <li class="nav-item" data-depth="2">
+    <a class="nav-link" href="../week-42-ubiquitous-topics/alternative-control-plane-architectures.html">Alternative control plane architectures</a>
+  </li>
+  <li class="nav-item" data-depth="2">
+    <a class="nav-link" href="../week-42-ubiquitous-topics/hypershift-and-kcp.html">HyperShift and kcp</a>
+  </li>
+  <li class="nav-item" data-depth="2">
+    <a class="nav-link" href="../week-42-ubiquitous-topics/microshift-and-k3s-form-factors.html">Microshift and k3s form factors</a>
+  </li>
+</ul>
+  </li>
+</ul>
+  </li>
+  <li class="nav-item" data-depth="0">
+<ul class="nav-list">
+  <li class="nav-item" data-depth="1">
+    <button class="nav-item-toggle"></button>
+    <a class="nav-link" href="../exercises/exercises.html">Exercises</a>
+<ul class="nav-list">
+  <li class="nav-item" data-depth="2">
+    <a class="nav-link" href="../exercises/week-1-build-a-controller-using-client-go-from-scratch.html">Week 1: Build a controller using client-go from scratch</a>
+  </li>
+  <li class="nav-item" data-depth="2">
+    <a class="nav-link" href="../exercises/week-2-implement-optimistic-locking-and-leader-election-via-lease.html">Week 2: Implement optimistic locking and leader election via Lease</a>
+  </li>
+  <li class="nav-item" data-depth="2">
+    <a class="nav-link" href="../exercises/week-3-develop-a-custom-validating-webhook-for-container-registry-enforcement.html">Week 3: Develop a custom Validating Webhook for container registry enforcement</a>
+  </li>
+</ul>
+  </li>
+</ul>
+  </li>
+  <li class="nav-item" data-depth="0">
+<ul class="nav-list">
+  <li class="nav-item" data-depth="1">
+    <button class="nav-item-toggle"></button>
+    <a class="nav-link" href="../recommended-reading/recommended-reading.html">Recommended Reading</a>
+<ul class="nav-list">
+  <li class="nav-item" data-depth="2">
+    <a class="nav-link" href="../recommended-reading/programming-kubernetes-hausenblas-schimanski.html">Programming Kubernetes (Hausenblas, Schimanski)</a>
+  </li>
+  <li class="nav-item" data-depth="2">
+    <a class="nav-link" href="../recommended-reading/kubernetes-operators-dobies-wood.html">Kubernetes Operators (Dobies, Wood)</a>
+  </li>
+  <li class="nav-item" data-depth="2">
+    <a class="nav-link" href="../recommended-reading/cncf-operator-whitepaper.html">CNCF Operator Whitepaper</a>
+  </li>
+</ul>
+  </li>
+</ul>
+  </li>
+  <li class="nav-item" data-depth="0">
+<ul class="nav-list">
+  <li class="nav-item" data-depth="1">
+    <button class="nav-item-toggle"></button>
+    <a class="nav-link" href="../suggested-reading/suggested-reading.html">Suggested Reading</a>
+<ul class="nav-list">
+  <li class="nav-item" data-depth="2">
+    <a class="nav-link" href="../suggested-reading/kubernetes-security-and-observability-creane-gupta.html">Kubernetes Security and Observability (Creane, Gupta)</a>
+  </li>
+  <li class="nav-item" data-depth="2">
+    <a class="nav-link" href="../suggested-reading/designing-distributed-systems-burns.html">Designing Distributed Systems (Burns)</a>
+  </li>
+</ul>
+  </li>
+</ul>
+  </li>
+  <li class="nav-item" data-depth="0">
+<ul class="nav-list">
+  <li class="nav-item" data-depth="1">
+    <a class="nav-link" href="../appendix/appendix.html">Appendix</a>
+  </li>
+</ul>
+  </li>
+</ul>
+  </nav>
+</div>
+<div class="nav-panel-explore" data-panel="explore">
+  <div class="context">
+    <span class="title">Kubernetes Developer Learning Path</span>
+    <span class="version">1.0.0</span>
+  </div>
+  <ul class="components">
+    <li class="component is-current">
+      <a class="title" href="../index.html">Kubernetes Developer Learning Path</a>
+      <ul class="versions">
+        <li class="version is-current is-latest">
+          <a href="../index.html">1.0.0</a>
+        </li>
+      </ul>
+    </li>
+  </ul>
+</div>
+    </div>
+  </aside>
+</div>
+<main class="article">
+<div class="toolbar" role="navigation">
+<button class="nav-toggle"></button>
+  <a href="../index.html" class="home-link"></a>
+<nav class="breadcrumbs" aria-label="breadcrumbs">
+  <ul>
+    <li><a href="../index.html">Kubernetes Developer Learning Path</a></li>
+    <li><a href="week-21-controllers-contd.html">Week 2.1 — Controllers contd.</a></li>
+    <li><a href="reconcile-loop-and-controller-runtime-abstraction.html">Reconcile loop and controller-runtime abstraction</a></li>
+  </ul>
+</nav>
+</div>
+  <div class="content">
+<aside class="toc sidebar" data-title="Contents" data-levels="2">
+  <div class="toc-menu"></div>
+</aside>
+<article class="doc">
+<h1 class="page">Reconcile loop and controller-runtime abstraction</h1>
+<h1 id="_reconcile_loop_and_controller_runtime_abstraction" class="sect0"><a class="anchor" href="#_reconcile_loop_and_controller_runtime_abstraction"></a>Reconcile Loop and controller-runtime Abstraction</h1>
+<div class="paragraph">
+<p>In Kubernetes, the control plane is a collection of "control loops." Instead of imperative commands, Kubernetes relies on a <strong>declarative model</strong> where controllers continuously work to drive the actual state of the system toward the desired state defined in the object&#8217;s specification.</p>
+</div>
+<div class="sect1">
+<h2 id="_the_reconcile_loop_explained"><a class="anchor" href="#_the_reconcile_loop_explained"></a>The Reconcile Loop Explained</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>The heart of any Kubernetes controller is the <strong>Reconcile Loop</strong>. It is a control loop that constantly observes the current state of a resource and performs the necessary actions to achieve the desired state.</p>
+</div>
+<div class="paragraph">
+<p>The reconcile process follows three core steps:</p>
+</div>
+<div class="olist arabic">
+<ol class="arabic">
+<li>
+<p><strong>Observe:</strong> Retrieve the current state of the resource from the Kubernetes API server (often via a cached lister).</p>
+</li>
+<li>
+<p><strong>Analyze:</strong> Compare the current state (the <code>Status</code>) against the desired state (the <code>Spec</code>).</p>
+</li>
+<li>
+<p><strong>Act:</strong> Perform operations (create, update, delete, or patch) to synchronize the system to match the <code>Spec</code>.</p>
+</li>
+</ol>
+</div>
+<div class="sect2">
+<h3 id="_the_controller_runtime_abstraction"><a class="anchor" href="#_the_controller_runtime_abstraction"></a>The controller-runtime Abstraction</h3>
+<div class="paragraph">
+<p>While writing controllers using raw <code>client-go</code> is possible, it involves significant boilerplate (handling informers, workqueues, and cache synchronization). <strong><code>controller-runtime</code></strong> is the standard library used by the community to abstract these complexities.</p>
+</div>
+<div class="paragraph">
+<p>Key benefits of <code>controller-runtime</code> include:
+* <strong>Manager:</strong> Orchestrates all controllers in the process, handling shared caches and leader election.
+* <strong>Reconciler Interface:</strong> Provides a simple <code>Reconcile(ctx, request)</code> signature that hides the underlying queue management.
+* <strong>Event Filters:</strong> Allows you to filter events (e.g., ignore status updates) to prevent unnecessary reconciliation cycles.</p>
+</div>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_spec_vs_status_the_truth_of_state"><a class="anchor" href="#_spec_vs_status_the_truth_of_state"></a>Spec vs. Status: The Truth of State</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>Understanding the separation of concerns between <code>Spec</code> and <code>Status</code> is critical for building idempotent controllers:</p>
+</div>
+<div class="ulist">
+<ul>
+<li>
+<p><strong><code>Spec</code> (Desired State):</strong> The definition of what the user wants. The controller must treat this as "read-only" and authoritative.</p>
+</li>
+<li>
+<p><strong><code>Status</code> (Actual State):</strong> A reflection of the current reality. The controller is responsible for updating this field based on the work it performs.</p>
+</li>
+</ul>
+</div>
+<div class="admonitionblock note">
+<table>
+<tr>
+<td class="icon">
+<i class="fa icon-note" title="Note"></i>
+</td>
+<td class="content">
+<div class="paragraph">
+<p>Never modify the <code>Spec</code> from within your controller&#8217;s reconcile loop. Modifying the <code>Spec</code> causes an infinite reconciliation loop, as the controller will detect a change in the desired state and trigger itself again.</p>
+</div>
+</td>
+</tr>
+</table>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_hands_on_activity_defining_the_reconciler"><a class="anchor" href="#_hands_on_activity_defining_the_reconciler"></a>Hands-on Activity: Defining the Reconciler</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>In this activity, we will define a basic reconciler structure using <code>controller-runtime</code>.</p>
+</div>
+<div class="sect2">
+<h3 id="_prerequisites"><a class="anchor" href="#_prerequisites"></a>Prerequisites</h3>
+<div class="ulist">
+<ul>
+<li>
+<p>Go installed (version 1.21+)</p>
+</li>
+<li>
+<p><code>kubebuilder</code> initialized project</p>
+</li>
+</ul>
+</div>
+</div>
+<div class="sect2">
+<h3 id="_step_1_define_the_reconciler_struct"><a class="anchor" href="#_step_1_define_the_reconciler_struct"></a>Step 1: Define the Reconciler Struct</h3>
+<div class="paragraph">
+<p>In your <code>internal/controller/</code> directory, define your reconciler.</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-go hljs" data-lang="go">type MyResourceReconciler struct {
+    client.Client
+    Scheme *runtime.Scheme
+}
+
+// Reconcile is the main logic loop
+func (r *MyResourceReconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctrl.Result, error) {
+    // 1. Fetch the object
+    var myObj myv1.MyResource
+    if err := r.Get(ctx, req.NamespacedName, &amp;myObj); err != nil {
+        return ctrl.Result{}, client.IgnoreNotFound(err)
+    }
+
+    // 2. Add your logic here (e.g., checking Spec vs Status)
+
+    // 3. Update the Status
+    return ctrl.Result{}, nil
+}</code></pre>
+</div>
+</div>
+</div>
+<div class="sect2">
+<h3 id="_step_2_set_up_the_manager"><a class="anchor" href="#_step_2_set_up_the_manager"></a>Step 2: Set up the Manager</h3>
+<div class="paragraph">
+<p>Register your controller with the Manager in <code>main.go</code>. The manager handles the orchestration of the cache and ensures the Reconcile loop is triggered whenever the watched resource changes.</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-go hljs" data-lang="go">if err = (&amp;controller.MyResourceReconciler{
+    Client: mgr.GetClient(),
+    Scheme: mgr.GetScheme(),
+}).SetupWithManager(mgr); err != nil {
+    os.Exit(1)
+}</code></pre>
+</div>
+</div>
+</div>
+<div class="sect2">
+<h3 id="_step_3_implement_idempotency"><a class="anchor" href="#_step_3_implement_idempotency"></a>Step 3: Implement Idempotency</h3>
+<div class="paragraph">
+<p>To ensure your controller is safe, always ensure your logic is idempotent:
+*   <strong>Check before creating:</strong> Use <code>client.Get</code> to see if a resource exists before attempting a <code>client.Create</code>.
+*   <strong>Use Patch over Update:</strong> <code>Update</code> performs a full object overwrite, which is prone to conflicts. <code>Patch</code> allows for surgical updates to specific fields, reducing the likelihood of resource version conflicts.</p>
+</div>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_troubleshooting_tips"><a class="anchor" href="#_troubleshooting_tips"></a>Troubleshooting Tips</h2>
+<div class="sectionbody">
+<div class="ulist">
+<ul>
+<li>
+<p><strong>Requeueing:</strong> If a resource is not yet ready, return <code>ctrl.Result{RequeueAfter: time.Second * 5}, nil</code> to trigger a re-check later rather than failing the reconcile.</p>
+</li>
+<li>
+<p><strong>Logging:</strong> Use <code>log.FromContext(ctx)</code> provided by <code>controller-runtime</code> to keep consistent audit logs across your control plane.</p>
+</li>
+</ul>
+</div>
+</div>
+</div>
+<nav class="pagination">
+  <span class="prev"><a href="week-21-controllers-contd.html">Week 2.1 — Controllers contd.</a></span>
+  <span class="next"><a href="scaffolding-with-kubebuilder.html">Scaffolding with kubebuilder</a></span>
+</nav>
+</article>
+  </div>
+</main>
+</div>
+<footer class="footer">
+  <img src="../../../_/img/rhl-logo-red.png" height="40px" alt="Red Hat"  href="https://redhat.com" >
+</footer><script id="site-script" src="../../../_/js/site.js" data-ui-root-path="../../../_"></script>
+<script async src="../../../_/js/vendor/highlight.js"></script>
+<script defer src="../../../_/js/vendor/tabs.js"></script>
+<script defer src="../../../_/js/vendor/reading-time.js"></script>
+  </body>
+</html>
