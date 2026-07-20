@@ -1,10 +1,8 @@
-#  Week 4.2 — Ubiquitous topics!
+= Week 4.2 -- Ubiquitous Topics
+:navtitle: Week 4.2 -- Ubiquitous Topics
 
-== Week 4.2 — Ubiquitous topics!
+This final week zooms out to the broader operator ecosystem and alternative Kubernetes form factors.
+We examine the CNCF Operator White Paper's capability model and framework landscape, then survey control plane architectures that diverge from the standard self-hosted model.
 
-This module explores diverse control plane architectures and platform form factors designed to support specific operational requirements, from enterprise cloud environments to resource-constrained edge devices.
-
-*   **Control Plane Architectures:** Examination of alternative Kubernetes control plane implementations and models.
-*   **HyperShift:** An architectural approach for running hosted OpenShift control planes (nested clusters) to improve scalability and lifecycle management.
-*   **kcp:** A Kubernetes-like control plane optimized for multi-cluster management and alternative use cases.
-*   **Edge Form Factors:** Implementation of enterprise-grade Kubernetes on small-scale hardware using solutions such as MicroShift, k0s, and microk8s.
+* *The Operator Landscape* -- the CNCF's formal definition of operators, the five-level capability model, major frameworks, and proven design patterns.
+* *Alternative Control Planes and Form Factors* -- hosted control planes, Kubernetes-like API platforms, and minimal distributions built for edge and resource-constrained environments.

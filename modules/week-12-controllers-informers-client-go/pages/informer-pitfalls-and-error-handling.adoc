@@ -1,0 +1,143 @@
+= Informer Pitfalls and Error Handling
+:navtitle: Informer Pitfalls and Error Handling
+
+Informers are elegant in small clusters but introduce subtle failure modes at scale.
+This page covers the most common pitfalls, drawing from the upstream Kubernetes controller guidelines and from production experience at companies running large clusters.
+
+== Level-Driven, Not Edge-Driven
+
+This is the single most important principle for writing correct controllers.
+
+A *level-driven* controller examines the current state of the world and determines what action to take.
+An *edge-driven* controller examines the transition (the delta between old and new state) and reacts to what changed.
+
+[WARNING]
+====
+Do *not* compare `oldObj` and `newObj` in your `UpdateFunc` handler to decide whether to reconcile.
+The `oldObj` parameter in `UpdateFunc` is a footgun -- it tempts you into edge-driven logic that breaks when events are missed, reordered, or coalesced.
+====
+
+Edge-driven logic fails because:
+
+* Informers guarantee that you will eventually see the current state, but they do *not* guarantee that you will see every intermediate state.
+* During high churn, multiple updates may be coalesced into a single event.
+* If your controller restarts, it receives the full current state via the initial LIST -- there is no "previous state" to compare against.
+
+The correct approach: your `UpdateFunc` handler should enqueue the object's key unconditionally.
+The sync handler should then read the current state from the cache (or API server if needed) and reconcile from scratch.
+
+== Informer Pitfalls at Scale
+
+The following failure modes emerge in production clusters with tens of thousands of resources.
+
+=== The Initial LIST Phase
+
+When an Informer starts, it performs a LIST that returns *all* existing objects of the watched type.
+In a cluster with 100,000 Pods, the Informer loads 100,000 objects into memory at once, and each one triggers an `AddFunc` call.
+
+=== Serial Handler Execution
+
+Event handlers run *serially* on an unbounded ring buffer.
+If an `AddFunc` handler performs a slow operation (a network call, a database write), events queue up in memory while waiting their turn.
+
+=== The OOM Loop
+
+These two properties combine into a pathological failure mode observed in production:
+
+. The initial LIST returns a large number of objects, all enqueued in the ring buffer.
+. The handler is slow on certain items (for example, it makes a blocking API call per object).
+. While the handler works through the backlog, the WATCH stream continues generating new events that accumulate in the buffer.
+. Periodic resync compounds the problem by re-delivering every cached object.
+. Memory grows until the process is OOM-killed.
+. Kubernetes restarts the Pod, and the cycle repeats.
+
+=== Mitigations
+
+* *Use a workqueue.* The first recommendation in the official controller guidelines. Move processing out of the event handler and into a rate-limited workqueue with metrics, retries, and backoff.
+* *Filter with label selectors.* Use `WithTweakListOptions` when creating a `SharedInformerFactory` to restrict the LIST and WATCH to only the objects your controller cares about.
+* *Reduce object size.* Use the `SetTransform` hook on the Informer to strip out fields your controller does not need (such as managed fields or large annotations). This reduces memory footprint but can complicate debugging.
+
+== Error Handling and Requeues
+
+Correct error handling follows directly from the upstream guidelines.
+
+=== Percolate errors to the top
+
+Do not silently swallow errors inside your sync handler.
+Return the error so that the work loop can decide what to do with it.
+A returned error triggers `workqueue.AddRateLimited`, which requeues the item with exponential backoff.
+
+[source,go]
+----
+func (c *Controller) processNextWorkItem(ctx context.Context) bool {
+    objRef, shutdown := c.workqueue.Get()
+    if shutdown {
+        return false
+    }
+    defer c.workqueue.Done(objRef)
+
+    err := c.syncHandler(ctx, objRef)
+    if err == nil {
+        c.workqueue.Forget(objRef)  // success: reset backoff
+        return true
+    }
+
+    // failure: log and requeue with backoff
+    utilruntime.HandleErrorWithContext(ctx, err,
+        "Error syncing; requeuing for later retry",
+        "objectReference", objRef)
+    c.workqueue.AddRateLimited(objRef)
+    return true
+}
+----
+
+=== The three workqueue calls
+
+[cols="1,3", options="header"]
+|===
+| Call
+| Purpose
+
+| `Done(key)`
+| Releases the processing lock. Must always be called (typically via `defer`) so the key can be picked up again if it was requeued.
+
+| `Forget(key)`
+| Resets the rate-limiting backoff counter for this key. Call this on *success* so the next event for this key is processed immediately.
+
+| `AddRateLimited(key)`
+| Requeues the key with exponential backoff. Call this on *failure* so the controller retries after an increasing delay.
+|===
+
+== Common Mistakes
+
+The following mistakes are observed frequently in production controllers and during code reviews.
+
+=== Mutating cached objects without deep copy
+
+The Informer cache is shared across all controllers in the same process.
+If you modify an object retrieved from the cache -- even a map field like `Annotations` on a shallow copy -- every other controller reading that object sees the corrupted data.
+Always call `DeepCopy()` before modifying.
+
+=== Not waiting for cache sync
+
+Starting to process items before `cache.WaitForCacheSync` returns leads to incorrect decisions.
+For example, a ReplicaSet controller that begins reconciling before the Pod cache is populated will see zero Pods and create duplicates.
+
+=== Making direct API calls instead of using the Lister
+
+The entire point of the Informer cache is to avoid hitting the API server on every reconciliation.
+If your sync handler calls `clientset.CoreV1().Pods(ns).Get(...)` instead of `podLister.Pods(ns).Get(name)`, you defeat the cache and add unnecessary load to the API server.
+
+[TIP]
+====
+Use the Lister for reads and the clientset for writes.
+The Lister returns data from the local cache (fast, no network).
+The clientset talks to the API server (required for creates, updates, and deletes).
+====
+
+=== Using the cache as a source of truth for writes
+
+The Informer cache is eventually consistent.
+Before performing a write (update or patch), re-GET the resource from the API server to get the latest `resourceVersion`.
+Writing with a stale `resourceVersion` results in a conflict error.
+While the workqueue retry mechanism will eventually resolve this, it is more efficient to re-GET first.

@@ -1,4 +1,4 @@
 * xref:week-41-all-about-kube-scheduler.adoc[]
-** xref:pod-scheduling-de-scheduling-and-auto-scaling.adoc[]
-** xref:managing-resource-requests-and-limits.adoc[]
+** xref:how-the-scheduler-works.adoc[]
+** xref:resource-management.adoc[]
 ** xref:dynamic-resource-allocation.adoc[]

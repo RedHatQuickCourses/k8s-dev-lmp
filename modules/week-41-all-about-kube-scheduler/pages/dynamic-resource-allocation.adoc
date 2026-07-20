@@ -1,94 +1,100 @@
-#  Dynamic Resource Allocation
+= Dynamic Resource Allocation
+:navtitle: Dynamic Resource Allocation
 
-= Dynamic Resource Allocation (DRA)
+== The problem DRA solves
 
-In traditional Kubernetes scheduling, the `kube-scheduler` makes placement decisions based primarily on CPU and memory requests defined in a Pod's specification. However, as cluster workloads become increasingly specialized—relying on hardware accelerators like GPUs, FPGAs, or high-performance NICs—the static nature of resources becomes a bottleneck.
+Traditional Kubernetes scheduling treats resources as fungible quantities -- 500m of CPU on node A is the same as 500m on node B.
+That model breaks down for specialized hardware like GPUs, FPGAs, and high-performance network interfaces.
+A workload may need "one NVIDIA A100 with 80 GB VRAM", not just "some amount of GPU".
+These resources are non-fungible: they differ in type, capability, and availability across nodes.
 
-**Dynamic Resource Allocation (DRA)** is a Kubernetes API designed to extend the resource model, allowing third-party drivers to manage the lifecycle of complex, non-standard hardware resources.
+The older Device Plugin framework handled simple pass-through allocation, but it could not express device attributes, share devices across containers, or let the scheduler reason about which _specific_ device to assign.
+Dynamic Resource Allocation (DRA) replaces that model with a claim-based approach inspired by PersistentVolumeClaims.
 
-== Why do we need DRA?
+== Key API resources
 
-Historically, Kubernetes managed specialized hardware using the `Device Plugin` framework. While effective for simple "pass-through" scenarios, Device Plugins suffer from several limitations:
+DRA is part of the `resource.k8s.io/v1` API group and introduces three core resources:
 
-*   **Inflexible Allocation:** Device plugins operate at the node level. The scheduler has limited visibility into the specific state of the hardware.
-*   **Static Resource Requests:** It is difficult to model resources that can be partitioned or shared dynamically (e.g., slicing a GPU into smaller virtual instances).
-*   **No "Pre-allocation" Logic:** With standard plugins, the resource is often allocated only when the Pod is scheduled to the node, leaving little room for complex pre-provisioning requirements.
+*DeviceClass*::
+Defines a category of devices available in the cluster.
+A DeviceClass is created by device drivers or cluster administrators and tells the scheduler what kind of hardware exists and how to select it.
+For example, a driver might publish a `gpu-class` that covers all GPU models it manages.
 
-DRA shifts this by introducing a **claim-based** model, where the scheduler interacts with a Resource Driver to determine if and how a specific piece of hardware can be assigned to a Pod.
+*ResourceClaim*::
+A request for access to one or more devices.
+A ResourceClaim references a DeviceClass and can use https://cel.dev[CEL] selectors to filter for specific device attributes -- model, VRAM size, driver version, and so on.
+The scheduler coordinates with the DRA driver to find a node that has a matching device and allocates it to the claim.
 
-== Core Concepts
+*ResourceClaimTemplate*::
+A template that Kubernetes uses to generate a per-pod ResourceClaim automatically.
+This is analogous to how a VolumeClaimTemplate works in a StatefulSet: each pod gets its own claim, and the claim is deleted when the pod terminates.
 
-DRA introduces three primary custom resources:
+A fourth resource, *ResourceSlice*, is created by the device driver on each node.
+ResourceSlices advertise what devices are available and their attributes, giving the scheduler the information it needs to match claims to nodes.
 
-*   **`ResourceClass`**: Defines the "policy" for how a resource should be allocated. It acts as the interface between the cluster administrator's intent and the specific driver.
-*   **`ResourceClaim`**: A request for resources made by a user or an application. The claim acts as the binding between the Pod and the actual hardware.
-*   **`ResourceClaimTemplate`**: Used within a Pod template to allow for the automatic creation of `ResourceClaims` when a Pod is instantiated (similar to how a `PersistentVolumeClaim` works with a `PersistentVolume`).
+== How scheduling works with DRA
 
-== Hands-on Activity: Configuring a Resource Claim
+When a pod references a ResourceClaim (directly or via a ResourceClaimTemplate), the scheduling cycle adds an extra coordination step:
 
-In this exercise, you will create a `ResourceClaim` to request a specialized resource managed by a DRA-compliant driver.
+. The scheduler identifies nodes that might satisfy the claim based on published ResourceSlices.
+. For each candidate node, the scheduler asks the DRA driver whether the claim can be allocated on that node.
+. Nodes where allocation succeeds are considered feasible; others are filtered out.
+. The pod is scored and bound as usual, and the allocated device information is recorded in the ResourceClaim status.
+
+This means DRA extends the scheduler's Filter stage with device-aware logic without requiring changes to the scheduler core.
+
+== Prioritized alternatives
+
+A ResourceClaim can specify a *prioritized list* of sub-requests using `firstAvailable`.
+The scheduler evaluates each alternative in order and picks the first one that can be satisfied.
+This lets you express preferences -- for example, prefer a large GPU but fall back to two smaller ones:
+
+[source,yaml]
+----
+apiVersion: resource.k8s.io/v1
+kind: ResourceClaimTemplate
+metadata:
+  name: gpu-claim-template
+spec:
+  spec:
+    devices:
+      requests:
+      - name: gpu-req
+        firstAvailable:
+        - name: large-gpu
+          deviceClassName: gpu-class
+          selectors:
+          - cel:
+              expression: device.attributes["gpu-driver.example.com"].vram >= 80
+        - name: small-gpus
+          deviceClassName: gpu-class
+          selectors:
+          - cel:
+              expression: device.attributes["gpu-driver.example.com"].vram >= 24
+          count: 2
+----
+
+When scoring nodes, the scheduler prefers nodes that can satisfy a higher-ranked alternative, so the large GPU is chosen when available.
+
+== Device sharing
+
+Unlike the old Device Plugin model, DRA supports sharing a device across multiple containers or even multiple pods.
+If two containers in the same pod reference the same ResourceClaim, they both get access to the allocated device.
+Separate pods can also share a device by referencing the same named ResourceClaim, as long as the claim exists in the same namespace.
+
+== Relationship to traditional resources
+
+DRA does not replace CPU and memory requests.
+A pod that needs a GPU still needs CPU and memory to run the rest of its code.
+In practice, pods that use DRA set both traditional resource requests _and_ ResourceClaims:
+
+* The scheduler uses CPU and memory requests to ensure the node has enough compute.
+* The scheduler uses the ResourceClaim to ensure the node has the right device.
+* Only nodes that satisfy both constraints are feasible.
 
 [IMPORTANT]
 ====
-This activity assumes your cluster has a DRA-compatible driver installed (e.g., the official Kubernetes DRA dummy driver or a vendor-specific GPU driver).
+DRA is a rapidly evolving area.
+Some features like workload-level claims and device taints are still in alpha or beta.
+Check the upstream https://kubernetes.io/docs/concepts/scheduling-eviction/dynamic-resource-allocation/[DRA documentation] for the latest API stability and feature gates.
 ====
-
-=== Step 1: Create a Resource Class
-Define the class that dictates which driver handles the request.
-
-[source,yaml]
-----
-apiVersion: resource.k8s.io/v1alpha2
-kind: ResourceClass
-metadata:
-  name: gpu-class
-driverName: my-vendor.com/gpu-driver
-----
-
-=== Step 2: Define the Pod with a Resource Claim
-Instead of hardcoding resource requests in the container spec, use a `ResourceClaimTemplate` to request resources dynamically.
-
-[source,yaml]
-----
-apiVersion: v1
-kind: Pod
-metadata:
-  name: gpu-workload
-spec:
-  containers:
-  - name: worker
-    image: alpine
-    command: ["sleep", "infinity"]
-  resourceClaims:
-  - name: my-gpu
-    source:
-      resourceClaimTemplateName: gpu-template
----
-apiVersion: resource.k8s.io/v1alpha2
-kind: ResourceClaimTemplate
-metadata:
-  name: gpu-template
-spec:
-  spec:
-    resourceClassName: gpu-class
-----
-
-=== Step 3: Verify Allocation
-Once the Pod is created, the scheduler triggers the DRA controller to fulfill the claim. Check the status of your claim:
-
-[source,bash]
-----
-kubectl get resourceclaim
-kubectl describe resourceclaim <claim-name>
-----
-
-The `status` field will show whether the resource has been allocated and which node it has been bound to.
-
-== Troubleshooting DRA
-
-If your Pod remains in `Pending` state with DRA:
-
-1.  **Check Driver Logs:** Ensure your vendor-specific DRA driver is running in the `kube-system` namespace.
-2.  **Inspect ResourceClaim Events:** Run `kubectl describe resourceclaim <name>` to check for allocation failures.
-3.  **Validate ResourceClass:** Verify that the `driverName` in your `ResourceClass` matches the driver installed on your nodes.
-4.  **Scheduler Awareness:** Ensure your control plane is running a version of `kube-scheduler` that supports the `DynamicResourceAllocation` feature gate (enabled by default in modern Kubernetes versions).

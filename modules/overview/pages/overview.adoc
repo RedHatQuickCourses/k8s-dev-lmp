@@ -1,11 +1,63 @@
-#  Overview
+= Course Overview
+:navtitle: Overview
 
-= Overview
+This course provides a comprehensive overview of the Kubernetes architecture and its powerful extensibility mechanisms.
+We will start by learning how the Kubernetes API functions behind the scenes, exploring how cluster requests are authenticated, authorized, and validated by the control plane.
+The core of the course focuses on platform automation, teaching you how to extend Kubernetes by defining custom resources and writing custom controllers or operators to automatically manage different workloads.
 
-The Kubernetes Developer Learning Path provides a deep dive into the architecture and extensibility of Kubernetes, focusing on moving beyond basic usage to platform-level development. Key areas of focus include:
+== Weekly Roadmap
 
-* **Control Plane Internals:** Understanding the API server lifecycle, authentication, authorization, and the role of the etcd persistence layer.
-* **Platform Automation:** Mastering the creation of custom resources and operators using controller patterns, informers, and `client-go`.
-* **Distributed System Design:** Implementing high-availability strategies, including leader election, locking, leasing, and idempotent state machines.
-* **Advanced Architecture:** Exploring traffic management through the Gateway API, service meshes, and custom API server aggregation.
-* **Operational Security & Scheduling:** Advanced cluster hardening, admission control webhooks, and the mechanics of the `kube-scheduler`.
+=== Week 0: Familiarizing with Kubernetes
+
+At its core, Kubernetes is an API-centric, declarative configuration management and container orchestration system.
+This week orients you with how the API server, etcd, and controllers work together.
+
+xref:week-0-familiarizing-with-koobrnehteez:week-0-familiarizing-with-koobrnehteez.adoc[Go to Week 0]
+
+=== Week 1.1: Kubernetes Resource Model
+
+A walkthrough on kube-apiserver essentials -- the declarative intent of Kubernetes Resources and all the plugin layers (authentication, audit, impersonation, priority & fairness, authorization, admission, storage).
+
+xref:week-11-kubernetes-resource-model:week-11-kubernetes-resource-model.adoc[Go to Week 1.1]
+
+=== Week 1.2: Controllers, Informers, and client-go
+
+The basic building blocks behind operators -- client-go architecture, Informers, listers, workqueues, caches, and error handling.
+
+xref:week-12-controllers-informers-client-go:week-12-controllers-informers-client-go.adoc[Go to Week 1.2]
+
+=== Week 2.1: Controllers (continued)
+
+Writing concrete Kube APIs with controller-runtime -- Reconcile loop, kubebuilder, Spec vs Status, Conditions, API validation, CRUD operations, Apply vs Patch vs Update.
+
+xref:week-21-controllers-contd:week-21-controllers-contd.adoc[Go to Week 2.1]
+
+=== Week 2.2: Going Distributed
+
+Distributed systems challenges -- Idempotency, locks, leases, leader election, controller sharding (with OpenShift Ingress Controller case study).
+
+xref:week-22-going-distributed-locks-leases-ownership-eventual-consistency:week-22-going-distributed-locks-leases-ownership-eventual-consistency.adoc[Go to Week 2.2]
+
+=== Week 3.1: Admissions and Beyond the kube-apiserver
+
+From admission control webhooks into writing your own apiserver -- ValidatingWebhooks, MutatingWebhooks, policy engines, API discovery, aggregated APIs, custom API servers.
+
+xref:week-31-taking-more-control-admissions-and-beyond-the-kube-apiserver-to-writing-your-own-api-server:week-31-taking-more-control-admissions-and-beyond-the-kube-apiserver-to-writing-your-own-api-server.adoc[Go to Week 3.1]
+
+=== Week 3.2: The Other Stuff
+
+Networking (Ingress, Gateway API), Service Mesh, AuthN/AuthZ in OpenShift, Security, Cluster Hardening.
+
+xref:week-32-the-other-stuff:week-32-the-other-stuff.adoc[Go to Week 3.2]
+
+=== Week 4.1: All About kube-scheduler
+
+kube-scheduler deep dive -- scheduling, de-scheduling, resource requests and limits, Dynamic Resource Allocation.
+
+xref:week-41-all-about-kube-scheduler:week-41-all-about-kube-scheduler.adoc[Go to Week 4.1]
+
+=== Week 4.2: Ubiquitous Topics
+
+Operator landscape and alternative control plane architectures -- HyperShift, kcp, MicroShift, k3s.
+
+xref:week-42-ubiquitous-topics:week-42-ubiquitous-topics.adoc[Go to Week 4.2]

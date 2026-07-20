@@ -1,9 +1,9 @@
-#  Exercises
+= Exercises
+:navtitle: Exercises
 
-== Exercises
+These hands-on labs reinforce the concepts covered in the weekly modules.
+Each exercise builds a small but complete Go program that you can run against a local Kubernetes cluster.
 
-The practical curriculum focuses on applying advanced Kubernetes concepts through hands-on development:
-
-*   **Controller Implementation:** Build a custom controller from the ground up using `client-go` to understand resource synchronization.
-*   **Distributed Systems Logic:** Implement optimistic locking and leader election mechanisms using the `Lease` API to ensure high availability.
-*   **Admission Control:** Develop and deploy a custom validating webhook to enforce container registry policies within the cluster.
+* xref:week-1-build-a-controller-using-client-go-from-scratch.adoc[] -- Wire up the client-go pipeline from scratch
+* xref:week-2-implement-optimistic-locking-and-leader-election-via-lease.adoc[] -- Add leader election to your controller
+* xref:week-3-develop-a-custom-validating-webhook-for-container-registry-enforcement.adoc[] -- Build and deploy a validating admission webhook

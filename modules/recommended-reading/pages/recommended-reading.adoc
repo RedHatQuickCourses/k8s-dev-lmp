@@ -1,14 +1,29 @@
-#  Recommended Reading
+= Recommended Reading
+:navtitle: Recommended Reading
 
-== Recommended Reading
+The following resources are strongly recommended as companions to this course.
+Each book or paper aligns with specific weekly modules and will deepen your understanding of the topics covered.
 
-To deepen your understanding of Kubernetes development and distributed systems, the following resources are recommended:
+== Programming Kubernetes
 
-*   **Core Concepts:**
-    *   *Programming Kubernetes* by Michael Hausenblas and Stefan Schimanski.
-    *   *Kubernetes Operators* by Jason Dobies and Joshua Wood.
-    *   *CNCF Operator Whitepaper*.
-*   **Security and Observability:**
-    *   *Kubernetes Security and Observability* by Brendan Creane and Amit Gupta.
-*   **Distributed Systems Design:**
-    *   *Designing Distributed Systems* by Brendan Burns, focusing on patterns and paradigms for scalable, reliable systems.
+*Michael Hausenblas and Stefan Schimanski* (O'Reilly, 2019)
+
+This book is the definitive guide to client-go internals, custom resources, and the API machinery that powers Kubernetes extensibility.
+It serves as an excellent companion to xref:week-11-kubernetes-resource-model:week-11-kubernetes-resource-model.adoc[Week 1.1] and xref:week-12-controllers-informers-client-go:week-12-controllers-informers-client-go.adoc[Week 1.2], where you will explore the Kubernetes resource model and controller foundations.
+Readers will gain a thorough understanding of how the API server processes requests and how to build robust clients and controllers.
+
+== Kubernetes Operators
+
+*Jason Dobies and Joshua Wood* (O'Reilly, 2020)
+
+This book covers the operator pattern end-to-end, from the Operator SDK to lifecycle management of complex applications on Kubernetes.
+It pairs well with xref:week-21-controllers-contd:week-21-controllers-contd.adoc[Week 2.1] and xref:week-31-taking-more-control-admissions-and-beyond-the-kube-apiserver-to-writing-your-own-api-server:week-31-taking-more-control-admissions-and-beyond-the-kube-apiserver-to-writing-your-own-api-server.adoc[Week 3.1], where you will write controllers with controller-runtime and extend the API server.
+It provides practical guidance on packaging, deploying, and upgrading operators in production.
+
+== CNCF Operator White Paper
+
+https://tag-app-delivery.cncf.io/whitepapers/operator/[CNCF TAG App Delivery -- Operator White Paper]
+
+This industry reference defines the operator capability model and provides a comprehensive comparison of operator frameworks.
+It is the ideal companion to xref:week-42-ubiquitous-topics:week-42-ubiquitous-topics.adoc[Week 4.2], where you will survey the operator landscape and alternative control plane architectures.
+The white paper offers a vendor-neutral perspective on when and how to build operators.

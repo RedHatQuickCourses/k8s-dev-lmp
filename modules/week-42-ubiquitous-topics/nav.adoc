@@ -1,4 +1,3 @@
 * xref:week-42-ubiquitous-topics.adoc[]
-** xref:alternative-control-plane-architectures.adoc[]
-** xref:hypershift-and-kcp.adoc[]
-** xref:microshift-and-k3s-form-factors.adoc[]
+** xref:operator-landscape.adoc[]
+** xref:alternative-control-planes-and-form-factors.adoc[]

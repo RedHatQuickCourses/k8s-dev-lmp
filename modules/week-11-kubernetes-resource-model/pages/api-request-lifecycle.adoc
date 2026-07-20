@@ -1,0 +1,78 @@
+= API Request Lifecycle
+:navtitle: API Request Lifecycle
+
+Every interaction with a Kubernetes cluster -- whether from `kubectl`, an internal controller, or an external operator -- passes through the kube-apiserver's request pipeline.
+Understanding the stages of this pipeline is essential for building secure, efficient, and extension-ready Kubernetes applications.
+
+== The Request Pipeline
+
+When a request enters the kube-apiserver, it does not immediately interact with etcd.
+Instead, it traverses a chain of stages, each responsible for a distinct concern.
+For a mutation, the stages execute in the following order:
+
+. *Authentication* -- validates the caller's identity using X.509 client certificates, bearer tokens, or OIDC tokens. If authentication fails, the request is rejected with a 401 Unauthorized response. For a deeper treatment, see xref:week-32-the-other-stuff:authentication-and-authorization.adoc[Week 3.2].
+
+. *Audit* -- records the request for compliance and debugging purposes. Every request is logged, providing a full trail of who did what and when.
+
+. *Impersonation* -- allows authenticated users to act as another user or group. The apiserver checks whether the caller has the authority to impersonate the target identity.
+
+. *Priority and Fairness* -- classifies requests into flow schemas and priority levels to prevent API server overload. Requests are categorized (for example, leader election versus background listing) and rate-limited to ensure cluster stability.
++
+[NOTE]
+====
+Priority and Fairness is how the API server prevents a misbehaving controller from starving other clients.
+Without this mechanism, a single controller issuing a flood of list calls could degrade responsiveness for the entire cluster.
+====
+
+. *Authorization* -- checks whether the authenticated identity is allowed to perform the requested action on the specified resource. Kubernetes supports multiple authorization modes: RBAC, Node, Webhook, and ABAC.
+
+. *Mutation* -- mutating admission webhooks can modify the request object before it is validated. This is where sidecars are injected, default values are set by policy engines, and labels are added automatically.
+
+. *Validation* -- schema validation and validating admission webhooks ensure the object meets all constraints. Unlike mutating webhooks, validating webhooks cannot change the object -- they can only accept or reject it.
+
+. *Storage* -- the validated object is serialized and persisted to etcd. At this point the desired state is durably recorded and available for controllers to act on.
+
+For a detailed treatment of admission webhooks, see xref:week-31-taking-more-control-admissions-and-beyond-the-kube-apiserver-to-writing-your-own-api-server:admission-control-webhooks.adoc[Week 3.1].
+For authentication and authorization in depth, see xref:week-32-the-other-stuff:authentication-and-authorization.adoc[Week 3.2].
+
+[NOTE]
+====
+A vulnerability in HTTP/2 (CVE-2023-44487, the "rapid reset" attack) led the client-go library to fall back to HTTP/1.1 connections by default.
+This is worth keeping in mind when debugging connection behavior between clients and the apiserver.
+====
+
+== Exploring the API
+
+The kube-apiserver exposes discovery endpoints that let you inspect which API groups, versions, and resource types are available.
+This is a useful way to verify that your request is reaching the apiserver and to understand the shape of the API surface.
+
+Start a local proxy to the API server:
+
+[source,bash]
+----
+kubectl proxy --port=8001 &
+----
+
+List all API groups:
+
+[source,bash]
+----
+curl -s http://localhost:8001/apis | jq '.groups[].name'
+----
+
+Get the aggregated discovery document in v2 format:
+
+[source,bash]
+----
+curl -s -H "Accept: application/json;v=v2" http://localhost:8001/api | jq
+----
+
+Inspect a specific resource type (for example, pods in the default namespace):
+
+[source,bash]
+----
+curl -s http://localhost:8001/api/v1/namespaces/default/pods | jq '.items[].metadata.name'
+----
+
+These commands confirm that your request successfully passes through the authentication and authorization stages described above.
+The discovery endpoints are also what client libraries like client-go use under the hood to negotiate API versions and resource schemas.

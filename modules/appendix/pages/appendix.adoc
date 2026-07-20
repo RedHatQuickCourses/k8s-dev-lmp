@@ -1,7 +1,108 @@
 = Appendix
-
-FIXME: Content for Appendix...
+:navtitle: Appendix
 
 == Resources
 
 link:{attachmentsdir}/{page-component-name}.pdf[Download Course PDF]
+
+== Glossary
+
+API Server (kube-apiserver)::
+The central management component of the Kubernetes control plane.
+It exposes the Kubernetes API, validates and configures data for API objects, and serves as the front end for the cluster's shared state.
+
+CRD (Custom Resource Definition)::
+A mechanism for extending the Kubernetes API by defining new resource types without building a custom API server.
+CRDs allow users to create and manage custom objects using standard Kubernetes tooling.
+
+Controller::
+A control loop that watches the state of a cluster through the API server and makes changes to move the current state toward the desired state.
+Controllers are the core automation mechanism in Kubernetes.
+
+Controller-runtime::
+A set of Go libraries for building Kubernetes controllers and operators.
+It provides high-level abstractions over client-go, including the Reconcile loop pattern, and is used by kubebuilder.
+
+client-go::
+The official Go client library for interacting with the Kubernetes API.
+It provides typed clients, dynamic clients, discovery, informers, listers, and workqueues.
+
+DeltaFIFO::
+A queue implementation in client-go that stores deltas (changes) for Kubernetes objects.
+It feeds events to the Informer's event handlers in the order they were received.
+
+etcd::
+A distributed, consistent key-value store used as the backing store for all Kubernetes cluster data.
+It provides strong consistency guarantees through the Raft consensus algorithm.
+
+Finalizer::
+A key on a Kubernetes resource that prevents the resource from being deleted until the controller responsible for the finalizer has completed its cleanup logic.
+Finalizers enable graceful teardown of dependent resources.
+
+GVK (GroupVersionKind)::
+A tuple that uniquely identifies the type of a Kubernetes API object by its API group, version, and kind.
+For example, `apps/v1 Deployment` has group `apps`, version `v1`, and kind `Deployment`.
+
+GVR (GroupVersionResource)::
+A tuple that uniquely identifies a Kubernetes API resource endpoint by its API group, version, and resource name.
+GVR is used for RESTful URL construction, while GVK is used for object type identification.
+
+Informer::
+A client-go component that watches for changes to Kubernetes resources and maintains an in-memory cache.
+Informers reduce load on the API server by serving reads from cache and delivering events through handlers.
+
+KAL (kube-api-linter)::
+A linter for Kubernetes API types that enforces API conventions and best practices.
+It checks Go struct definitions for CRDs against the Kubernetes API guidelines.
+
+Lease::
+A lightweight Kubernetes resource used to implement distributed coordination primitives such as leader election and heartbeating.
+Leases allow controllers to claim and renew ownership of a coordination lock.
+
+Leader Election::
+A mechanism by which multiple replicas of a controller elect a single active instance (the leader) to perform work, while the others stand by.
+It is implemented using Leases or ConfigMaps in Kubernetes.
+
+Lister::
+A client-go component that reads Kubernetes objects from the Informer's local cache rather than making API server calls.
+Listers provide fast, low-latency reads for controller logic.
+
+OCC (Optimistic Concurrency Control)::
+A strategy used by the Kubernetes API server to detect conflicting writes.
+Each resource carries a `resourceVersion` field; updates that specify a stale version are rejected, forcing the client to re-read and retry.
+
+Operator::
+A pattern for packaging, deploying, and managing a Kubernetes application using custom resources and custom controllers.
+Operators encode domain-specific operational knowledge into software that runs on the cluster.
+
+Reconcile Loop::
+The core pattern in controller-runtime where a controller receives a request for a specific object and compares the current state to the desired state, taking action to converge them.
+Each invocation should be idempotent.
+
+Reflector::
+A client-go component that watches the Kubernetes API server for a specific resource type and pushes changes into a DeltaFIFO queue.
+It is the first stage of the Informer pipeline.
+
+Scheme::
+A registry in the Kubernetes API machinery that maps Go types to GVKs and vice versa.
+The Scheme is used for serialization, deserialization, and defaulting of API objects.
+
+Server-Side Apply (SSA)::
+An API server feature that tracks field ownership per manager, enabling safe concurrent updates by multiple controllers.
+SSA uses Apply operations instead of traditional Update or Patch, reducing merge conflicts.
+
+SharedInformerFactory::
+A factory in client-go that creates and manages shared Informers for multiple resource types.
+Sharing Informers across controllers reduces the number of API server watch connections.
+
+Spec::
+The section of a Kubernetes resource that declares the desired state.
+Users and controllers write to the Spec to express intent; controllers then reconcile the cluster to match.
+
+Status::
+The section of a Kubernetes resource that reports the observed state as determined by controllers.
+Status is typically updated by the controller that manages the resource, not by end users.
+
+Workqueue::
+A rate-limited, de-duplicating queue in client-go used by controllers to process events.
+Items are added by Informer event handlers and consumed by worker goroutines in the controller's reconcile loop.

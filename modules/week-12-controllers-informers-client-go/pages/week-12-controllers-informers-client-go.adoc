@@ -1,14 +1,8 @@
-#  Week 1.2 — Controllers, informers, client-go
+= Week 1.2 -- Controllers, Informers, and client-go
+:navtitle: Week 1.2 -- Controllers, Informers, client-go
 
-= Week 1.2 — Controllers, informers, client-go
-
-This module covers the fundamental building blocks of Kubernetes operators and resource synchronization. It focuses on the mechanics of how custom controllers observe state and ensure the cluster converges toward a desired configuration.
-
-Key components include:
-
-*   **client-go Architecture**: The official Go client library for interacting with the Kubernetes API.
-*   **Informers**: Act as the "eyes" of the controller, watching for cluster events and maintaining a local cache to minimize API server load.
-*   **Listers**: Provide read-only access to the local cache, allowing controllers to retrieve resource states efficiently.
-*   **Workqueues**: Serve as buffers for processing events; they implement FIFO (First-In-First-Out) logic to ensure reliable task management.
-*   **Event Propagation**: Understanding how changes in the API server flow through caches to trigger controller logic.
-*   **Operational Patterns**: Best practices for error handling, effective requeue strategies, and managing concurrency within reconciliation loops.
+This module covers the fundamental building blocks that power every Kubernetes operator and controller.
+We begin with the architecture of *client-go*, the official Go client library, examining its core components -- Reflector, DeltaFIFO, Indexer, and SharedInformerFactory -- and how they form a pipeline from the API server to your controller logic.
+From there we explore the Informer/Lister/Workqueue pattern that decouples event delivery from reconciliation, walk through the official sample-controller line by line, and discuss production pitfalls that surface only at scale.
+These components form the foundation that controller-runtime (covered in xref:week-21-controllers-contd:week-21-controllers-contd.adoc[Week 2.1]) abstracts over.
+A solid understanding of this layer is essential for debugging operator issues and for knowing when the higher-level abstractions are helping versus hiding problems.

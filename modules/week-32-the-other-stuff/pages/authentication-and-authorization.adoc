@@ -1,0 +1,84 @@
+= Authentication and Authorization
+:navtitle: Authentication and Authorization
+
+Every request to the Kubernetes API server passes through authentication, then authorization, before it reaches admission control and storage.
+Understanding how these layers work is essential for building controllers and operators that interact with the API safely.
+For the full request flow, see xref:week-11-kubernetes-resource-model:api-request-lifecycle.adoc[API Request Lifecycle].
+
+== Authentication: who are you?
+
+Kubernetes has two categories of identity:
+
+* *Service accounts* -- managed by the Kubernetes API, bound to namespaces, and backed by projected token volumes or Secrets.
+Every pod automatically gets a service account token mounted at `/var/run/secrets/kubernetes.io/serviceaccount/token`.
+* *Normal users* -- Kubernetes has no `User` object.
+Identity comes entirely from the authentication layer: a valid client certificate, a bearer token, or an OIDC token.
+
+The API server evaluates authenticator plugins in order.
+The first plugin that succeeds short-circuits the chain and populates a `UserInfo` struct with username, UID, groups, and optional extra fields.
+Available authentication methods include:
+
+* *X.509 client certificates* -- any certificate signed by the cluster CA is accepted.
+The `commonName` field becomes the username; `organization` fields become groups.
+* *Bearer tokens* -- static token files or bootstrap tokens, primarily used during cluster setup.
+* *OIDC tokens* -- the recommended approach for human users.
+The API server validates JWT tokens against a configured OIDC provider without acting as an identity provider itself.
+* *Service account tokens* -- projected, time-limited JWTs issued by the API server for in-cluster workloads.
+* *Webhook token review* -- delegates authentication to an external service via the `TokenReview` API.
+
+Requests that do not match any authenticator are treated as anonymous (`system:anonymous` user, `system:unauthenticated` group).
+
+== Authorization: what can you do?
+
+After authentication, the API server consults a chain of authorizer modules.
+Each module returns `Allow`, `Deny`, or `NoOpinion`.
+An `Allow` or `Deny` short-circuits the chain; `NoOpinion` passes the decision to the next module.
+
+=== RBAC
+
+Role-Based Access Control is the most common authorizer.
+`Role` and `ClusterRole` objects define sets of allowed verbs on API resources; `RoleBinding` and `ClusterRoleBinding` map those roles to users, groups, or service accounts.
+RBAC is purely additive -- it never returns `Deny`, only `Allow` or `NoOpinion`.
+
+=== Node authorizer
+
+The Node authorization mode exists specifically for kubelets.
+A kubelet authenticates as `system:node:<nodeName>` and the Node authorizer grants it access only to the pods, secrets, configmaps, and persistent volumes that are bound to its own node.
+This graph-based decision prevents a compromised node from reading secrets belonging to pods on other nodes.
+
+The logic follows a resource graph:
+
+----
+node <- pod
+node <- pod <- secret
+node <- pod <- configmap
+node <- pod <- pvc <- pv <- secret
+----
+
+For resources outside this graph -- such as listing all secrets cluster-wide -- the Node authorizer returns `NoOpinion` and the request falls through to RBAC.
+The `NodeRestriction` admission controller further limits what properties of `Node` and `Pod` objects a kubelet can modify.
+
+[NOTE]
+====
+The `kubectl auth can-i --list` command only reports RBAC-granted permissions.
+Rights granted by the Node authorizer will not appear in that output, which can be misleading during security audits.
+====
+
+=== Webhook authorization
+
+For requirements that exceed RBAC's additive model, Kubernetes supports external webhook authorizers.
+The API server sends a `SubjectAccessReview` to the webhook, which can return `Allow`, `Deny`, or `NoOpinion` -- including native deny rules that RBAC cannot express.
+
+=== ReBAC: relation-based access control
+
+ReBAC is an emerging approach inspired by the https://research.google/pubs/pub48190/[Google Zanzibar paper].
+Instead of flat role-to-permission mappings, authorization state is modelled as a graph with typed nodes and directed relations -- for example, `user:alice -- editor -> document:secret`.
+
+The https://github.com/luxas/kube-rebac-authorizer[kube-rebac-authorizer] prototype demonstrates how ReBAC (built on the CNCF project https://openfga.dev/[OpenFGA]) can replace both the RBAC and Node authorizers with a single graph-based engine.
+Key advantages over RBAC include:
+
+* *Native deny rules* -- the RBAC authorizer is additive-only, but ReBAC can express deny decisions directly.
+* *Inheritance* -- grant access to a Deployment and automatically propagate it to its child ReplicaSets and grandchild Pods without separate role entries.
+* *Cross-system integration* -- external permission sources (LDAP groups, cloud IAM roles) can be projected into the same graph as Kubernetes RBAC objects.
+
+ReBAC is still experimental in the Kubernetes ecosystem, but it signals the direction that SIG-Auth is exploring for fine-grained, graph-aware authorization.

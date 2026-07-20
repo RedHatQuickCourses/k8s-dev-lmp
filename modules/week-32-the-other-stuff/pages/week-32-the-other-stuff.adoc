@@ -1,9 +1,9 @@
-#  Week 3.2 — The other stuff
+= Week 3.2 -- The Other Stuff
+:navtitle: Week 3.2 -- The Other Stuff
 
-= Week 3.2 — The other stuff
+This week covers the other important topics that complement the operator and controller focus of the course -- networking (Ingress and Gateway API), service mesh, authentication and authorization, and cluster security hardening.
 
-This module addresses the essential ecosystem components that complement the core Kubernetes control plane, focusing on traffic management, identity, and cluster-level security.
-
-*   **Advanced Networking:** Examines the evolution of traffic management from Ingress to the modern Gateway API, alongside an introduction to Service Mesh concepts.
-*   **Authentication and Authorization:** Explores AuthN/AuthZ mechanisms, including RBAC, Node Authorizers, and custom authorization webhooks.
-*   **Cluster Security and Hardening:** Covers security implementation strategies such as OpenShift Security Context Constraints (SCC), native Kubernetes `SecurityContext`, SELinux, and seccomp profiles to enforce granular workload isolation.
+* *Ingress and Gateway API* -- how external traffic reaches your services, from the original Ingress resource to its role-oriented successor.
+* *Service Mesh Fundamentals* -- what a service mesh solves, its architecture, and how Istio implements traffic management, security, and observability.
+* *Authentication and Authorization* -- how Kubernetes identifies users and decides what they can do, including the Node authorizer and emerging ReBAC approaches.
+* *Security Context and Hardening* -- locking down pods with SecurityContext fields, the Security Profiles Operator, and OpenShift SecurityContextConstraints.

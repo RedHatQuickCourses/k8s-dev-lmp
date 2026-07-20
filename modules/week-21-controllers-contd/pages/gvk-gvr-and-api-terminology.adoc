@@ -1,0 +1,83 @@
+= GVK, GVR, and API Terminology
+:navtitle: GVK, GVR, and API Terminology
+
+When working with the Kubernetes API, four terms appear everywhere: *Groups*, *Versions*, *Kinds*, and *Resources*.
+Understanding how they relate -- and the shorthand GVK and GVR -- is essential before writing controllers.
+
+== Groups
+
+An API Group is a logical collection of related functionality.
+Core resources live in the empty group (often written as `core` or `""`), while others belong to named groups such as `apps`, `batch`, or `networking.k8s.io`.
+Group names follow DNS subdomain conventions; the Kubernetes project reserves single-word names and the `*.k8s.io` suffix.
+
+== Versions
+
+Each group exposes one or more versions (e.g. `v1`, `v1beta1`).
+Versions indicate the stability and maturity of the API surface.
+A Kind may change shape between versions, but every version must be able to round-trip all data stored by other versions so that upgrading or downgrading never loses information.
+
+== Kinds
+
+A *Kind* is the type name of an API object -- always CamelCase and singular (e.g. `Deployment`, `Pod`, `CronJob`).
+The API server uses the `kind` and `apiVersion` fields in every JSON payload to determine which schema to apply.
+
+== Resources
+
+A *Resource* is the lowercase, plural form that appears in REST URLs (e.g. `deployments`, `pods`, `cronjobs`).
+In most cases there is a one-to-one mapping between Kind and Resource, but exceptions exist.
+For example, the `Scale` Kind is returned by multiple resources such as `deployments/scale` and `replicasets/scale`, which is what allows the HorizontalPodAutoscaler to work across different resource types.
+
+== GVK vs GVR
+
+*GroupVersionKind (GVK)* identifies the Go type -- for example `apps/v1.Deployment`.
+*GroupVersionResource (GVR)* identifies the REST endpoint -- for example `apps/v1/deployments`.
+
+The *REST mapper* translates between GVK and GVR.
+When you call `client.Get` in controller-runtime, the framework uses the GVK (looked up via the Scheme) to find the correct GVR and issue the HTTP request.
+
+== The Scheme
+
+The `Scheme` is a registry that maps Go types to their GVKs for serialization and deserialization.
+When you register a type -- for instance `"batch.tutorial.kubebuilder.io/v1".CronJob{}` -- the Scheme records that this Go struct corresponds to the `CronJob` Kind in the `batch.tutorial.kubebuilder.io/v1` group-version.
+This allows the framework to construct a `&CronJob{}` from JSON or to determine the correct API path when submitting an update.
+
+[source,go]
+----
+import "k8s.io/apimachinery/pkg/runtime"
+
+scheme := runtime.NewScheme()
+batchv1.AddToScheme(scheme) // registers CronJob GVK
+----
+
+[TIP]
+====
+GVK uses CamelCase singular (`CronJob`), GVR uses lowercase plural (`cronjobs`).
+When using controller-runtime, `client.Get` resolves the GVK through the Scheme internally -- you rarely need to work with GVR directly.
+====
+
+== Summary
+
+[cols="1,1,2", options="header"]
+|===
+|Concept |Example |Purpose
+
+|Group
+|`batch`, `apps`, `networking.k8s.io`
+|Logical collection of related API types
+
+|Version
+|`v1`, `v1beta1`
+|Stability level; enables API evolution
+
+|Kind (GVK)
+|`batch/v1.CronJob`
+|Identifies the Go type and schema
+
+|Resource (GVR)
+|`batch/v1/cronjobs`
+|Identifies the REST endpoint
+
+|Scheme
+|`runtime.Scheme`
+|Maps Go types to GVKs for (de)serialization
+|===

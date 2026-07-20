@@ -1,0 +1,106 @@
+= Security Context and Hardening
+:navtitle: Security Context and Hardening
+
+A `SecurityContext` defines privilege and access control settings for a pod or container.
+It is the primary mechanism for hardening workloads at the pod spec level.
+
+== Pod-level vs container-level SecurityContext
+
+Kubernetes supports security context at two scopes:
+
+* *Pod-level* (`spec.securityContext`) -- applies to all containers in the pod.
+Fields like `runAsUser`, `runAsGroup`, `fsGroup`, and `supplementalGroups` are set here.
+* *Container-level* (`spec.containers[].securityContext`) -- overrides pod-level settings for a specific container.
+Fields like `allowPrivilegeEscalation`, `capabilities`, `readOnlyRootFilesystem`, and `seccompProfile` are typically set here.
+
+When both levels specify the same field, the container-level value takes precedence.
+
+== Key SecurityContext fields
+
+[cols="2,3", options="header"]
+|===
+| Field | Purpose
+
+| `runAsUser` / `runAsGroup`
+| Sets the UID and primary GID for all processes in the container.
+
+| `runAsNonRoot`
+| Rejects the pod at admission if the container image would run as UID 0.
+
+| `readOnlyRootFilesystem`
+| Mounts the container's root filesystem as read-only, preventing writes outside of explicitly mounted volumes.
+
+| `allowPrivilegeEscalation`
+| Controls whether a child process can gain more privileges than its parent. Setting this to `false` sets the `no_new_privs` kernel flag.
+
+| `capabilities`
+| Adds or drops Linux capabilities. A hardened container drops `ALL` and adds back only what it needs.
+
+| `seccompProfile`
+| Selects a seccomp profile that filters which syscalls the process can make. `RuntimeDefault` is the baseline.
+|===
+
+== A minimal hardened pod
+
+The following pod spec demonstrates a defense-in-depth configuration that is compatible with most workloads:
+
+[source,yaml]
+----
+apiVersion: v1
+kind: Pod
+metadata:
+  name: hardened-pod
+spec:
+  securityContext:
+    runAsNonRoot: true
+    runAsUser: 1000
+    fsGroup: 2000
+    seccompProfile:
+      type: RuntimeDefault
+  containers:
+  - name: app
+    image: registry.example.com/app:v1
+    securityContext:
+      allowPrivilegeEscalation: false
+      capabilities:
+        drop: ["ALL"]
+      readOnlyRootFilesystem: true
+----
+
+This configuration ensures the container cannot run as root, cannot escalate privileges, cannot write to its root filesystem, and is restricted to the runtime's default set of allowed syscalls.
+
+== Security Profiles Operator
+
+Managing seccomp, SELinux, and AppArmor profiles manually across nodes is operationally painful.
+The https://github.com/kubernetes-sigs/security-profiles-operator[Security Profiles Operator] (SPO) is a Kubernetes-sigs project that automates profile lifecycle management.
+
+SPO provides CRDs for each profile type:
+
+* `SeccompProfile` -- declares a seccomp filter and distributes it to nodes.
+* `SELinuxProfile` -- defines and installs SELinux policies.
+* `AppArmorProfile` -- manages AppArmor profiles on nodes that support them.
+
+Two additional features make SPO especially useful:
+
+* *Profile recording* -- SPO can observe a running workload (via audit logs or eBPF) and generate a least-privilege profile automatically.
+* *Profile binding* -- a `ProfileBinding` resource links a profile to a container image, so the profile is applied automatically whenever that image is deployed.
+
+== OpenShift SecurityContextConstraints
+
+OpenShift extends the upstream Pod Security model with *SecurityContextConstraints* (SCCs) -- cluster-scoped policies that define what security contexts a pod is allowed to use.
+
+SCCs are evaluated by an admission controller at pod creation time.
+The controller checks the pod's service account against the available SCCs and rejects the pod if its requested security context violates the constraints.
+
+OpenShift ships with several default SCCs:
+
+* `restricted-v2` -- the default for most workloads.
+Prevents running as root, drops all capabilities, and requires a seccomp profile.
+* `anyuid` -- allows the container to run as any UID, useful for legacy images that require root.
+* `privileged` -- unrestricted access, reserved for infrastructure components like CNI plugins and storage drivers.
+
+[WARNING]
+====
+Granting the `privileged` SCC to a workload effectively disables all pod-level security controls.
+Use it only for infrastructure components that genuinely require host-level access, and always through a dedicated service account.
+====

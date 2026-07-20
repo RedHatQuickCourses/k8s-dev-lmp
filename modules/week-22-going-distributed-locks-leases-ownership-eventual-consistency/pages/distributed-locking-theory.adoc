@@ -1,0 +1,69 @@
+= Distributed Locking Theory
+:navtitle: Distributed Locking Theory
+
+Distributed locks appear simple but conceal subtle failure modes.
+This section draws on Martin Kleppmann's analysis to explain why locks are harder than they look and what guarantees are actually achievable.
+
+== Why Distributed Locks?
+
+There are two distinct reasons to use a distributed lock, and they demand very different levels of rigor:
+
+* *Efficiency:* Prevent duplicate expensive work. For example, two cron jobs should not both run the same batch computation simultaneously. If the lock mechanism fails, the worst case is wasted compute -- the same work is done twice.
+* *Correctness:* Prevent concurrent operations from corrupting shared state. For example, two processes must not simultaneously modify a file in object storage. If the lock mechanism fails, the worst case is data loss or inconsistency.
+
+For efficiency-only use cases, a simple single-node lock (such as a Redis `SET ... NX`) is sufficient. Correctness requires much stronger guarantees.
+
+== Why Locks Are Harder Than They Look
+
+Three categories of failure undermine naive distributed locking:
+
+* *Process pauses:* A lock holder may be paused by garbage collection, an OS context switch, or a page fault. During the pause, the lock expires and another process acquires it -- but the original process does not know it has lost the lock when it resumes.
+* *Network delays:* Messages between a client and the lock service can be delayed arbitrarily. A "lock acquired" response may arrive after the lock has already expired.
+* *Clock skew:* Nodes in a distributed system do not share a perfectly synchronized clock. Time-based lock expiration (TTLs) becomes unreliable when clocks drift or experience NTP jumps.
+
+These failures are not edge cases. In production environments with garbage-collected runtimes (Java, Go), they occur regularly.
+
+== Fencing Tokens
+
+Kleppmann's recommended solution for correctness-critical locking is the *fencing token* pattern:
+
+. The lock service issues a monotonically increasing _fencing token_ each time a lock is acquired.
+. The client includes this token with every write to the shared resource.
+. The storage service rejects any write carrying a token lower than the highest token it has already seen.
+
+This ensures that even if a stale lock holder wakes up after a pause, its writes are rejected because its token is outdated. The storage service acts as the final arbiter of ordering.
+
+[source,text]
+----
+Client 1 acquires lock -> token 34
+Client 1 pauses (GC)
+Client 2 acquires lock -> token 35
+Client 2 writes with token 35 -> accepted
+Client 1 resumes, writes with token 34 -> rejected (34 < 35)
+----
+
+== Kubernetes Leases
+
+The `Lease` resource in the `coordination.k8s.io` API group provides a lightweight coordination primitive built into Kubernetes. It serves three built-in use cases:
+
+. *Node heartbeats:* Each node renews a Lease in the `kube-node-lease` namespace to signal liveness. The control plane uses `spec.renewTime` to detect unresponsive nodes.
+. *Leader election:* Controllers use Leases to elect a single active instance among multiple replicas. The holder sets `holderIdentity` and periodically renews the lease.
+. *API server identity:* Each kube-apiserver instance maintains a Lease in `kube-system`, enabling distributed features to discover and track active API servers.
+
+Custom workloads can also create their own Lease objects for coordination. The best practice is to name Leases in a way that is clearly linked to the product or component (for example, `my-controller-leader`).
+
+You can inspect the Leases in a cluster to observe these mechanisms in action:
+
+[source,bash]
+----
+# View node heartbeat leases
+kubectl get leases -n kube-node-lease
+
+# View control-plane leader election leases
+kubectl get leases -n kube-system
+----
+
+[NOTE]
+====
+Kubernetes leader election via Leases does *not* provide fencing token guarantees. Brief periods of dual leadership are possible -- a paused leader can resume alongside a newly elected one. For most controllers, this is acceptable because reconciliation is designed to be idempotent (see xref:idempotent-reconciliation.adoc[Idempotent Reconciliation]). The Kubernetes API server's conflict detection on stale `resourceVersion` values provides an additional layer of safety against state regression.
+====

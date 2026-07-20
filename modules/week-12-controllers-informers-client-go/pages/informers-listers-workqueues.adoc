@@ -1,0 +1,98 @@
+= Informers, Listers, and Workqueues
+:navtitle: Informers, Listers, and Workqueues
+
+A controller needs three things: *eyes* to watch for changes, *memory* to recall current state, and a *task list* to schedule work.
+In client-go, these roles map to Informers, Listers, and Workqueues.
+
+== Informers -- The Eyes
+
+An Informer watches the API server and maintains a local cache of the resources it tracks.
+Under the hood the Reflector performs two operations:
+
+. An initial *LIST* that fetches every existing object of the watched resource type and records the `resourceVersion`.
+. A continuous *WATCH* that streams incremental changes starting from that `resourceVersion`.
+
+Every object returned by the initial LIST is treated as "new" and passed to the `AddFunc` handler.
+Subsequent creations go to `AddFunc`, modifications to `UpdateFunc`, and deletions to `DeleteFunc`.
+
+The key implementation is *SharedIndexInformer* (defined in `tools/cache/shared_informer.go`), which ties together the Reflector, DeltaFIFO, the event processor, and the Indexer.
+This is what most people mean when they say "Informer."
+
+== Listers -- The Memory
+
+A Lister is a thin, read-only wrapper around the Indexer (the local cache).
+Instead of making a live API call to retrieve an object, you query the Lister:
+
+[source,go]
+----
+pod, err := podLister.Pods(namespace).Get(name)
+----
+
+This read hits the in-process cache and returns immediately -- no network round trip, no additional load on the API server, and the data is kept fresh by the Informer's WATCH stream.
+
+[TIP]
+====
+In controller-runtime, `client.Get()` uses a cache-backed client by default, which is equivalent to using a Lister.
+Direct API calls should only be used when you need an uncached, strongly consistent read (for example, right before a write to avoid conflicts).
+====
+
+== Workqueues -- The Task List
+
+When an event handler fires, it does *not* run the reconciliation logic inline.
+Instead, it extracts the object's key (`namespace/name`) and enqueues it into a workqueue.
+The reconciliation loop then processes keys from the queue independently.
+
+This design provides three critical benefits:
+
+* *Deduplication* -- if three rapid updates arrive for the same Pod, the queue collapses them into a single entry. The controller reconciles once against the current state, not three times against three stale snapshots.
+* *Rate limiting* -- failed items are requeued with exponential backoff, preventing a broken resource from consuming all worker capacity.
+* *Serialized processing per key* -- while multiple worker goroutines may run in parallel, the queue guarantees that only one worker processes a given key at a time.
+
+Worker loop pseudocode:
+
+----
+while true:
+    key = queue.Get()
+    err = reconcile(key)
+    if err == nil:
+        queue.Forget(key)   // reset backoff
+    else:
+        queue.AddRateLimited(key)  // requeue with backoff
+    queue.Done(key)  // release processing lock
+----
+
+== Controller Guidelines
+
+The upstream Kubernetes project maintains a set of guidelines for writing correct controllers.
+The most important ones are summarized here.
+
+. *Operate on one item at a time via workqueue.* Use `workqueue.Interface` for deduplication and safe concurrent processing. When a secondary resource (such as a Pod) triggers an event, find its owning resource (such as a ReplicaSet) and enqueue that instead.
+
+. *Random ordering between resources.* There is no ordering guarantee across distinct watches. If `resourceA/X` is created before `resourceB/Y`, your controller may observe them in reverse order.
+
+. *Level-driven, not edge-driven.* Your controller may be offline for an arbitrary period. You cannot count on seeing a transition from `false` to `true` -- only the current value. Reconcile based on the current state of the world, not the event that triggered the reconciliation.
+
+. *Use SharedInformers.* Never create individual informers per controller. SharedInformers provide shared caches and multiplex API connections, saving server resources.
+
+. *Never mutate original objects from the cache.* Caches are shared across controllers. Always deep copy before modifying.
+
+. *Wait for secondary caches before processing items.* Call `cache.WaitForCacheSync` at startup. Processing items before caches are populated leads to thrashing (for example, a ReplicaSet controller that sees zero Pods because the Pod cache has not synced yet).
+
+. *Expect other actors.* Your controller is not the only entity modifying resources. The current state can change at any moment -- guard against assumptions about what "should" be there.
+
+. *Run leader election for availability.* Deploy multiple controller replicas via a Deployment and use `k8s.io/client-go/tools/leader-election` so that exactly one is active at a time.
+
+== Resync
+
+Informers can optionally re-list all cached objects on a periodic interval known as the *resync period*.
+The default resync period is typically around 10 hours.
+
+During a resync, the Informer calls the `UpdateFunc` handler for every object in the cache, even if nothing has changed on the API server.
+This acts as a safety net -- if a reconciliation was missed or an error was swallowed, the resync gives the controller another chance to process the object.
+
+[IMPORTANT]
+====
+A resync does *not* make a new LIST call to the API server.
+It simply re-delivers the existing cached objects to the event handlers.
+If you need to avoid redundant reconciliations during resync, compare the `ResourceVersion` of the old and new objects in your `UpdateFunc` handler and skip processing if they are equal -- but be careful, because skipping too aggressively can prevent retries of previously failed items.
+====

@@ -1,0 +1,109 @@
+= Resource Management
+:navtitle: Resource Management
+
+== Requests vs. limits
+
+Every container in a Pod can declare two resource values: a *request* and a *limit*.
+They serve fundamentally different purposes:
+
+* *Requests* tell the kube-scheduler how much capacity to reserve.
+  The scheduler sums the requests of all containers in a Pod and only places it on a node that has enough unallocated resources.
+  Requests are a scheduling-time concept -- they do not constrain the running container.
+
+* *Limits* tell the kubelet (and ultimately the Linux kernel) how much a container is allowed to consume at runtime.
+  A container can burst above its request when spare capacity exists, but it cannot exceed its limit.
+
+If you set a limit without a request, Kubernetes copies the limit value into the request automatically.
+
+== CPU
+
+CPU is measured in _millicores_ (symbol `m`).
+One core equals `1000m`.
+The expression `0.5` is equivalent to `500m` -- half a core.
+
+CPU limits are enforced through CFS (Completely Fair Scheduler) throttling.
+When a container reaches its CPU limit, the kernel restricts its CPU time for the remainder of the scheduling interval.
+The container is *not* killed -- it simply runs more slowly.
+Because throttling is invisible to many monitoring tools, a sluggish application with low reported CPU usage is a classic sign that the CPU limit is set too low.
+
+== Memory
+
+Memory is measured in bytes.
+Kubernetes accepts suffixes like `Mi` (mebibytes) and `Gi` (gibibytes).
+
+Memory limits are enforced by the kernel's OOM (Out-Of-Memory) killer.
+When a container allocates more memory than its limit allows and the system is under pressure, the kernel terminates it.
+Unlike CPU throttling, an OOM kill is destructive -- the container restarts (subject to `restartPolicy`), and in-flight work is lost.
+
+== Example Pod with requests and limits
+
+[source,yaml]
+----
+apiVersion: v1
+kind: Pod
+metadata:
+  name: resource-demo
+spec:
+  containers:
+  - name: app
+    image: nginx:1.27
+    resources:
+      requests:
+        cpu: "250m"
+        memory: "64Mi"
+      limits:
+        cpu: "500m"
+        memory: "128Mi"
+----
+
+The scheduler looks at the request -- 250m CPU and 64Mi memory -- to decide where this Pod can fit.
+Once running, the kernel enforces the limit -- at most 500m CPU and 128Mi memory.
+
+== QoS classes
+
+Kubernetes automatically assigns each Pod a Quality of Service class based on its resource declarations.
+The QoS class determines eviction priority when a node runs out of resources.
+
+[cols="1,2,2", options="header"]
+|===
+| QoS Class | Condition | Eviction Priority
+
+| *Guaranteed*
+| Every container sets requests == limits for both CPU and memory.
+| Evicted last.
+
+| *Burstable*
+| At least one container has a request or limit, but they are not all equal.
+| Evicted after BestEffort pods.
+
+| *BestEffort*
+| No container sets any request or limit.
+| Evicted first.
+|===
+
+[TIP]
+====
+Setting requests equal to limits for production workloads gives them `Guaranteed` QoS and protects them from eviction during memory pressure.
+====
+
+== Namespace-level guardrails
+
+Cluster administrators can enforce resource policies at the namespace level with two objects:
+
+* *LimitRange* -- sets default requests and limits for containers that omit them, and defines per-container minimums and maximums.
+  This prevents a single container from requesting an unreasonable amount of resources.
+
+* *ResourceQuota* -- caps the total amount of CPU, memory, and object count (pods, services, etc.) that a namespace can consume.
+  Once a quota is exhausted, new pods in that namespace will fail to create until existing resources are freed.
+
+Together, LimitRange and ResourceQuota let platform teams give development teams self-service access to a cluster without risking a single team monopolizing shared resources.
+
+== Practical debugging tips
+
+* A pod stuck in `Pending` with a `FailedScheduling` event usually means its requests exceed available node capacity.
+  Run `kubectl describe node` and compare _Allocatable_ with _Allocated resources_.
+
+* A container restarting with exit reason `OOMKilled` needs a higher memory limit -- or a memory leak investigation.
+
+* High `container_cpu_cfs_throttled_seconds_total` in Prometheus indicates CPU throttling.
+  Consider raising the CPU limit or removing it entirely if the node has spare capacity.
