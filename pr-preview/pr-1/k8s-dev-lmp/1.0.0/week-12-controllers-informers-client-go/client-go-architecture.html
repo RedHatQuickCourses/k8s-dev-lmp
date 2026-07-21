@@ -337,7 +337,8 @@
 <div class="sectionbody">
 <div class="paragraph">
 <p>client-go is the official Go client library for the Kubernetes API server.
-It provides the event-driven programming primitives that every controller and operator is built on&#8201;&#8212;&#8201;even <code>kubectl</code> uses client-go under the hood.</p>
+It provides the event-driven programming primitives that every controller and operator is built on&#8201;&#8212;&#8201;even <code>kubectl</code> uses client-go under the hood.
+If you are building a Kubernetes controller, this is the library you need to understand.</p>
 </div>
 <div class="paragraph">
 <p>Conceptually, three layers sit between a developer and the API server:</p>
@@ -510,6 +511,18 @@ The bottom half&#8201;&#8212;&#8201;event handlers, workqueue, and sync handler&
 <div class="paragraph">
 <p>For a walkthrough of a controller that implements the bottom half, see <a href="sample-controller-walkthrough.html" class="xref page">Sample Controller Walkthrough</a>.
 For how controller-runtime abstracts this entire pipeline behind <code>ctrl.NewControllerManagedBy()</code>, see <a href="../week-21-controllers-contd/week-21-controllers-contd.html" class="xref page">Week 2.1</a>.</p>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_references"><a class="anchor" href="#_references"></a>References</h2>
+<div class="sectionbody">
+<div class="ulist">
+<ul>
+<li>
+<p><a href="https://github.com/kubernetes/client-go/tree/master/tools/cache">client-go tools/cache</a></p>
+</li>
+</ul>
 </div>
 </div>
 </div>

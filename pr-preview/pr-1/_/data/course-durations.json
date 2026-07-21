@@ -1,5 +1,5 @@
 {
-  "totalSeconds": 5634,
+  "totalSeconds": 5693,
   "pageCount": 51,
   "pages": [
     {
@@ -30,7 +30,7 @@
     {
       "module": "week-0-familiarizing-with-koobrnehteez",
       "page": "what-kubernetes-really-is.adoc",
-      "seconds": 109
+      "seconds": 108
     },
     {
       "module": "week-0-familiarizing-with-koobrnehteez",
@@ -40,12 +40,12 @@
     {
       "module": "week-11-kubernetes-resource-model",
       "page": "week-11-kubernetes-resource-model.adoc",
-      "seconds": 41
+      "seconds": 42
     },
     {
       "module": "week-11-kubernetes-resource-model",
       "page": "the-kubernetes-resource-model.adoc",
-      "seconds": 242
+      "seconds": 243
     },
     {
       "module": "week-11-kubernetes-resource-model",
@@ -55,7 +55,7 @@
     {
       "module": "week-11-kubernetes-resource-model",
       "page": "declarative-configuration-layers.adoc",
-      "seconds": 230
+      "seconds": 231
     },
     {
       "module": "week-12-controllers-informers-client-go",
@@ -65,22 +65,22 @@
     {
       "module": "week-12-controllers-informers-client-go",
       "page": "client-go-architecture.adoc",
-      "seconds": 168
+      "seconds": 173
     },
     {
       "module": "week-12-controllers-informers-client-go",
       "page": "informers-listers-workqueues.adoc",
-      "seconds": 100
+      "seconds": 101
     },
     {
       "module": "week-12-controllers-informers-client-go",
       "page": "sample-controller-walkthrough.adoc",
-      "seconds": 144
+      "seconds": 147
     },
     {
       "module": "week-12-controllers-informers-client-go",
       "page": "informer-pitfalls-and-error-handling.adoc",
-      "seconds": 229
+      "seconds": 232
     },
     {
       "module": "week-21-controllers-contd",
@@ -90,27 +90,27 @@
     {
       "module": "week-21-controllers-contd",
       "page": "gvk-gvr-and-api-terminology.adoc",
-      "seconds": 134
+      "seconds": 138
     },
     {
       "module": "week-21-controllers-contd",
       "page": "controller-runtime-and-kubebuilder.adoc",
-      "seconds": 118
+      "seconds": 122
     },
     {
       "module": "week-21-controllers-contd",
       "page": "spec-status-and-conditions.adoc",
-      "seconds": 143
+      "seconds": 144
     },
     {
       "module": "week-21-controllers-contd",
       "page": "api-validation-and-linting.adoc",
-      "seconds": 65
+      "seconds": 67
     },
     {
       "module": "week-21-controllers-contd",
       "page": "update-patch-and-server-side-apply.adoc",
-      "seconds": 206
+      "seconds": 209
     },
     {
       "module": "week-22-going-distributed-locks-leases-ownership-eventual-consistency",
@@ -125,17 +125,17 @@
     {
       "module": "week-22-going-distributed-locks-leases-ownership-eventual-consistency",
       "page": "distributed-locking-theory.adoc",
-      "seconds": 105
+      "seconds": 106
     },
     {
       "module": "week-22-going-distributed-locks-leases-ownership-eventual-consistency",
       "page": "leader-election-in-kubernetes.adoc",
-      "seconds": 74
+      "seconds": 77
     },
     {
       "module": "week-22-going-distributed-locks-leases-ownership-eventual-consistency",
       "page": "controller-sharding.adoc",
-      "seconds": 105
+      "seconds": 109
     },
     {
       "module": "week-31-taking-more-control-admissions-and-beyond-the-kube-apiserver-to-writing-your-own-api-server",
@@ -145,22 +145,22 @@
     {
       "module": "week-31-taking-more-control-admissions-and-beyond-the-kube-apiserver-to-writing-your-own-api-server",
       "page": "admission-control-webhooks.adoc",
-      "seconds": 146
+      "seconds": 147
     },
     {
       "module": "week-31-taking-more-control-admissions-and-beyond-the-kube-apiserver-to-writing-your-own-api-server",
       "page": "policy-engines-and-gatekeeper.adoc",
-      "seconds": 137
+      "seconds": 139
     },
     {
       "module": "week-31-taking-more-control-admissions-and-beyond-the-kube-apiserver-to-writing-your-own-api-server",
       "page": "api-discovery-and-aggregation.adoc",
-      "seconds": 146
+      "seconds": 150
     },
     {
       "module": "week-31-taking-more-control-admissions-and-beyond-the-kube-apiserver-to-writing-your-own-api-server",
       "page": "custom-api-servers.adoc",
-      "seconds": 153
+      "seconds": 155
     },
     {
       "module": "week-32-the-other-stuff",
@@ -170,22 +170,22 @@
     {
       "module": "week-32-the-other-stuff",
       "page": "ingress-and-gateway-api.adoc",
-      "seconds": 66
+      "seconds": 67
     },
     {
       "module": "week-32-the-other-stuff",
       "page": "service-mesh-fundamentals.adoc",
-      "seconds": 135
+      "seconds": 139
     },
     {
       "module": "week-32-the-other-stuff",
       "page": "authentication-and-authorization.adoc",
-      "seconds": 194
+      "seconds": 195
     },
     {
       "module": "week-32-the-other-stuff",
       "page": "security-context-and-hardening.adoc",
-      "seconds": 158
+      "seconds": 161
     },
     {
       "module": "week-41-all-about-kube-scheduler",
@@ -195,32 +195,32 @@
     {
       "module": "week-41-all-about-kube-scheduler",
       "page": "how-the-scheduler-works.adoc",
-      "seconds": 189
+      "seconds": 193
     },
     {
       "module": "week-41-all-about-kube-scheduler",
       "page": "resource-management.adoc",
-      "seconds": 179
+      "seconds": 181
     },
     {
       "module": "week-41-all-about-kube-scheduler",
       "page": "dynamic-resource-allocation.adoc",
-      "seconds": 186
+      "seconds": 188
     },
     {
       "module": "week-42-ubiquitous-topics",
       "page": "week-42-ubiquitous-topics.adoc",
-      "seconds": 24
+      "seconds": 23
     },
     {
       "module": "week-42-ubiquitous-topics",
       "page": "operator-landscape.adoc",
-      "seconds": 249
+      "seconds": 245
     },
     {
       "module": "week-42-ubiquitous-topics",
       "page": "alternative-control-planes-and-form-factors.adoc",
-      "seconds": 269
+      "seconds": 270
     },
     {
       "module": "exercises",
@@ -230,7 +230,7 @@
     {
       "module": "exercises",
       "page": "week-1-build-a-controller-using-client-go-from-scratch.adoc",
-      "seconds": 72
+      "seconds": 73
     },
     {
       "module": "exercises",

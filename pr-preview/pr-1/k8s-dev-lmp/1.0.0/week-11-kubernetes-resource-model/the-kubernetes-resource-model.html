@@ -342,7 +342,7 @@ Both user clients and components implementing business logic (called controllers
 All persistent cluster state is stored in one or more instances of etcd.</p>
 </div>
 <div class="paragraph">
-<p>This design means that the distinction between being part of the system and being built on top of the system is deliberately blurred.
+<p>This means the distinction between being part of the system and being built on top of the system is deliberately blurred.
 With the growth of API extension mechanisms such as Custom Resource Definitions (CRDs) and aggregated API servers, the number of resource types can be extended without modifying Kubernetes itself.
 Any API using the same mechanisms and patterns automatically works with libraries and tools that already integrate support for the model&#8201;&#8212;&#8201;making integration O(M) work for M tools rather than O(NM) for N APIs and M tools.</p>
 </div>
@@ -516,6 +516,18 @@ status:</code></pre>
 <div class="paragraph">
 <p>For how controllers interact with these APIs, see <a href="../week-12-controllers-informers-client-go/client-go-architecture.html" class="xref page">Week 1.2</a>.
 For conditions and status conventions in depth, see <a href="../week-21-controllers-contd/spec-status-and-conditions.html" class="xref page">Week 2.1</a>.</p>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_references"><a class="anchor" href="#_references"></a>References</h2>
+<div class="sectionbody">
+<div class="ulist">
+<ul>
+<li>
+<p><a href="https://docs.google.com/document/d/1RmHXdLhNbyOWPW_AtnnowaRfGejw-qlKQIuLKQWlwzs/edit#">Kubernetes Resource Model (KRM)</a></p>
+</li>
+</ul>
 </div>
 </div>
 </div>

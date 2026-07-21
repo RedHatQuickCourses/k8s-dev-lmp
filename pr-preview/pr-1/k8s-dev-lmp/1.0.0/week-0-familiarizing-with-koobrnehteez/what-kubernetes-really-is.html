@@ -336,17 +336,17 @@
 <div class="sectionbody">
 <div class="paragraph">
 <p>At its core, Kubernetes is an API-centric, declarative configuration management and container orchestration system.
-Rather than issuing imperative commands to instruct the server what to do, users interact with the system by declaring the desired state of their resources as pure data.</p>
+Rather than issuing imperative commands to tell the server what to do, you interact with the system by declaring the desired state of your resources as pure data.</p>
 </div>
 <div class="paragraph">
-<p>The heart of the Kubernetes control plane is the API server, which acts as a central coordination point and persists this desired state into a key-value store called etcd.</p>
+<p>The heart of the control plane is the API server, which acts as a central coordination point and persists this desired state into a key-value store called etcd.</p>
 </div>
 <div class="paragraph">
-<p>To make reality match these expectations, Kubernetes relies on an ecosystem of asynchronous controllers.
+<p>To make reality match those declarations, Kubernetes relies on an ecosystem of asynchronous controllers.
 These controllers continuously watch the API server for changes, compare the current observed state of the world to your desired state, and actively reconcile any differences.</p>
 </div>
 <div class="paragraph">
-<p>This powerful separation of responsibilities&#8201;&#8212;&#8201;where the API server maintains the shared state and independent controllers actuate it&#8201;&#8212;&#8201;forms the exact same fundamental architecture you will utilize and extend when building your own custom operators.</p>
+<p>This separation of responsibilities&#8201;&#8212;&#8201;where the API server maintains shared state and independent controllers actuate it&#8201;&#8212;&#8201;is the same fundamental architecture you will use and extend when building your own custom operators.</p>
 </div>
 </div>
 </div>
@@ -354,7 +354,7 @@ These controllers continuously watch the API server for changes, compare the cur
 <h2 id="_a_three_layer_mental_model"><a class="anchor" href="#_a_three_layer_mental_model"></a>A Three-Layer Mental Model</h2>
 <div class="sectionbody">
 <div class="paragraph">
-<p>It is useful to think of any declarative configuration management system&#8201;&#8212;&#8201;Kubernetes included&#8201;&#8212;&#8201;as composed of three distinct layers:</p>
+<p>It helps to think of any declarative configuration management system&#8201;&#8212;&#8201;Kubernetes included&#8201;&#8212;&#8201;as composed of three distinct layers:</p>
 </div>
 <div class="ulist">
 <ul>

@@ -335,8 +335,8 @@
 <div id="preamble">
 <div class="sectionbody">
 <div class="paragraph">
-<p>The CNCF Operator White Paper formalises what the community learned from years of building controllers for stateful workloads.
-This page distils the paper&#8217;s key ideas: a precise definition, a maturity model, the major frameworks, and the design patterns that keep operators maintainable at scale.</p>
+<p>The operator concept has been formalised through years of building controllers for stateful workloads.
+Below you will find a precise definition, a maturity model, the major frameworks, and the design patterns that keep operators maintainable at scale.</p>
 </div>
 </div>
 </div>
@@ -344,7 +344,7 @@ This page distils the paper&#8217;s key ideas: a precise definition, a maturity 
 <h2 id="_what_is_an_operator"><a class="anchor" href="#_what_is_an_operator"></a>What is an Operator?</h2>
 <div class="sectionbody">
 <div class="paragraph">
-<p>The CNCF white paper defines an operator as <em>a Kubernetes extension that uses custom resources to manage applications and their components</em>.
+<p>An operator is formally defined as <em>a Kubernetes extension that uses custom resources to manage applications and their components</em>.
 More concretely, an operator encodes domain-specific operational knowledge&#8201;&#8212;&#8201;installation sequences, upgrade migrations, backup procedures, failure recovery&#8201;&#8212;&#8201;into software that runs inside the cluster.</p>
 </div>
 <div class="paragraph">
@@ -373,7 +373,7 @@ A controller that creates a Pod when a custom resource appears is a simple contr
 <h2 id="_operator_capability_model"><a class="anchor" href="#_operator_capability_model"></a>Operator Capability Model</h2>
 <div class="sectionbody">
 <div class="paragraph">
-<p>The white paper defines a five-level maturity model that describes what an operator can do at each stage.
+<p>A five-level maturity model describes what an operator can do at each stage.
 Teams use the model to scope an operator&#8217;s initial release and to plan future investment.</p>
 </div>
 <table class="tableblock frame-all grid-all stretch">
@@ -460,7 +460,7 @@ No custom binary needs to be compiled or deployed&#8201;&#8212;&#8201;the webhoo
 <h2 id="_design_patterns"><a class="anchor" href="#_design_patterns"></a>Design Patterns</h2>
 <div class="sectionbody">
 <div class="paragraph">
-<p>The white paper and the broader community converge on several patterns for keeping operators focused and composable.</p>
+<p>The community has converged on several patterns for keeping operators focused and composable.</p>
 </div>
 <div class="sect2">
 <h3 id="_one_crd_per_controller"><a class="anchor" href="#_one_crd_per_controller"></a>One CRD per Controller</h3>
@@ -505,6 +505,18 @@ If you want to avoid compiling a binary entirely, Metacontroller&#8217;s webhook
 </tr>
 </table>
 </div>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_references"><a class="anchor" href="#_references"></a>References</h2>
+<div class="sectionbody">
+<div class="ulist">
+<ul>
+<li>
+<p><a href="https://tag-app-delivery.cncf.io/whitepapers/operator/">CNCF Operator White Paper</a></p>
+</li>
+</ul>
 </div>
 </div>
 </div>

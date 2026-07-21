@@ -336,7 +336,7 @@
 <div class="sectionbody">
 <div class="paragraph">
 <p>Informers are elegant in small clusters but introduce subtle failure modes at scale.
-This page covers the most common pitfalls, drawing from the upstream Kubernetes controller guidelines and from production experience at companies running large clusters.</p>
+This page covers the most common pitfalls, drawn from the upstream Kubernetes controller guidelines and from production experience running large clusters.</p>
 </div>
 </div>
 </div>
@@ -526,7 +526,7 @@ A returned error triggers <code>workqueue.AddRateLimited</code>, which requeues 
 <h2 id="_common_mistakes"><a class="anchor" href="#_common_mistakes"></a>Common Mistakes</h2>
 <div class="sectionbody">
 <div class="paragraph">
-<p>The following mistakes are observed frequently in production controllers and during code reviews.</p>
+<p>The following mistakes come up frequently in production controllers and during code reviews.</p>
 </div>
 <div class="sect2">
 <h3 id="_mutating_cached_objects_without_deep_copy"><a class="anchor" href="#_mutating_cached_objects_without_deep_copy"></a>Mutating cached objects without deep copy</h3>
@@ -574,6 +574,21 @@ Before performing a write (update or patch), re-GET the resource from the API se
 Writing with a stale <code>resourceVersion</code> results in a conflict error.
 While the workqueue retry mechanism will eventually resolve this, it is more efficient to re-GET first.</p>
 </div>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_references"><a class="anchor" href="#_references"></a>References</h2>
+<div class="sectionbody">
+<div class="ulist">
+<ul>
+<li>
+<p><a href="https://render.com/blog/kubernetes-informers">Kubernetes Informers Are So Easy&#8230;&#8203; to Misuse!</a></p>
+</li>
+<li>
+<p><a href="https://github.com/kubernetes/community/blob/master/contributors/devel/sig-api-machinery/controllers.md">Writing Controllers</a></p>
+</li>
+</ul>
 </div>
 </div>
 </div>

@@ -336,7 +336,7 @@
 <div class="sectionbody">
 <div class="paragraph">
 <p>Every interaction with a Kubernetes cluster&#8201;&#8212;&#8201;whether from <code>kubectl</code>, an internal controller, or an external operator&#8201;&#8212;&#8201;passes through the kube-apiserver&#8217;s request pipeline.
-Understanding the stages of this pipeline is essential for building secure, efficient, and extension-ready Kubernetes applications.</p>
+Understanding these stages is essential for building secure, efficient, and extension-ready Kubernetes applications.</p>
 </div>
 </div>
 </div>
@@ -454,6 +454,18 @@ This is a useful way to verify that your request is reaching the apiserver and t
 <div class="paragraph">
 <p>These commands confirm that your request successfully passes through the authentication and authorization stages described above.
 The discovery endpoints are also what client libraries like client-go use under the hood to negotiate API versions and resource schemas.</p>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_references"><a class="anchor" href="#_references"></a>References</h2>
+<div class="sectionbody">
+<div class="ulist">
+<ul>
+<li>
+<p><a href="https://kubernetes.io/docs/reference/access-authn-authz/admission-controllers">Admission Controllers Reference</a></p>
+</li>
+</ul>
 </div>
 </div>
 </div>

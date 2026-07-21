@@ -335,7 +335,7 @@
 <div id="preamble">
 <div class="sectionbody">
 <div class="paragraph">
-<p>A controller needs three things: <strong>eyes</strong> to watch for changes, <strong>memory</strong> to recall current state, and a <strong>task list</strong> to schedule work.
+<p>Your controller needs three things: <strong>eyes</strong> to watch for changes, <strong>memory</strong> to recall current state, and a <strong>task list</strong> to schedule work.
 In client-go, these roles map to Informers, Listers, and Workqueues.</p>
 </div>
 </div>
@@ -445,7 +445,7 @@ The reconciliation loop then processes keys from the queue independently.</p>
 <div class="sectionbody">
 <div class="paragraph">
 <p>The upstream Kubernetes project maintains a set of guidelines for writing correct controllers.
-The most important ones are summarized here.</p>
+Here are the most important ones.</p>
 </div>
 <div class="olist arabic">
 <ol class="arabic">
@@ -503,6 +503,18 @@ If you need to avoid redundant reconciliations during resync, compare the <code>
 </td>
 </tr>
 </table>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_references"><a class="anchor" href="#_references"></a>References</h2>
+<div class="sectionbody">
+<div class="ulist">
+<ul>
+<li>
+<p><a href="https://medium.com/@dhruvbhl/informers-listers-workqueues-the-brain-behind-your-controller-f5b0967026de">Informers, Listers &amp; Workqueues</a></p>
+</li>
+</ul>
 </div>
 </div>
 </div>

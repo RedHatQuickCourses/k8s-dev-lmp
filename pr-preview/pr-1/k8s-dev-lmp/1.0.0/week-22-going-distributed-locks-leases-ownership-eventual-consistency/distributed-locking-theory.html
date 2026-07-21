@@ -336,7 +336,7 @@
 <div class="sectionbody">
 <div class="paragraph">
 <p>Distributed locks appear simple but conceal subtle failure modes.
-This section draws on Martin Kleppmann&#8217;s analysis to explain why locks are harder than they look and what guarantees are actually achievable.</p>
+This section explains why locks are harder than they look and what guarantees are actually achievable.</p>
 </div>
 </div>
 </div>
@@ -389,7 +389,7 @@ This section draws on Martin Kleppmann&#8217;s analysis to explain why locks are
 <h2 id="_fencing_tokens"><a class="anchor" href="#_fencing_tokens"></a>Fencing Tokens</h2>
 <div class="sectionbody">
 <div class="paragraph">
-<p>Kleppmann&#8217;s recommended solution for correctness-critical locking is the <strong>fencing token</strong> pattern:</p>
+<p>The recommended solution for correctness-critical locking is the <strong>fencing token</strong> pattern:</p>
 </div>
 <div class="olist arabic">
 <ol class="arabic">
@@ -465,6 +465,21 @@ kubectl get leases -n kube-system</code></pre>
 </td>
 </tr>
 </table>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_references"><a class="anchor" href="#_references"></a>References</h2>
+<div class="sectionbody">
+<div class="ulist">
+<ul>
+<li>
+<p><a href="https://martin.kleppmann.com/2016/02/08/how-to-do-distributed-locking.html">How to Do Distributed Locking</a></p>
+</li>
+<li>
+<p><a href="https://kubernetes.io/docs/concepts/architecture/leases">Leases</a></p>
+</li>
+</ul>
 </div>
 </div>
 </div>
