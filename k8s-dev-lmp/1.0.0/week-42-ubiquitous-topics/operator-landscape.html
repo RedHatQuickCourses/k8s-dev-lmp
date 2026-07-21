@@ -1,0 +1,538 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width,initial-scale=1">
+    <title>The Operator Landscape :: Kubernetes Developer Learning Path</title>
+    <link rel="prev" href="week-42-ubiquitous-topics.html">
+    <link rel="next" href="alternative-control-planes-and-form-factors.html">
+    <meta name="generator" content="Antora 3.2.0-alpha.12">
+    <link rel="stylesheet" href="../../../_/css/site.css">
+    <link rel="stylesheet" href="../../../_/css/vendor/tabs.css">
+    <link rel="stylesheet" href="../../../_/css/vendor/collapsible.css">
+    <link rel="stylesheet" href="../../../_/css/vendor/reading-time.css">
+    <link rel="stylesheet" href="../../../_/css/vendor/audio-transcript.css">
+    <script>var uiRootPath = '../../../_'</script>
+  </head>
+  <body class="article">
+<header class="header">
+  <nav class="navbar">
+    <div class="navbar-brand">
+      <a class="navbar-item" href="https://www.redhat.com" target="_blank"><img src="../../../_/img/redhat-logo.png" height="40px" alt="Red Hat"></a>
+      <a class="navbar-item" style="font-size: 24px; color: white" href="../../..">Kubernetes Developer Learning Path</a>
+      <button class="navbar-burger" data-target="topbar-nav">
+        <span></span>
+        <span></span>
+        <span></span>
+      </button>
+    </div>
+    <div id="topbar-nav" class="navbar-menu">
+      <div class="navbar-end">
+        <a class="navbar-item" href="https://github.com/RedHatQuickCourses/REPLACEREPONAME/issues" target="_blank">Report Issues</a>
+      </div>
+    </div>
+  </nav>
+</header>
+<div class="body">
+<div class="nav-container" data-component="k8s-dev-lmp" data-version="1.0.0">
+  <aside class="nav">
+    <div class="panels">
+<div class="nav-panel-menu is-active" data-panel="menu">
+  <nav class="nav-menu">
+    <h3 class="title"><a href="../index.html">Kubernetes Developer Learning Path</a></h3>
+<ul class="nav-list">
+  <li class="nav-item" data-depth="0">
+<ul class="nav-list">
+  <li class="nav-item" data-depth="1">
+    <a class="nav-link" href="../index.html">Home</a>
+  </li>
+</ul>
+  </li>
+  <li class="nav-item" data-depth="0">
+<ul class="nav-list">
+  <li class="nav-item" data-depth="1">
+    <a class="nav-link" href="../LABENV/index.html">Lab Environment</a>
+  </li>
+</ul>
+  </li>
+  <li class="nav-item" data-depth="0">
+<ul class="nav-list">
+  <li class="nav-item" data-depth="1">
+    <a class="nav-link" href="../overview/overview.html">Overview</a>
+  </li>
+</ul>
+  </li>
+  <li class="nav-item" data-depth="0">
+<ul class="nav-list">
+  <li class="nav-item" data-depth="1">
+    <a class="nav-link" href="../who-is-this-for-pre-requisites/who-is-this-for-pre-requisites.html">Who Is This For? Prerequisites</a>
+  </li>
+</ul>
+  </li>
+  <li class="nav-item" data-depth="0">
+<ul class="nav-list">
+  <li class="nav-item" data-depth="1">
+    <button class="nav-item-toggle"></button>
+    <a class="nav-link" href="../week-0-familiarizing-with-koobrnehteez/week-0-familiarizing-with-koobrnehteez.html">Week 0&#8201;&#8212;&#8201;Familiarizing with Kubernetes</a>
+<ul class="nav-list">
+  <li class="nav-item" data-depth="2">
+    <a class="nav-link" href="../week-0-familiarizing-with-koobrnehteez/what-kubernetes-really-is.html">What Kubernetes Really Is</a>
+  </li>
+  <li class="nav-item" data-depth="2">
+    <a class="nav-link" href="../week-0-familiarizing-with-koobrnehteez/control-plane-architecture-primer.html">Control Plane Architecture Primer</a>
+  </li>
+</ul>
+  </li>
+</ul>
+  </li>
+  <li class="nav-item" data-depth="0">
+<ul class="nav-list">
+  <li class="nav-item" data-depth="1">
+    <button class="nav-item-toggle"></button>
+    <a class="nav-link" href="../week-11-kubernetes-resource-model/week-11-kubernetes-resource-model.html">Week 1.1&#8201;&#8212;&#8201;Kubernetes Resource Model</a>
+<ul class="nav-list">
+  <li class="nav-item" data-depth="2">
+    <a class="nav-link" href="../week-11-kubernetes-resource-model/the-kubernetes-resource-model.html">The Kubernetes Resource Model</a>
+  </li>
+  <li class="nav-item" data-depth="2">
+    <a class="nav-link" href="../week-11-kubernetes-resource-model/api-request-lifecycle.html">API Request Lifecycle</a>
+  </li>
+  <li class="nav-item" data-depth="2">
+    <a class="nav-link" href="../week-11-kubernetes-resource-model/declarative-configuration-layers.html">Declarative Configuration Layers</a>
+  </li>
+</ul>
+  </li>
+</ul>
+  </li>
+  <li class="nav-item" data-depth="0">
+<ul class="nav-list">
+  <li class="nav-item" data-depth="1">
+    <button class="nav-item-toggle"></button>
+    <a class="nav-link" href="../week-12-controllers-informers-client-go/week-12-controllers-informers-client-go.html">Week 1.2&#8201;&#8212;&#8201;Controllers, Informers, client-go</a>
+<ul class="nav-list">
+  <li class="nav-item" data-depth="2">
+    <a class="nav-link" href="../week-12-controllers-informers-client-go/client-go-architecture.html">client-go Architecture</a>
+  </li>
+  <li class="nav-item" data-depth="2">
+    <a class="nav-link" href="../week-12-controllers-informers-client-go/informers-listers-workqueues.html">Informers, Listers, and Workqueues</a>
+  </li>
+  <li class="nav-item" data-depth="2">
+    <a class="nav-link" href="../week-12-controllers-informers-client-go/sample-controller-walkthrough.html">Sample Controller Walkthrough</a>
+  </li>
+  <li class="nav-item" data-depth="2">
+    <a class="nav-link" href="../week-12-controllers-informers-client-go/informer-pitfalls-and-error-handling.html">Informer Pitfalls and Error Handling</a>
+  </li>
+</ul>
+  </li>
+</ul>
+  </li>
+  <li class="nav-item" data-depth="0">
+<ul class="nav-list">
+  <li class="nav-item" data-depth="1">
+    <button class="nav-item-toggle"></button>
+    <a class="nav-link" href="../week-21-controllers-contd/week-21-controllers-contd.html">Week 2.1&#8201;&#8212;&#8201;Controllers with controller-runtime</a>
+<ul class="nav-list">
+  <li class="nav-item" data-depth="2">
+    <a class="nav-link" href="../week-21-controllers-contd/gvk-gvr-and-api-terminology.html">GVK, GVR, and API Terminology</a>
+  </li>
+  <li class="nav-item" data-depth="2">
+    <a class="nav-link" href="../week-21-controllers-contd/controller-runtime-and-kubebuilder.html">Controller-runtime and Kubebuilder</a>
+  </li>
+  <li class="nav-item" data-depth="2">
+    <a class="nav-link" href="../week-21-controllers-contd/spec-status-and-conditions.html">Spec, Status, and Conditions</a>
+  </li>
+  <li class="nav-item" data-depth="2">
+    <a class="nav-link" href="../week-21-controllers-contd/api-validation-and-linting.html">API Validation and Linting</a>
+  </li>
+  <li class="nav-item" data-depth="2">
+    <a class="nav-link" href="../week-21-controllers-contd/update-patch-and-server-side-apply.html">Update, Patch, and Server-Side Apply</a>
+  </li>
+</ul>
+  </li>
+</ul>
+  </li>
+  <li class="nav-item" data-depth="0">
+<ul class="nav-list">
+  <li class="nav-item" data-depth="1">
+    <button class="nav-item-toggle"></button>
+    <a class="nav-link" href="../week-22-going-distributed-locks-leases-ownership-eventual-consistency/week-22-going-distributed-locks-leases-ownership-eventual-consistency.html">Week 2.2&#8201;&#8212;&#8201;Going Distributed</a>
+<ul class="nav-list">
+  <li class="nav-item" data-depth="2">
+    <a class="nav-link" href="../week-22-going-distributed-locks-leases-ownership-eventual-consistency/idempotent-reconciliation.html">Idempotent Reconciliation</a>
+  </li>
+  <li class="nav-item" data-depth="2">
+    <a class="nav-link" href="../week-22-going-distributed-locks-leases-ownership-eventual-consistency/distributed-locking-theory.html">Distributed Locking Theory</a>
+  </li>
+  <li class="nav-item" data-depth="2">
+    <a class="nav-link" href="../week-22-going-distributed-locks-leases-ownership-eventual-consistency/leader-election-in-kubernetes.html">Leader Election in Kubernetes</a>
+  </li>
+  <li class="nav-item" data-depth="2">
+    <a class="nav-link" href="../week-22-going-distributed-locks-leases-ownership-eventual-consistency/controller-sharding.html">Controller Sharding</a>
+  </li>
+</ul>
+  </li>
+</ul>
+  </li>
+  <li class="nav-item" data-depth="0">
+<ul class="nav-list">
+  <li class="nav-item" data-depth="1">
+    <button class="nav-item-toggle"></button>
+    <a class="nav-link" href="../week-31-taking-more-control-admissions-and-beyond-the-kube-apiserver-to-writing-your-own-api-server/week-31-taking-more-control-admissions-and-beyond-the-kube-apiserver-to-writing-your-own-api-server.html">Week 3.1 Overview</a>
+<ul class="nav-list">
+  <li class="nav-item" data-depth="2">
+    <a class="nav-link" href="../week-31-taking-more-control-admissions-and-beyond-the-kube-apiserver-to-writing-your-own-api-server/admission-control-webhooks.html">Admission Control Webhooks</a>
+  </li>
+  <li class="nav-item" data-depth="2">
+    <a class="nav-link" href="../week-31-taking-more-control-admissions-and-beyond-the-kube-apiserver-to-writing-your-own-api-server/policy-engines-and-gatekeeper.html">Policy Engines and Gatekeeper</a>
+  </li>
+  <li class="nav-item" data-depth="2">
+    <a class="nav-link" href="../week-31-taking-more-control-admissions-and-beyond-the-kube-apiserver-to-writing-your-own-api-server/api-discovery-and-aggregation.html">API Discovery and Aggregation</a>
+  </li>
+  <li class="nav-item" data-depth="2">
+    <a class="nav-link" href="../week-31-taking-more-control-admissions-and-beyond-the-kube-apiserver-to-writing-your-own-api-server/custom-api-servers.html">Custom API Servers</a>
+  </li>
+</ul>
+  </li>
+</ul>
+  </li>
+  <li class="nav-item" data-depth="0">
+<ul class="nav-list">
+  <li class="nav-item" data-depth="1">
+    <button class="nav-item-toggle"></button>
+    <a class="nav-link" href="../week-32-the-other-stuff/week-32-the-other-stuff.html">Week 3.2&#8201;&#8212;&#8201;The Other Stuff</a>
+<ul class="nav-list">
+  <li class="nav-item" data-depth="2">
+    <a class="nav-link" href="../week-32-the-other-stuff/ingress-and-gateway-api.html">Ingress and Gateway API</a>
+  </li>
+  <li class="nav-item" data-depth="2">
+    <a class="nav-link" href="../week-32-the-other-stuff/service-mesh-fundamentals.html">Service Mesh Fundamentals</a>
+  </li>
+  <li class="nav-item" data-depth="2">
+    <a class="nav-link" href="../week-32-the-other-stuff/authentication-and-authorization.html">Authentication and Authorization</a>
+  </li>
+  <li class="nav-item" data-depth="2">
+    <a class="nav-link" href="../week-32-the-other-stuff/security-context-and-hardening.html">Security Context and Hardening</a>
+  </li>
+</ul>
+  </li>
+</ul>
+  </li>
+  <li class="nav-item" data-depth="0">
+<ul class="nav-list">
+  <li class="nav-item" data-depth="1">
+    <button class="nav-item-toggle"></button>
+    <a class="nav-link" href="../week-41-all-about-kube-scheduler/week-41-all-about-kube-scheduler.html">Week 4.1&#8201;&#8212;&#8201;All About kube-scheduler</a>
+<ul class="nav-list">
+  <li class="nav-item" data-depth="2">
+    <a class="nav-link" href="../week-41-all-about-kube-scheduler/how-the-scheduler-works.html">How the Scheduler Works</a>
+  </li>
+  <li class="nav-item" data-depth="2">
+    <a class="nav-link" href="../week-41-all-about-kube-scheduler/resource-management.html">Resource Management</a>
+  </li>
+  <li class="nav-item" data-depth="2">
+    <a class="nav-link" href="../week-41-all-about-kube-scheduler/dynamic-resource-allocation.html">Dynamic Resource Allocation</a>
+  </li>
+</ul>
+  </li>
+</ul>
+  </li>
+  <li class="nav-item" data-depth="0">
+<ul class="nav-list">
+  <li class="nav-item" data-depth="1">
+    <button class="nav-item-toggle"></button>
+    <a class="nav-link" href="week-42-ubiquitous-topics.html">Week 4.2&#8201;&#8212;&#8201;Ubiquitous Topics</a>
+<ul class="nav-list">
+  <li class="nav-item is-current-page" data-depth="2">
+    <a class="nav-link" href="operator-landscape.html">The Operator Landscape</a>
+  </li>
+  <li class="nav-item" data-depth="2">
+    <a class="nav-link" href="alternative-control-planes-and-form-factors.html">Alternative Control Planes and Form Factors</a>
+  </li>
+</ul>
+  </li>
+</ul>
+  </li>
+  <li class="nav-item" data-depth="0">
+<ul class="nav-list">
+  <li class="nav-item" data-depth="1">
+    <button class="nav-item-toggle"></button>
+    <a class="nav-link" href="../exercises/exercises.html">Exercises</a>
+<ul class="nav-list">
+  <li class="nav-item" data-depth="2">
+    <a class="nav-link" href="../exercises/week-1-build-a-controller-using-client-go-from-scratch.html">Exercise 1: Build a Controller</a>
+  </li>
+  <li class="nav-item" data-depth="2">
+    <a class="nav-link" href="../exercises/week-2-implement-optimistic-locking-and-leader-election-via-lease.html">Exercise 2: Leader Election</a>
+  </li>
+  <li class="nav-item" data-depth="2">
+    <a class="nav-link" href="../exercises/week-3-develop-a-custom-validating-webhook-for-container-registry-enforcement.html">Exercise 3: Validating Webhook</a>
+  </li>
+</ul>
+  </li>
+</ul>
+  </li>
+  <li class="nav-item" data-depth="0">
+<ul class="nav-list">
+  <li class="nav-item" data-depth="1">
+    <a class="nav-link" href="../recommended-reading/recommended-reading.html">Recommended Reading</a>
+  </li>
+</ul>
+  </li>
+  <li class="nav-item" data-depth="0">
+<ul class="nav-list">
+  <li class="nav-item" data-depth="1">
+    <a class="nav-link" href="../suggested-reading/suggested-reading.html">Suggested Reading</a>
+  </li>
+</ul>
+  </li>
+  <li class="nav-item" data-depth="0">
+<ul class="nav-list">
+  <li class="nav-item" data-depth="1">
+    <a class="nav-link" href="../appendix/appendix.html">Appendix</a>
+  </li>
+</ul>
+  </li>
+</ul>
+  </nav>
+</div>
+<div class="nav-panel-explore" data-panel="explore">
+  <div class="context">
+    <span class="title">Kubernetes Developer Learning Path</span>
+    <span class="version">1.0.0</span>
+  </div>
+  <ul class="components">
+    <li class="component is-current">
+      <a class="title" href="../index.html">Kubernetes Developer Learning Path</a>
+      <ul class="versions">
+        <li class="version is-current is-latest">
+          <a href="../index.html">1.0.0</a>
+        </li>
+      </ul>
+    </li>
+  </ul>
+</div>
+    </div>
+  </aside>
+</div>
+<main class="article">
+<div class="toolbar" role="navigation">
+<button class="nav-toggle"></button>
+  <a href="../index.html" class="home-link"></a>
+<nav class="breadcrumbs" aria-label="breadcrumbs">
+  <ul>
+    <li><a href="../index.html">Kubernetes Developer Learning Path</a></li>
+    <li><a href="week-42-ubiquitous-topics.html">Week 4.2&#8201;&#8212;&#8201;Ubiquitous Topics</a></li>
+    <li><a href="operator-landscape.html">The Operator Landscape</a></li>
+  </ul>
+</nav>
+</div>
+  <div class="content">
+<aside class="toc sidebar" data-title="Contents" data-levels="2">
+  <div class="toc-menu"></div>
+</aside>
+<article class="doc">
+<h1 class="page">The Operator Landscape</h1>
+<div id="preamble">
+<div class="sectionbody">
+<div class="paragraph">
+<p>The operator concept has been formalised through years of building controllers for stateful workloads.
+Below you will find a precise definition, a maturity model, the major frameworks, and the design patterns that keep operators maintainable at scale.</p>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_what_is_an_operator"><a class="anchor" href="#_what_is_an_operator"></a>What is an Operator?</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>An operator is formally defined as <em>a Kubernetes extension that uses custom resources to manage applications and their components</em>.
+More concretely, an operator encodes domain-specific operational knowledge&#8201;&#8212;&#8201;installation sequences, upgrade migrations, backup procedures, failure recovery&#8201;&#8212;&#8201;into software that runs inside the cluster.</p>
+</div>
+<div class="paragraph">
+<p>An operator combines three things:</p>
+</div>
+<div class="olist arabic">
+<ol class="arabic">
+<li>
+<p>One or more <strong>Custom Resource Definitions</strong> (CRDs) that let users declare the desired state of an application in Kubernetes-native YAML.</p>
+</li>
+<li>
+<p>A <strong>controller</strong> that watches those custom resources and continuously reconciles the real world with the declared intent.</p>
+</li>
+<li>
+<p><strong>Domain knowledge</strong>&#8201;&#8212;&#8201;the operational runbook that a human expert would otherwise execute by hand.</p>
+</li>
+</ol>
+</div>
+<div class="paragraph">
+<p>The distinction between a plain controller and an operator is precisely that domain knowledge.
+A controller that creates a Pod when a custom resource appears is a simple controller; one that also knows how to perform a zero-downtime database migration during an upgrade is an operator.</p>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_operator_capability_model"><a class="anchor" href="#_operator_capability_model"></a>Operator Capability Model</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>A five-level maturity model describes what an operator can do at each stage.
+Teams use the model to scope an operator&#8217;s initial release and to plan future investment.</p>
+</div>
+<table class="tableblock frame-all grid-all stretch">
+<colgroup>
+<col style="width: 33.3333%;">
+<col style="width: 66.6667%;">
+</colgroup>
+<thead>
+<tr>
+<th class="tableblock halign-left valign-top">Level</th>
+<th class="tableblock halign-left valign-top">Capabilities</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Level 1&#8201;&#8212;&#8201;Basic Install</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Automated application provisioning and configuration</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Level 2&#8201;&#8212;&#8201;Seamless Upgrades</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Patch and minor version upgrades, including dependency updates and custom migration steps</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Level 3&#8201;&#8212;&#8201;Full Lifecycle</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Backup, restore, and failure recovery so the application can survive data-loss scenarios</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Level 4&#8201;&#8212;&#8201;Deep Insights</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Metrics, alerts, log processing, and workload analysis surfaced through the operator&#8217;s status</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Level 5&#8201;&#8212;&#8201;Auto Pilot</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Horizontal and vertical scaling, auto-configuration tuning, and anomaly detection with no human input</p></td>
+</tr>
+</tbody>
+</table>
+<div class="paragraph">
+<p>Most open-source operators ship at Level 1 or 2.
+Reaching Level 3 typically requires deep knowledge of the managed application&#8217;s storage and consistency model.
+Levels 4 and 5 add observability and closed-loop automation&#8201;&#8212;&#8201;capabilities that justify the operator&#8217;s existence for complex stateful systems like databases, message brokers, and monitoring stacks.</p>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_operator_frameworks"><a class="anchor" href="#_operator_frameworks"></a>Operator Frameworks</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>Several frameworks reduce the boilerplate of building an operator.
+Each makes different trade-offs between language choice, abstraction level, and ecosystem integration.</p>
+</div>
+<div class="paragraph">
+<p><strong>Kubebuilder</strong> is the upstream Go-based framework maintained by the Kubernetes project.
+It scaffolds CRDs and controllers on top of <code>controller-runtime</code>, producing the same Manager / Reconciler architecture we explored in <a href="../week-21-controllers-contd/controller-runtime-and-kubebuilder.html" class="xref page">Week 2.1</a>.
+Kubebuilder projects follow a convention-over-configuration approach: after <code>kubebuilder init</code> and <code>kubebuilder create api</code>, developers fill in the <code>Reconcile</code> method and the CRD spec struct.</p>
+</div>
+<div class="paragraph">
+<p><strong>Operator SDK</strong> builds on Kubebuilder and adds integration with the Operator Lifecycle Manager (OLM) for packaging, dependency resolution, and catalog publishing.
+Beyond Go, the SDK supports two additional project types:</p>
+</div>
+<div class="ulist">
+<ul>
+<li>
+<p><strong>Ansible-based operators</strong>&#8201;&#8212;&#8201;reconciliation logic lives in Ansible playbooks and roles, invoked automatically when a custom resource changes.</p>
+</li>
+<li>
+<p><strong>Helm-based operators</strong>&#8201;&#8212;&#8201;each custom resource maps to a Helm chart release; the SDK renders and applies the chart on every reconciliation.</p>
+</li>
+</ul>
+</div>
+<div class="paragraph">
+<p><strong>Kopf</strong> (Kubernetes Operator Pythonic Framework) lets developers write operators in Python using decorators.
+A handler decorated with <code>@kopf.on.create</code> fires when a custom resource is created; <code>@kopf.timer</code> sets up periodic reconciliation.
+Kopf is a good fit for teams that already maintain Python services and want ad-hoc operators without learning Go.</p>
+</div>
+<div class="paragraph">
+<p><strong>Metacontroller</strong> takes a different approach entirely.
+It runs as a single controller in the cluster and delegates reconciliation to user-supplied webhooks.
+You define a <code>CompositeController</code> or <code>DecoratorController</code> custom resource that tells Metacontroller which parent and child resources to watch, then implement a sync webhook in any language.
+No custom binary needs to be compiled or deployed&#8201;&#8212;&#8201;the webhook can even run as a serverless function.</p>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_design_patterns"><a class="anchor" href="#_design_patterns"></a>Design Patterns</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>The community has converged on several patterns for keeping operators focused and composable.</p>
+</div>
+<div class="sect2">
+<h3 id="_one_crd_per_controller"><a class="anchor" href="#_one_crd_per_controller"></a>One CRD per Controller</h3>
+<div class="paragraph">
+<p>Each controller should handle exactly one custom resource type.
+This keeps the reconciliation loop simple, makes unit testing straightforward, and lets the Manager restart individual controllers independently.
+When an operator project grows to manage multiple CRDs, each CRD gets its own controller registered with the same Manager.</p>
+</div>
+</div>
+<div class="sect2">
+<h3 id="_single_type_per_operator"><a class="anchor" href="#_single_type_per_operator"></a>Single Type per Operator</h3>
+<div class="paragraph">
+<p>An operator should manage a single type of application.
+Applied to a microservice stack with a web frontend, an API gateway, and a database, this pattern yields three separate operators rather than one monolithic one.
+The result is better separation of concerns: each operator can be versioned, upgraded, and tested on its own schedule.</p>
+</div>
+</div>
+<div class="sect2">
+<h3 id="_operator_of_operators"><a class="anchor" href="#_operator_of_operators"></a>Operator of Operators</h3>
+<div class="paragraph">
+<p>When a higher-level platform needs to coordinate multiple applications&#8201;&#8212;&#8201;each with its own operator&#8201;&#8212;&#8201;a <em>meta-operator</em> manages the lifecycle of the subordinate operators.
+The user interacts with a single top-level CRD that represents the entire stack.
+The meta-operator translates that intent into custom resources consumed by the per-component operators, then aggregates their status back into the top-level resource.</p>
+</div>
+<div class="paragraph">
+<p>This pattern appears in production systems like the IBM Cloud Pak operators, where a single <code>OperandRequest</code> CRD triggers the installation and configuration of dozens of subordinate operators.
+The key rule is that the meta-operator should <em>delegate</em> work to the component operators rather than duplicating their logic.</p>
+</div>
+<div class="admonitionblock tip">
+<table>
+<tr>
+<td class="icon">
+<i class="fa icon-tip" title="Tip"></i>
+</td>
+<td class="content">
+<div class="paragraph">
+<p>When choosing a framework, start with the language your team already knows.
+If you need OLM integration for catalog publishing and dependency management, Operator SDK is the natural choice.
+If you want to avoid compiling a binary entirely, Metacontroller&#8217;s webhook model removes that step.</p>
+</div>
+</td>
+</tr>
+</table>
+</div>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_references"><a class="anchor" href="#_references"></a>References</h2>
+<div class="sectionbody">
+<div class="ulist">
+<ul>
+<li>
+<p><a href="https://tag-app-delivery.cncf.io/whitepapers/operator/">CNCF Operator White Paper</a></p>
+</li>
+</ul>
+</div>
+</div>
+</div>
+<nav class="pagination">
+  <span class="prev"><a href="week-42-ubiquitous-topics.html">Week 4.2&#8201;&#8212;&#8201;Ubiquitous Topics</a></span>
+  <span class="next"><a href="alternative-control-planes-and-form-factors.html">Alternative Control Planes and Form Factors</a></span>
+</nav>
+</article>
+  </div>
+</main>
+</div>
+<footer class="footer">
+  <img src="../../../_/img/rhl-logo-red.png" height="40px" alt="Red Hat"  href="https://redhat.com" >
+</footer><script id="site-script" src="../../../_/js/site.js" data-ui-root-path="../../../_"></script>
+<script async src="../../../_/js/vendor/highlight.js"></script>
+<script defer src="../../../_/js/vendor/tabs.js"></script>
+<script defer src="../../../_/js/vendor/reading-time.js"></script>
+  </body>
+</html>

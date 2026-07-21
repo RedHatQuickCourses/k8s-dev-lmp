@@ -1,0 +1,550 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width,initial-scale=1">
+    <title>client-go Architecture :: Kubernetes Developer Learning Path</title>
+    <link rel="prev" href="week-12-controllers-informers-client-go.html">
+    <link rel="next" href="informers-listers-workqueues.html">
+    <meta name="generator" content="Antora 3.2.0-alpha.12">
+    <link rel="stylesheet" href="../../../_/css/site.css">
+    <link rel="stylesheet" href="../../../_/css/vendor/tabs.css">
+    <link rel="stylesheet" href="../../../_/css/vendor/collapsible.css">
+    <link rel="stylesheet" href="../../../_/css/vendor/reading-time.css">
+    <link rel="stylesheet" href="../../../_/css/vendor/audio-transcript.css">
+    <script>var uiRootPath = '../../../_'</script>
+  </head>
+  <body class="article">
+<header class="header">
+  <nav class="navbar">
+    <div class="navbar-brand">
+      <a class="navbar-item" href="https://www.redhat.com" target="_blank"><img src="../../../_/img/redhat-logo.png" height="40px" alt="Red Hat"></a>
+      <a class="navbar-item" style="font-size: 24px; color: white" href="../../..">Kubernetes Developer Learning Path</a>
+      <button class="navbar-burger" data-target="topbar-nav">
+        <span></span>
+        <span></span>
+        <span></span>
+      </button>
+    </div>
+    <div id="topbar-nav" class="navbar-menu">
+      <div class="navbar-end">
+        <a class="navbar-item" href="https://github.com/RedHatQuickCourses/REPLACEREPONAME/issues" target="_blank">Report Issues</a>
+      </div>
+    </div>
+  </nav>
+</header>
+<div class="body">
+<div class="nav-container" data-component="k8s-dev-lmp" data-version="1.0.0">
+  <aside class="nav">
+    <div class="panels">
+<div class="nav-panel-menu is-active" data-panel="menu">
+  <nav class="nav-menu">
+    <h3 class="title"><a href="../index.html">Kubernetes Developer Learning Path</a></h3>
+<ul class="nav-list">
+  <li class="nav-item" data-depth="0">
+<ul class="nav-list">
+  <li class="nav-item" data-depth="1">
+    <a class="nav-link" href="../index.html">Home</a>
+  </li>
+</ul>
+  </li>
+  <li class="nav-item" data-depth="0">
+<ul class="nav-list">
+  <li class="nav-item" data-depth="1">
+    <a class="nav-link" href="../LABENV/index.html">Lab Environment</a>
+  </li>
+</ul>
+  </li>
+  <li class="nav-item" data-depth="0">
+<ul class="nav-list">
+  <li class="nav-item" data-depth="1">
+    <a class="nav-link" href="../overview/overview.html">Overview</a>
+  </li>
+</ul>
+  </li>
+  <li class="nav-item" data-depth="0">
+<ul class="nav-list">
+  <li class="nav-item" data-depth="1">
+    <a class="nav-link" href="../who-is-this-for-pre-requisites/who-is-this-for-pre-requisites.html">Who Is This For? Prerequisites</a>
+  </li>
+</ul>
+  </li>
+  <li class="nav-item" data-depth="0">
+<ul class="nav-list">
+  <li class="nav-item" data-depth="1">
+    <button class="nav-item-toggle"></button>
+    <a class="nav-link" href="../week-0-familiarizing-with-koobrnehteez/week-0-familiarizing-with-koobrnehteez.html">Week 0&#8201;&#8212;&#8201;Familiarizing with Kubernetes</a>
+<ul class="nav-list">
+  <li class="nav-item" data-depth="2">
+    <a class="nav-link" href="../week-0-familiarizing-with-koobrnehteez/what-kubernetes-really-is.html">What Kubernetes Really Is</a>
+  </li>
+  <li class="nav-item" data-depth="2">
+    <a class="nav-link" href="../week-0-familiarizing-with-koobrnehteez/control-plane-architecture-primer.html">Control Plane Architecture Primer</a>
+  </li>
+</ul>
+  </li>
+</ul>
+  </li>
+  <li class="nav-item" data-depth="0">
+<ul class="nav-list">
+  <li class="nav-item" data-depth="1">
+    <button class="nav-item-toggle"></button>
+    <a class="nav-link" href="../week-11-kubernetes-resource-model/week-11-kubernetes-resource-model.html">Week 1.1&#8201;&#8212;&#8201;Kubernetes Resource Model</a>
+<ul class="nav-list">
+  <li class="nav-item" data-depth="2">
+    <a class="nav-link" href="../week-11-kubernetes-resource-model/the-kubernetes-resource-model.html">The Kubernetes Resource Model</a>
+  </li>
+  <li class="nav-item" data-depth="2">
+    <a class="nav-link" href="../week-11-kubernetes-resource-model/api-request-lifecycle.html">API Request Lifecycle</a>
+  </li>
+  <li class="nav-item" data-depth="2">
+    <a class="nav-link" href="../week-11-kubernetes-resource-model/declarative-configuration-layers.html">Declarative Configuration Layers</a>
+  </li>
+</ul>
+  </li>
+</ul>
+  </li>
+  <li class="nav-item" data-depth="0">
+<ul class="nav-list">
+  <li class="nav-item" data-depth="1">
+    <button class="nav-item-toggle"></button>
+    <a class="nav-link" href="week-12-controllers-informers-client-go.html">Week 1.2&#8201;&#8212;&#8201;Controllers, Informers, client-go</a>
+<ul class="nav-list">
+  <li class="nav-item is-current-page" data-depth="2">
+    <a class="nav-link" href="client-go-architecture.html">client-go Architecture</a>
+  </li>
+  <li class="nav-item" data-depth="2">
+    <a class="nav-link" href="informers-listers-workqueues.html">Informers, Listers, and Workqueues</a>
+  </li>
+  <li class="nav-item" data-depth="2">
+    <a class="nav-link" href="sample-controller-walkthrough.html">Sample Controller Walkthrough</a>
+  </li>
+  <li class="nav-item" data-depth="2">
+    <a class="nav-link" href="informer-pitfalls-and-error-handling.html">Informer Pitfalls and Error Handling</a>
+  </li>
+</ul>
+  </li>
+</ul>
+  </li>
+  <li class="nav-item" data-depth="0">
+<ul class="nav-list">
+  <li class="nav-item" data-depth="1">
+    <button class="nav-item-toggle"></button>
+    <a class="nav-link" href="../week-21-controllers-contd/week-21-controllers-contd.html">Week 2.1&#8201;&#8212;&#8201;Controllers with controller-runtime</a>
+<ul class="nav-list">
+  <li class="nav-item" data-depth="2">
+    <a class="nav-link" href="../week-21-controllers-contd/gvk-gvr-and-api-terminology.html">GVK, GVR, and API Terminology</a>
+  </li>
+  <li class="nav-item" data-depth="2">
+    <a class="nav-link" href="../week-21-controllers-contd/controller-runtime-and-kubebuilder.html">Controller-runtime and Kubebuilder</a>
+  </li>
+  <li class="nav-item" data-depth="2">
+    <a class="nav-link" href="../week-21-controllers-contd/spec-status-and-conditions.html">Spec, Status, and Conditions</a>
+  </li>
+  <li class="nav-item" data-depth="2">
+    <a class="nav-link" href="../week-21-controllers-contd/api-validation-and-linting.html">API Validation and Linting</a>
+  </li>
+  <li class="nav-item" data-depth="2">
+    <a class="nav-link" href="../week-21-controllers-contd/update-patch-and-server-side-apply.html">Update, Patch, and Server-Side Apply</a>
+  </li>
+</ul>
+  </li>
+</ul>
+  </li>
+  <li class="nav-item" data-depth="0">
+<ul class="nav-list">
+  <li class="nav-item" data-depth="1">
+    <button class="nav-item-toggle"></button>
+    <a class="nav-link" href="../week-22-going-distributed-locks-leases-ownership-eventual-consistency/week-22-going-distributed-locks-leases-ownership-eventual-consistency.html">Week 2.2&#8201;&#8212;&#8201;Going Distributed</a>
+<ul class="nav-list">
+  <li class="nav-item" data-depth="2">
+    <a class="nav-link" href="../week-22-going-distributed-locks-leases-ownership-eventual-consistency/idempotent-reconciliation.html">Idempotent Reconciliation</a>
+  </li>
+  <li class="nav-item" data-depth="2">
+    <a class="nav-link" href="../week-22-going-distributed-locks-leases-ownership-eventual-consistency/distributed-locking-theory.html">Distributed Locking Theory</a>
+  </li>
+  <li class="nav-item" data-depth="2">
+    <a class="nav-link" href="../week-22-going-distributed-locks-leases-ownership-eventual-consistency/leader-election-in-kubernetes.html">Leader Election in Kubernetes</a>
+  </li>
+  <li class="nav-item" data-depth="2">
+    <a class="nav-link" href="../week-22-going-distributed-locks-leases-ownership-eventual-consistency/controller-sharding.html">Controller Sharding</a>
+  </li>
+</ul>
+  </li>
+</ul>
+  </li>
+  <li class="nav-item" data-depth="0">
+<ul class="nav-list">
+  <li class="nav-item" data-depth="1">
+    <button class="nav-item-toggle"></button>
+    <a class="nav-link" href="../week-31-taking-more-control-admissions-and-beyond-the-kube-apiserver-to-writing-your-own-api-server/week-31-taking-more-control-admissions-and-beyond-the-kube-apiserver-to-writing-your-own-api-server.html">Week 3.1 Overview</a>
+<ul class="nav-list">
+  <li class="nav-item" data-depth="2">
+    <a class="nav-link" href="../week-31-taking-more-control-admissions-and-beyond-the-kube-apiserver-to-writing-your-own-api-server/admission-control-webhooks.html">Admission Control Webhooks</a>
+  </li>
+  <li class="nav-item" data-depth="2">
+    <a class="nav-link" href="../week-31-taking-more-control-admissions-and-beyond-the-kube-apiserver-to-writing-your-own-api-server/policy-engines-and-gatekeeper.html">Policy Engines and Gatekeeper</a>
+  </li>
+  <li class="nav-item" data-depth="2">
+    <a class="nav-link" href="../week-31-taking-more-control-admissions-and-beyond-the-kube-apiserver-to-writing-your-own-api-server/api-discovery-and-aggregation.html">API Discovery and Aggregation</a>
+  </li>
+  <li class="nav-item" data-depth="2">
+    <a class="nav-link" href="../week-31-taking-more-control-admissions-and-beyond-the-kube-apiserver-to-writing-your-own-api-server/custom-api-servers.html">Custom API Servers</a>
+  </li>
+</ul>
+  </li>
+</ul>
+  </li>
+  <li class="nav-item" data-depth="0">
+<ul class="nav-list">
+  <li class="nav-item" data-depth="1">
+    <button class="nav-item-toggle"></button>
+    <a class="nav-link" href="../week-32-the-other-stuff/week-32-the-other-stuff.html">Week 3.2&#8201;&#8212;&#8201;The Other Stuff</a>
+<ul class="nav-list">
+  <li class="nav-item" data-depth="2">
+    <a class="nav-link" href="../week-32-the-other-stuff/ingress-and-gateway-api.html">Ingress and Gateway API</a>
+  </li>
+  <li class="nav-item" data-depth="2">
+    <a class="nav-link" href="../week-32-the-other-stuff/service-mesh-fundamentals.html">Service Mesh Fundamentals</a>
+  </li>
+  <li class="nav-item" data-depth="2">
+    <a class="nav-link" href="../week-32-the-other-stuff/authentication-and-authorization.html">Authentication and Authorization</a>
+  </li>
+  <li class="nav-item" data-depth="2">
+    <a class="nav-link" href="../week-32-the-other-stuff/security-context-and-hardening.html">Security Context and Hardening</a>
+  </li>
+</ul>
+  </li>
+</ul>
+  </li>
+  <li class="nav-item" data-depth="0">
+<ul class="nav-list">
+  <li class="nav-item" data-depth="1">
+    <button class="nav-item-toggle"></button>
+    <a class="nav-link" href="../week-41-all-about-kube-scheduler/week-41-all-about-kube-scheduler.html">Week 4.1&#8201;&#8212;&#8201;All About kube-scheduler</a>
+<ul class="nav-list">
+  <li class="nav-item" data-depth="2">
+    <a class="nav-link" href="../week-41-all-about-kube-scheduler/how-the-scheduler-works.html">How the Scheduler Works</a>
+  </li>
+  <li class="nav-item" data-depth="2">
+    <a class="nav-link" href="../week-41-all-about-kube-scheduler/resource-management.html">Resource Management</a>
+  </li>
+  <li class="nav-item" data-depth="2">
+    <a class="nav-link" href="../week-41-all-about-kube-scheduler/dynamic-resource-allocation.html">Dynamic Resource Allocation</a>
+  </li>
+</ul>
+  </li>
+</ul>
+  </li>
+  <li class="nav-item" data-depth="0">
+<ul class="nav-list">
+  <li class="nav-item" data-depth="1">
+    <button class="nav-item-toggle"></button>
+    <a class="nav-link" href="../week-42-ubiquitous-topics/week-42-ubiquitous-topics.html">Week 4.2&#8201;&#8212;&#8201;Ubiquitous Topics</a>
+<ul class="nav-list">
+  <li class="nav-item" data-depth="2">
+    <a class="nav-link" href="../week-42-ubiquitous-topics/operator-landscape.html">The Operator Landscape</a>
+  </li>
+  <li class="nav-item" data-depth="2">
+    <a class="nav-link" href="../week-42-ubiquitous-topics/alternative-control-planes-and-form-factors.html">Alternative Control Planes and Form Factors</a>
+  </li>
+</ul>
+  </li>
+</ul>
+  </li>
+  <li class="nav-item" data-depth="0">
+<ul class="nav-list">
+  <li class="nav-item" data-depth="1">
+    <button class="nav-item-toggle"></button>
+    <a class="nav-link" href="../exercises/exercises.html">Exercises</a>
+<ul class="nav-list">
+  <li class="nav-item" data-depth="2">
+    <a class="nav-link" href="../exercises/week-1-build-a-controller-using-client-go-from-scratch.html">Exercise 1: Build a Controller</a>
+  </li>
+  <li class="nav-item" data-depth="2">
+    <a class="nav-link" href="../exercises/week-2-implement-optimistic-locking-and-leader-election-via-lease.html">Exercise 2: Leader Election</a>
+  </li>
+  <li class="nav-item" data-depth="2">
+    <a class="nav-link" href="../exercises/week-3-develop-a-custom-validating-webhook-for-container-registry-enforcement.html">Exercise 3: Validating Webhook</a>
+  </li>
+</ul>
+  </li>
+</ul>
+  </li>
+  <li class="nav-item" data-depth="0">
+<ul class="nav-list">
+  <li class="nav-item" data-depth="1">
+    <a class="nav-link" href="../recommended-reading/recommended-reading.html">Recommended Reading</a>
+  </li>
+</ul>
+  </li>
+  <li class="nav-item" data-depth="0">
+<ul class="nav-list">
+  <li class="nav-item" data-depth="1">
+    <a class="nav-link" href="../suggested-reading/suggested-reading.html">Suggested Reading</a>
+  </li>
+</ul>
+  </li>
+  <li class="nav-item" data-depth="0">
+<ul class="nav-list">
+  <li class="nav-item" data-depth="1">
+    <a class="nav-link" href="../appendix/appendix.html">Appendix</a>
+  </li>
+</ul>
+  </li>
+</ul>
+  </nav>
+</div>
+<div class="nav-panel-explore" data-panel="explore">
+  <div class="context">
+    <span class="title">Kubernetes Developer Learning Path</span>
+    <span class="version">1.0.0</span>
+  </div>
+  <ul class="components">
+    <li class="component is-current">
+      <a class="title" href="../index.html">Kubernetes Developer Learning Path</a>
+      <ul class="versions">
+        <li class="version is-current is-latest">
+          <a href="../index.html">1.0.0</a>
+        </li>
+      </ul>
+    </li>
+  </ul>
+</div>
+    </div>
+  </aside>
+</div>
+<main class="article">
+<div class="toolbar" role="navigation">
+<button class="nav-toggle"></button>
+  <a href="../index.html" class="home-link"></a>
+<nav class="breadcrumbs" aria-label="breadcrumbs">
+  <ul>
+    <li><a href="../index.html">Kubernetes Developer Learning Path</a></li>
+    <li><a href="week-12-controllers-informers-client-go.html">Week 1.2&#8201;&#8212;&#8201;Controllers, Informers, client-go</a></li>
+    <li><a href="client-go-architecture.html">client-go Architecture</a></li>
+  </ul>
+</nav>
+</div>
+  <div class="content">
+<aside class="toc sidebar" data-title="Contents" data-levels="2">
+  <div class="toc-menu"></div>
+</aside>
+<article class="doc">
+<h1 class="page">client-go Architecture</h1>
+<div class="sect1">
+<h2 id="_what_is_client_go"><a class="anchor" href="#_what_is_client_go"></a>What is client-go?</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>client-go is the official Go client library for the Kubernetes API server.
+It provides the event-driven programming primitives that every controller and operator is built on&#8201;&#8212;&#8201;even <code>kubectl</code> uses client-go under the hood.
+If you are building a Kubernetes controller, this is the library you need to understand.</p>
+</div>
+<div class="paragraph">
+<p>Conceptually, three layers sit between a developer and the API server:</p>
+</div>
+<div class="olist arabic">
+<ol class="arabic">
+<li>
+<p><strong>API server</strong>&#8201;&#8212;&#8201;the source of truth for cluster state.</p>
+</li>
+<li>
+<p><strong>client-go</strong> (<code>k8s.io/client-go</code>)&#8201;&#8212;&#8201;provides typed clients, informers, listers, caches, and workqueues.</p>
+</li>
+<li>
+<p><strong>controller-runtime</strong>&#8201;&#8212;&#8201;a higher-level framework (covered in <a href="../week-21-controllers-contd/week-21-controllers-contd.html" class="xref page">Week 2.1</a>) that masks the details of client-go&#8217;s event-oriented architecture.</p>
+</li>
+</ol>
+</div>
+<div class="paragraph">
+<p>The key packages within client-go are <code>tools/cache</code> (informers, reflectors, indexers, DeltaFIFO), <code>kubernetes</code> (typed clientsets), <code>dynamic</code> (untyped clients), and <code>discovery</code> (API group discovery).</p>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_core_components"><a class="anchor" href="#_core_components"></a>Core Components</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>Every client-go-based controller relies on the following components, all defined under <code>tools/cache</code>.</p>
+</div>
+<div class="sect2">
+<h3 id="_reflector"><a class="anchor" href="#_reflector"></a>Reflector</h3>
+<div class="paragraph">
+<p>The <strong>Reflector</strong> (defined in <code>tools/cache/reflector.go</code>) mirrors API server state into a local store using <code>ListAndWatch</code>.
+On startup it performs an initial LIST to fetch all existing objects and records the <code>resourceVersion</code>.
+It then opens a long-running WATCH connection starting from that <code>resourceVersion</code> to receive incremental updates.
+When a new or modified resource is detected through the WATCH, the Reflector places the object&#8201;&#8212;&#8201;along with the type of change&#8201;&#8212;&#8201;into a DeltaFIFO queue inside its <code>watchHandler</code> function.</p>
+</div>
+</div>
+<div class="sect2">
+<h3 id="_deltafifo"><a class="anchor" href="#_deltafifo"></a>DeltaFIFO</h3>
+<div class="paragraph">
+<p><strong>DeltaFIFO</strong> is a producer-consumer queue that stores resource events as incremental deltas.
+Each entry records the change type (Added, Updated, Deleted, Replaced, Sync) along with the object itself.
+The Reflector is the producer; the Informer&#8217;s <code>processLoop</code> is the consumer.</p>
+</div>
+<div class="paragraph">
+<p>DeltaFIFO provides two guarantees that matter for controller correctness:</p>
+</div>
+<div class="ulist">
+<ul>
+<li>
+<p><strong>Exactly-once, in-order processing</strong> per resource&#8201;&#8212;&#8201;deltas for a given key are consumed in the order they arrived.</p>
+</li>
+<li>
+<p><strong>Deduplication</strong>&#8201;&#8212;&#8201;if multiple updates arrive for the same key before the consumer processes it, the queue coalesces them so the consumer sees the latest state.</p>
+</li>
+</ul>
+</div>
+</div>
+<div class="sect2">
+<h3 id="_indexer"><a class="anchor" href="#_indexer"></a>Indexer</h3>
+<div class="paragraph">
+<p>The <strong>Indexer</strong> (defined in <code>tools/cache/index.go</code>) is a thread-safe local cache that stores objects popped from DeltaFIFO.
+It uses the default key function <code>MetaNamespaceKeyFunc</code> (from <code>tools/cache/store.go</code>) to generate keys in the format <code>&lt;namespace&gt;/&lt;name&gt;</code>.</p>
+</div>
+<div class="admonitionblock warning">
+<table>
+<tr>
+<td class="icon">
+<i class="fa icon-warning" title="Warning"></i>
+</td>
+<td class="content">
+<div class="paragraph">
+<p>Multiple controllers within the same process share the Indexer cache.
+Mutating a cached object&#8201;&#8212;&#8201;even a shallow field like <code>Annotations</code>&#8201;&#8212;&#8201;without a deep copy corrupts the object for every controller that reads it.
+Always use <code>api.Scheme.Copy</code> or the generated <code>DeepCopy()</code> method before modifying a cached object.</p>
+</div>
+</td>
+</tr>
+</table>
+</div>
+<div class="admonitionblock note">
+<table>
+<tr>
+<td class="icon">
+<i class="fa icon-note" title="Note"></i>
+</td>
+<td class="content">
+<div class="paragraph">
+<p>Each resource stored in etcd has a hard size limit of approximately 1.5 MB.
+Keep this in mind when designing custom resources with large specs or status fields.</p>
+</div>
+</td>
+</tr>
+</table>
+</div>
+</div>
+<div class="sect2">
+<h3 id="_sharedinformerfactory"><a class="anchor" href="#_sharedinformerfactory"></a>SharedInformerFactory</h3>
+<div class="paragraph">
+<p>A <strong>SharedInformerFactory</strong> multiplexes watchers across controllers so that only one API server connection is maintained per resource type within a process.
+This saves API connections, serialization and deserialization costs, and server-side memory.
+Factory methods are available in <code>k8s.io/client-go/informers/factory.go</code>.</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-go hljs" data-lang="go">type SharedInformer interface {
+    // AddEventHandler registers handler functions that are called
+    // when objects are added, updated, or deleted.
+    AddEventHandler(handler ResourceEventHandler) (ResourceEventHandlerRegistration, error)
+
+    // HasSynced returns true after the initial LIST has been
+    // fully processed and the cache is populated.
+    HasSynced() bool
+
+    // LastSyncResourceVersion returns the resourceVersion observed
+    // during the most recent sync with the API server.
+    LastSyncResourceVersion() string
+
+    // Run starts the informer and blocks until the stop channel is closed.
+    Run(stopCh &lt;-chan struct{})
+}</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>The <code>SharedInformer</code> interface is the contract that all informers implement.
+Calling <code>AddEventHandler</code> registers your controller&#8217;s callbacks; calling <code>Run</code> starts the Reflector and begins populating the cache.</p>
+</div>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_the_data_flow_pipeline"><a class="anchor" href="#_the_data_flow_pipeline"></a>The Data Flow Pipeline</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>The following diagram shows how data flows from the API server through client-go into your controller logic:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre>API Server
+    |
+    | (ListAndWatch)
+    v
+Reflector
+    |
+    | (Enqueue deltas)
+    v
+DeltaFIFO
+    |
+    | (Pop + store)
+    v
+Informer (Indexer / Cache)
+    |
+    | (Invoke registered callbacks)
+    v
+Event Handlers (AddFunc / UpdateFunc / DeleteFunc)
+    |
+    | (Enqueue namespace/name key)
+    v
+Workqueue
+    |
+    | (Dequeue key)
+    v
+Controller Sync Handler (your reconciliation logic)</pre>
+</div>
+</div>
+<div class="paragraph">
+<p>The top half of this pipeline&#8201;&#8212;&#8201;Reflector, DeltaFIFO, Indexer&#8201;&#8212;&#8201;is managed entirely by client-go.
+The bottom half&#8201;&#8212;&#8201;event handlers, workqueue, and sync handler&#8201;&#8212;&#8201;is what you write as a controller author.</p>
+</div>
+<div class="paragraph">
+<p>For a walkthrough of a controller that implements the bottom half, see <a href="sample-controller-walkthrough.html" class="xref page">Sample Controller Walkthrough</a>.
+For how controller-runtime abstracts this entire pipeline behind <code>ctrl.NewControllerManagedBy()</code>, see <a href="../week-21-controllers-contd/week-21-controllers-contd.html" class="xref page">Week 2.1</a>.</p>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_references"><a class="anchor" href="#_references"></a>References</h2>
+<div class="sectionbody">
+<div class="ulist">
+<ul>
+<li>
+<p><a href="https://github.com/kubernetes/client-go/tree/master/tools/cache">client-go tools/cache</a></p>
+</li>
+<li>
+<p><a href="https://github.com/kubernetes/sample-controller/blob/master/docs/controller-client-go.md">client-go under the hood</a></p>
+</li>
+<li>
+<p><a href="https://github.com/thejasn/presentations/blob/main/kubernetes-informers/presentation.slide">Kubernetes Informers Presentation</a></p>
+</li>
+</ul>
+</div>
+</div>
+</div>
+<nav class="pagination">
+  <span class="prev"><a href="week-12-controllers-informers-client-go.html">Week 1.2&#8201;&#8212;&#8201;Controllers, Informers, client-go</a></span>
+  <span class="next"><a href="informers-listers-workqueues.html">Informers, Listers, and Workqueues</a></span>
+</nav>
+</article>
+  </div>
+</main>
+</div>
+<footer class="footer">
+  <img src="../../../_/img/rhl-logo-red.png" height="40px" alt="Red Hat"  href="https://redhat.com" >
+</footer><script id="site-script" src="../../../_/js/site.js" data-ui-root-path="../../../_"></script>
+<script async src="../../../_/js/vendor/highlight.js"></script>
+<script defer src="../../../_/js/vendor/tabs.js"></script>
+<script defer src="../../../_/js/vendor/reading-time.js"></script>
+  </body>
+</html>

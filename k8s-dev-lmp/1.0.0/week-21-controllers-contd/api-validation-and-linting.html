@@ -3,9 +3,9 @@
   <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width,initial-scale=1">
-    <title>API validation and linting :: Kubernetes Developer Learning Path</title>
-    <link rel="prev" href="spec-vs-status-and-condition-management.html">
-    <link rel="next" href="crud-operations-and-applypatchupdate-semantics.html">
+    <title>API Validation and Linting :: Kubernetes Developer Learning Path</title>
+    <link rel="prev" href="spec-status-and-conditions.html">
+    <link rel="next" href="update-patch-and-server-side-apply.html">
     <meta name="generator" content="Antora 3.2.0-alpha.12">
     <link rel="stylesheet" href="../../../_/css/site.css">
     <link rel="stylesheet" href="../../../_/css/vendor/tabs.css">
@@ -58,23 +58,28 @@
   <li class="nav-item" data-depth="0">
 <ul class="nav-list">
   <li class="nav-item" data-depth="1">
-    <button class="nav-item-toggle"></button>
     <a class="nav-link" href="../overview/overview.html">Overview</a>
+  </li>
+</ul>
+  </li>
+  <li class="nav-item" data-depth="0">
+<ul class="nav-list">
+  <li class="nav-item" data-depth="1">
+    <a class="nav-link" href="../who-is-this-for-pre-requisites/who-is-this-for-pre-requisites.html">Who Is This For? Prerequisites</a>
+  </li>
+</ul>
+  </li>
+  <li class="nav-item" data-depth="0">
+<ul class="nav-list">
+  <li class="nav-item" data-depth="1">
+    <button class="nav-item-toggle"></button>
+    <a class="nav-link" href="../week-0-familiarizing-with-koobrnehteez/week-0-familiarizing-with-koobrnehteez.html">Week 0&#8201;&#8212;&#8201;Familiarizing with Kubernetes</a>
 <ul class="nav-list">
   <li class="nav-item" data-depth="2">
-    <a class="nav-link" href="../overview/kubernetes-architecture-overview-and-extensibility-mechanisms.html">Kubernetes architecture overview and extensibility mechanisms</a>
+    <a class="nav-link" href="../week-0-familiarizing-with-koobrnehteez/what-kubernetes-really-is.html">What Kubernetes Really Is</a>
   </li>
   <li class="nav-item" data-depth="2">
-    <a class="nav-link" href="../overview/control-plane-authentication-authorization-and-validation.html">Control plane authentication, authorization, and validation</a>
-  </li>
-  <li class="nav-item" data-depth="2">
-    <a class="nav-link" href="../overview/platform-automation-through-custom-resources-and-operators.html">Platform automation through custom resources and operators</a>
-  </li>
-  <li class="nav-item" data-depth="2">
-    <a class="nav-link" href="../overview/distributed-system-principles-for-high-availability.html">Distributed system principles for high availability</a>
-  </li>
-  <li class="nav-item" data-depth="2">
-    <a class="nav-link" href="../overview/advanced-networking-traffic-management-and-control-plane-architectures.html">Advanced networking, traffic management, and control plane architectures</a>
+    <a class="nav-link" href="../week-0-familiarizing-with-koobrnehteez/control-plane-architecture-primer.html">Control Plane Architecture Primer</a>
   </li>
 </ul>
   </li>
@@ -84,16 +89,16 @@
 <ul class="nav-list">
   <li class="nav-item" data-depth="1">
     <button class="nav-item-toggle"></button>
-    <a class="nav-link" href="../who-is-this-for-pre-requisites/who-is-this-for-pre-requisites.html">Who is this for? pre-requisites.</a>
+    <a class="nav-link" href="../week-11-kubernetes-resource-model/week-11-kubernetes-resource-model.html">Week 1.1&#8201;&#8212;&#8201;Kubernetes Resource Model</a>
 <ul class="nav-list">
   <li class="nav-item" data-depth="2">
-    <a class="nav-link" href="../who-is-this-for-pre-requisites/target-audience-engineers-sys-admins-and-developers-with-container-experience.html">Target audience: Engineers, sys admins, and developers with container experience</a>
+    <a class="nav-link" href="../week-11-kubernetes-resource-model/the-kubernetes-resource-model.html">The Kubernetes Resource Model</a>
   </li>
   <li class="nav-item" data-depth="2">
-    <a class="nav-link" href="../who-is-this-for-pre-requisites/recommended-prerequisites-basic-distributed-systems-knowledge.html">Recommended prerequisites: Basic distributed systems knowledge</a>
+    <a class="nav-link" href="../week-11-kubernetes-resource-model/api-request-lifecycle.html">API Request Lifecycle</a>
   </li>
   <li class="nav-item" data-depth="2">
-    <a class="nav-link" href="../who-is-this-for-pre-requisites/ideal-baseline-ckad-certification-or-red-hat-do-180-and-do-280-tracks.html">Ideal baseline: CKAD certification, or Red Hat DO-180 and DO-280 tracks</a>
+    <a class="nav-link" href="../week-11-kubernetes-resource-model/declarative-configuration-layers.html">Declarative Configuration Layers</a>
   </li>
 </ul>
   </li>
@@ -103,19 +108,19 @@
 <ul class="nav-list">
   <li class="nav-item" data-depth="1">
     <button class="nav-item-toggle"></button>
-    <a class="nav-link" href="../week-0-familiarizing-with-koobrnehteez/week-0-familiarizing-with-koobrnehteez.html">Week 0 — Familiarizing with koo·br·neh·teez</a>
+    <a class="nav-link" href="../week-12-controllers-informers-client-go/week-12-controllers-informers-client-go.html">Week 1.2&#8201;&#8212;&#8201;Controllers, Informers, client-go</a>
 <ul class="nav-list">
   <li class="nav-item" data-depth="2">
-    <a class="nav-link" href="../week-0-familiarizing-with-koobrnehteez/api-centric-declarative-configuration-management.html">API-centric declarative configuration management</a>
+    <a class="nav-link" href="../week-12-controllers-informers-client-go/client-go-architecture.html">client-go Architecture</a>
   </li>
   <li class="nav-item" data-depth="2">
-    <a class="nav-link" href="../week-0-familiarizing-with-koobrnehteez/kubernetes-control-plane-and-api-server-role.html">Kubernetes control plane and API server role</a>
+    <a class="nav-link" href="../week-12-controllers-informers-client-go/informers-listers-workqueues.html">Informers, Listers, and Workqueues</a>
   </li>
   <li class="nav-item" data-depth="2">
-    <a class="nav-link" href="../week-0-familiarizing-with-koobrnehteez/persistence-layer-etcd-key-value-store.html">Persistence layer: etcd key-value store</a>
+    <a class="nav-link" href="../week-12-controllers-informers-client-go/sample-controller-walkthrough.html">Sample Controller Walkthrough</a>
   </li>
   <li class="nav-item" data-depth="2">
-    <a class="nav-link" href="../week-0-familiarizing-with-koobrnehteez/asynchronous-controller-reconciliation-patterns.html">Asynchronous controller reconciliation patterns</a>
+    <a class="nav-link" href="../week-12-controllers-informers-client-go/informer-pitfalls-and-error-handling.html">Informer Pitfalls and Error Handling</a>
   </li>
 </ul>
   </li>
@@ -125,60 +130,22 @@
 <ul class="nav-list">
   <li class="nav-item" data-depth="1">
     <button class="nav-item-toggle"></button>
-    <a class="nav-link" href="../week-11-kubernetes-resource-model/week-11-kubernetes-resource-model.html">Week 1.1 — Kubernetes Resource Model</a>
+    <a class="nav-link" href="week-21-controllers-contd.html">Week 2.1&#8201;&#8212;&#8201;Controllers with controller-runtime</a>
 <ul class="nav-list">
   <li class="nav-item" data-depth="2">
-    <a class="nav-link" href="../week-11-kubernetes-resource-model/the-declarative-intent-of-kubernetes-resources.html">The declarative intent of Kubernetes Resources</a>
+    <a class="nav-link" href="gvk-gvr-and-api-terminology.html">GVK, GVR, and API Terminology</a>
   </li>
   <li class="nav-item" data-depth="2">
-    <a class="nav-link" href="../week-11-kubernetes-resource-model/kube-apiserver-plugin-requestresponse-lifecycle.html">kube-apiserver plugin request/response lifecycle</a>
-  </li>
-</ul>
-  </li>
-</ul>
-  </li>
-  <li class="nav-item" data-depth="0">
-<ul class="nav-list">
-  <li class="nav-item" data-depth="1">
-    <button class="nav-item-toggle"></button>
-    <a class="nav-link" href="../week-12-controllers-informers-client-go/week-12-controllers-informers-client-go.html">Week 1.2 — Controllers, informers, client-go</a>
-<ul class="nav-list">
-  <li class="nav-item" data-depth="2">
-    <a class="nav-link" href="../week-12-controllers-informers-client-go/client-go-architecture-fundamentals.html">client-go architecture fundamentals</a>
+    <a class="nav-link" href="controller-runtime-and-kubebuilder.html">Controller-runtime and Kubebuilder</a>
   </li>
   <li class="nav-item" data-depth="2">
-    <a class="nav-link" href="../week-12-controllers-informers-client-go/informers-listers-and-workqueues.html">Informers, listers, and workqueues</a>
-  </li>
-  <li class="nav-item" data-depth="2">
-    <a class="nav-link" href="../week-12-controllers-informers-client-go/cache-mechanisms-and-event-propagation.html">Cache mechanisms and event propagation</a>
-  </li>
-  <li class="nav-item" data-depth="2">
-    <a class="nav-link" href="../week-12-controllers-informers-client-go/error-handling-and-requeue-strategies.html">Error handling and requeue strategies</a>
-  </li>
-</ul>
-  </li>
-</ul>
-  </li>
-  <li class="nav-item" data-depth="0">
-<ul class="nav-list">
-  <li class="nav-item" data-depth="1">
-    <button class="nav-item-toggle"></button>
-    <a class="nav-link" href="week-21-controllers-contd.html">Week 2.1 — Controllers contd.</a>
-<ul class="nav-list">
-  <li class="nav-item" data-depth="2">
-    <a class="nav-link" href="reconcile-loop-and-controller-runtime-abstraction.html">Reconcile loop and controller-runtime abstraction</a>
-  </li>
-  <li class="nav-item" data-depth="2">
-    <a class="nav-link" href="scaffolding-with-kubebuilder.html">Scaffolding with kubebuilder</a>
-  </li>
-  <li class="nav-item" data-depth="2">
-    <a class="nav-link" href="spec-vs-status-and-condition-management.html">Spec vs Status and condition management</a>
+    <a class="nav-link" href="spec-status-and-conditions.html">Spec, Status, and Conditions</a>
   </li>
   <li class="nav-item is-current-page" data-depth="2">
-    <a class="nav-link" href="api-validation-and-linting.html">API validation and linting</a>
+    <a class="nav-link" href="api-validation-and-linting.html">API Validation and Linting</a>
   </li>
   <li class="nav-item" data-depth="2">
-    <a class="nav-link" href="crud-operations-and-applypatchupdate-semantics.html">CRUD operations and apply/patch/update semantics</a>
+    <a class="nav-link" href="update-patch-and-server-side-apply.html">Update, Patch, and Server-Side Apply</a>
   </li>
 </ul>
   </li>
@@ -188,19 +155,19 @@
 <ul class="nav-list">
   <li class="nav-item" data-depth="1">
     <button class="nav-item-toggle"></button>
-    <a class="nav-link" href="../week-22-going-distributed-locks-leases-ownership-eventual-consistency/week-22-going-distributed-locks-leases-ownership-eventual-consistency.html">Week 2.2 — Going distributed: locks, leases, ownership, eventual consistency</a>
+    <a class="nav-link" href="../week-22-going-distributed-locks-leases-ownership-eventual-consistency/week-22-going-distributed-locks-leases-ownership-eventual-consistency.html">Week 2.2&#8201;&#8212;&#8201;Going Distributed</a>
 <ul class="nav-list">
   <li class="nav-item" data-depth="2">
-    <a class="nav-link" href="../week-22-going-distributed-locks-leases-ownership-eventual-consistency/designing-idempotent-state-machines.html">Designing idempotent state machines</a>
+    <a class="nav-link" href="../week-22-going-distributed-locks-leases-ownership-eventual-consistency/idempotent-reconciliation.html">Idempotent Reconciliation</a>
   </li>
   <li class="nav-item" data-depth="2">
-    <a class="nav-link" href="../week-22-going-distributed-locks-leases-ownership-eventual-consistency/locks-and-leases-for-synchronization.html">Locks and Leases for synchronization</a>
+    <a class="nav-link" href="../week-22-going-distributed-locks-leases-ownership-eventual-consistency/distributed-locking-theory.html">Distributed Locking Theory</a>
   </li>
   <li class="nav-item" data-depth="2">
-    <a class="nav-link" href="../week-22-going-distributed-locks-leases-ownership-eventual-consistency/leader-election-mechanisms.html">Leader election mechanisms</a>
+    <a class="nav-link" href="../week-22-going-distributed-locks-leases-ownership-eventual-consistency/leader-election-in-kubernetes.html">Leader Election in Kubernetes</a>
   </li>
   <li class="nav-item" data-depth="2">
-    <a class="nav-link" href="../week-22-going-distributed-locks-leases-ownership-eventual-consistency/controller-sharding-strategies.html">Controller sharding strategies</a>
+    <a class="nav-link" href="../week-22-going-distributed-locks-leases-ownership-eventual-consistency/controller-sharding.html">Controller Sharding</a>
   </li>
 </ul>
   </li>
@@ -210,19 +177,19 @@
 <ul class="nav-list">
   <li class="nav-item" data-depth="1">
     <button class="nav-item-toggle"></button>
-    <a class="nav-link" href="../week-31-taking-more-control-admissions-and-beyond-the-kube-apiserver-to-writing-your-own-api-server/week-31-taking-more-control-admissions-and-beyond-the-kube-apiserver-to-writing-your-own-api-server.html">Week 3.1 — Taking more control: Admissions and beyond the kube-apiserver to writing your own API Server</a>
+    <a class="nav-link" href="../week-31-taking-more-control-admissions-and-beyond-the-kube-apiserver-to-writing-your-own-api-server/week-31-taking-more-control-admissions-and-beyond-the-kube-apiserver-to-writing-your-own-api-server.html">Week 3.1 Overview</a>
 <ul class="nav-list">
   <li class="nav-item" data-depth="2">
-    <a class="nav-link" href="../week-31-taking-more-control-admissions-and-beyond-the-kube-apiserver-to-writing-your-own-api-server/admission-control-webhooks-validating-and-mutating.html">Admission control webhooks (Validating and Mutating)</a>
+    <a class="nav-link" href="../week-31-taking-more-control-admissions-and-beyond-the-kube-apiserver-to-writing-your-own-api-server/admission-control-webhooks.html">Admission Control Webhooks</a>
   </li>
   <li class="nav-item" data-depth="2">
-    <a class="nav-link" href="../week-31-taking-more-control-admissions-and-beyond-the-kube-apiserver-to-writing-your-own-api-server/differences-between-webhooks-and-policy-engines.html">Differences between webhooks and Policy Engines</a>
+    <a class="nav-link" href="../week-31-taking-more-control-admissions-and-beyond-the-kube-apiserver-to-writing-your-own-api-server/policy-engines-and-gatekeeper.html">Policy Engines and Gatekeeper</a>
   </li>
   <li class="nav-item" data-depth="2">
-    <a class="nav-link" href="../week-31-taking-more-control-admissions-and-beyond-the-kube-apiserver-to-writing-your-own-api-server/api-discovery-and-aggregation-layer.html">API discovery and Aggregation Layer</a>
+    <a class="nav-link" href="../week-31-taking-more-control-admissions-and-beyond-the-kube-apiserver-to-writing-your-own-api-server/api-discovery-and-aggregation.html">API Discovery and Aggregation</a>
   </li>
   <li class="nav-item" data-depth="2">
-    <a class="nav-link" href="../week-31-taking-more-control-admissions-and-beyond-the-kube-apiserver-to-writing-your-own-api-server/implementing-custom-api-servers.html">Implementing custom API servers</a>
+    <a class="nav-link" href="../week-31-taking-more-control-admissions-and-beyond-the-kube-apiserver-to-writing-your-own-api-server/custom-api-servers.html">Custom API Servers</a>
   </li>
 </ul>
   </li>
@@ -232,19 +199,19 @@
 <ul class="nav-list">
   <li class="nav-item" data-depth="1">
     <button class="nav-item-toggle"></button>
-    <a class="nav-link" href="../week-32-the-other-stuff/week-32-the-other-stuff.html">Week 3.2 — The other stuff</a>
+    <a class="nav-link" href="../week-32-the-other-stuff/week-32-the-other-stuff.html">Week 3.2&#8201;&#8212;&#8201;The Other Stuff</a>
 <ul class="nav-list">
   <li class="nav-item" data-depth="2">
-    <a class="nav-link" href="../week-32-the-other-stuff/advanced-networking-ingress-and-gateway-api.html">Advanced networking: Ingress and Gateway API</a>
+    <a class="nav-link" href="../week-32-the-other-stuff/ingress-and-gateway-api.html">Ingress and Gateway API</a>
   </li>
   <li class="nav-item" data-depth="2">
-    <a class="nav-link" href="../week-32-the-other-stuff/service-mesh-concepts.html">Service Mesh concepts</a>
+    <a class="nav-link" href="../week-32-the-other-stuff/service-mesh-fundamentals.html">Service Mesh Fundamentals</a>
   </li>
   <li class="nav-item" data-depth="2">
-    <a class="nav-link" href="../week-32-the-other-stuff/authnauthz-in-openshift.html">AuthN/AuthZ in OpenShift</a>
+    <a class="nav-link" href="../week-32-the-other-stuff/authentication-and-authorization.html">Authentication and Authorization</a>
   </li>
   <li class="nav-item" data-depth="2">
-    <a class="nav-link" href="../week-32-the-other-stuff/cluster-security-and-hardening-techniques.html">Cluster security and hardening techniques</a>
+    <a class="nav-link" href="../week-32-the-other-stuff/security-context-and-hardening.html">Security Context and Hardening</a>
   </li>
 </ul>
   </li>
@@ -254,13 +221,13 @@
 <ul class="nav-list">
   <li class="nav-item" data-depth="1">
     <button class="nav-item-toggle"></button>
-    <a class="nav-link" href="../week-41-all-about-kube-scheduler/week-41-all-about-kube-scheduler.html">Week 4.1 — All about kube-scheduler</a>
+    <a class="nav-link" href="../week-41-all-about-kube-scheduler/week-41-all-about-kube-scheduler.html">Week 4.1&#8201;&#8212;&#8201;All About kube-scheduler</a>
 <ul class="nav-list">
   <li class="nav-item" data-depth="2">
-    <a class="nav-link" href="../week-41-all-about-kube-scheduler/pod-scheduling-de-scheduling-and-auto-scaling.html">Pod scheduling, de-scheduling, and auto-scaling</a>
+    <a class="nav-link" href="../week-41-all-about-kube-scheduler/how-the-scheduler-works.html">How the Scheduler Works</a>
   </li>
   <li class="nav-item" data-depth="2">
-    <a class="nav-link" href="../week-41-all-about-kube-scheduler/managing-resource-requests-and-limits.html">Managing resource Requests and Limits</a>
+    <a class="nav-link" href="../week-41-all-about-kube-scheduler/resource-management.html">Resource Management</a>
   </li>
   <li class="nav-item" data-depth="2">
     <a class="nav-link" href="../week-41-all-about-kube-scheduler/dynamic-resource-allocation.html">Dynamic Resource Allocation</a>
@@ -273,16 +240,13 @@
 <ul class="nav-list">
   <li class="nav-item" data-depth="1">
     <button class="nav-item-toggle"></button>
-    <a class="nav-link" href="../week-42-ubiquitous-topics/week-42-ubiquitous-topics.html">Week 4.2 — Ubiquitous topics!</a>
+    <a class="nav-link" href="../week-42-ubiquitous-topics/week-42-ubiquitous-topics.html">Week 4.2&#8201;&#8212;&#8201;Ubiquitous Topics</a>
 <ul class="nav-list">
   <li class="nav-item" data-depth="2">
-    <a class="nav-link" href="../week-42-ubiquitous-topics/alternative-control-plane-architectures.html">Alternative control plane architectures</a>
+    <a class="nav-link" href="../week-42-ubiquitous-topics/operator-landscape.html">The Operator Landscape</a>
   </li>
   <li class="nav-item" data-depth="2">
-    <a class="nav-link" href="../week-42-ubiquitous-topics/hypershift-and-kcp.html">HyperShift and kcp</a>
-  </li>
-  <li class="nav-item" data-depth="2">
-    <a class="nav-link" href="../week-42-ubiquitous-topics/microshift-and-k3s-form-factors.html">Microshift and k3s form factors</a>
+    <a class="nav-link" href="../week-42-ubiquitous-topics/alternative-control-planes-and-form-factors.html">Alternative Control Planes and Form Factors</a>
   </li>
 </ul>
   </li>
@@ -295,13 +259,13 @@
     <a class="nav-link" href="../exercises/exercises.html">Exercises</a>
 <ul class="nav-list">
   <li class="nav-item" data-depth="2">
-    <a class="nav-link" href="../exercises/week-1-build-a-controller-using-client-go-from-scratch.html">Week 1: Build a controller using client-go from scratch</a>
+    <a class="nav-link" href="../exercises/week-1-build-a-controller-using-client-go-from-scratch.html">Exercise 1: Build a Controller</a>
   </li>
   <li class="nav-item" data-depth="2">
-    <a class="nav-link" href="../exercises/week-2-implement-optimistic-locking-and-leader-election-via-lease.html">Week 2: Implement optimistic locking and leader election via Lease</a>
+    <a class="nav-link" href="../exercises/week-2-implement-optimistic-locking-and-leader-election-via-lease.html">Exercise 2: Leader Election</a>
   </li>
   <li class="nav-item" data-depth="2">
-    <a class="nav-link" href="../exercises/week-3-develop-a-custom-validating-webhook-for-container-registry-enforcement.html">Week 3: Develop a custom Validating Webhook for container registry enforcement</a>
+    <a class="nav-link" href="../exercises/week-3-develop-a-custom-validating-webhook-for-container-registry-enforcement.html">Exercise 3: Validating Webhook</a>
   </li>
 </ul>
   </li>
@@ -310,35 +274,14 @@
   <li class="nav-item" data-depth="0">
 <ul class="nav-list">
   <li class="nav-item" data-depth="1">
-    <button class="nav-item-toggle"></button>
     <a class="nav-link" href="../recommended-reading/recommended-reading.html">Recommended Reading</a>
-<ul class="nav-list">
-  <li class="nav-item" data-depth="2">
-    <a class="nav-link" href="../recommended-reading/programming-kubernetes-hausenblas-schimanski.html">Programming Kubernetes (Hausenblas, Schimanski)</a>
-  </li>
-  <li class="nav-item" data-depth="2">
-    <a class="nav-link" href="../recommended-reading/kubernetes-operators-dobies-wood.html">Kubernetes Operators (Dobies, Wood)</a>
-  </li>
-  <li class="nav-item" data-depth="2">
-    <a class="nav-link" href="../recommended-reading/cncf-operator-whitepaper.html">CNCF Operator Whitepaper</a>
-  </li>
-</ul>
   </li>
 </ul>
   </li>
   <li class="nav-item" data-depth="0">
 <ul class="nav-list">
   <li class="nav-item" data-depth="1">
-    <button class="nav-item-toggle"></button>
     <a class="nav-link" href="../suggested-reading/suggested-reading.html">Suggested Reading</a>
-<ul class="nav-list">
-  <li class="nav-item" data-depth="2">
-    <a class="nav-link" href="../suggested-reading/kubernetes-security-and-observability-creane-gupta.html">Kubernetes Security and Observability (Creane, Gupta)</a>
-  </li>
-  <li class="nav-item" data-depth="2">
-    <a class="nav-link" href="../suggested-reading/designing-distributed-systems-burns.html">Designing Distributed Systems (Burns)</a>
-  </li>
-</ul>
   </li>
 </ul>
   </li>
@@ -378,8 +321,8 @@
 <nav class="breadcrumbs" aria-label="breadcrumbs">
   <ul>
     <li><a href="../index.html">Kubernetes Developer Learning Path</a></li>
-    <li><a href="week-21-controllers-contd.html">Week 2.1 — Controllers contd.</a></li>
-    <li><a href="api-validation-and-linting.html">API validation and linting</a></li>
+    <li><a href="week-21-controllers-contd.html">Week 2.1&#8201;&#8212;&#8201;Controllers with controller-runtime</a></li>
+    <li><a href="api-validation-and-linting.html">API Validation and Linting</a></li>
   </ul>
 </nav>
 </div>
@@ -388,156 +331,212 @@
   <div class="toc-menu"></div>
 </aside>
 <article class="doc">
-<h1 class="page">API validation and linting</h1>
-<h1 id="_api_validation_and_linting" class="sect0"><a class="anchor" href="#_api_validation_and_linting"></a>API Validation and Linting</h1>
+<h1 class="page">API Validation and Linting</h1>
+<div id="preamble">
+<div class="sectionbody">
 <div class="paragraph">
-<p>In the Kubernetes Resource Model, ensuring the integrity and quality of your Custom Resource Definitions (CRDs) is paramount. Because Kubernetes relies on declarative state, "bad" API definitions can lead to fragmented control planes, broken reconciliation loops, and unpredictable cluster behavior.</p>
+<p>Well-designed CRD schemas catch invalid input before it reaches your controller.
+Kubernetes offers multiple layers of validation, from declarative schema constraints to programmatic admission webhooks.</p>
 </div>
-<div class="paragraph">
-<p>API validation and linting ensure that your CRDs adhere to community standards, follow best practices for API design, and minimize runtime errors.</p>
+</div>
 </div>
 <div class="sect1">
-<h2 id="_why_validation_and_linting_matter"><a class="anchor" href="#_why_validation_and_linting_matter"></a>Why Validation and Linting Matter</h2>
+<h2 id="_validation_approaches"><a class="anchor" href="#_validation_approaches"></a>Validation Approaches</h2>
 <div class="sectionbody">
+<div class="sect2">
+<h3 id="_openapi_v3_schema_validation"><a class="anchor" href="#_openapi_v3_schema_validation"></a>OpenAPI v3 Schema Validation</h3>
+<div class="paragraph">
+<p>Every CRD includes an OpenAPI v3 schema that the API server enforces automatically.
+Kubebuilder generates this schema from your Go struct definitions and marker comments.
+Fields without proper validation markers accept any value that matches their Go type, which is rarely what you want.</p>
+</div>
+</div>
+<div class="sect2">
+<h3 id="_cel_validation_rules"><a class="anchor" href="#_cel_validation_rules"></a>CEL Validation Rules</h3>
+<div class="paragraph">
+<p>Common Expression Language (CEL) rules let you express cross-field validation directly in the CRD schema.
+Kubebuilder supports these through the <code>+kubebuilder:validation:XValidation</code> marker:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-go hljs" data-lang="go">// +kubebuilder:validation:XValidation:rule="self.minReplicas &lt;= self.maxReplicas",message="minReplicas must not exceed maxReplicas"
+type AutoscalerSpec struct {
+    MinReplicas int32 `json:"minReplicas"`
+    MaxReplicas int32 `json:"maxReplicas"`
+}</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>CEL rules run on the API server and do not require a webhook deployment.</p>
+</div>
+</div>
+<div class="sect2">
+<h3 id="_admission_webhooks"><a class="anchor" href="#_admission_webhooks"></a>Admission Webhooks</h3>
+<div class="paragraph">
+<p>For validation logic that cannot be expressed declaratively&#8201;&#8212;&#8201;such as checking external state or enforcing complex business rules&#8201;&#8212;&#8201;you can implement validating admission webhooks.
+These are covered in more detail in Week 3.1.</p>
+</div>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_kube_api_linter_kal"><a class="anchor" href="#_kube_api_linter_kal"></a>Kube API Linter (KAL)</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>The <a href="https://github.com/kubernetes-sigs/kube-api-linter">Kube API Linter (KAL)</a> is a Go-based static analysis tool that checks your CRD struct definitions against upstream Kubernetes API conventions.
+It catches mechanical API review issues so that human reviewers can focus on design.</p>
+</div>
+<div class="sect2">
+<h3 id="_installation_options"><a class="anchor" href="#_installation_options"></a>Installation Options</h3>
+<div class="paragraph">
+<p>KAL ships in three forms:</p>
+</div>
 <div class="olist arabic">
 <ol class="arabic">
 <li>
-<p><strong>Semantic Consistency:</strong> Ensuring that <code>Spec</code> fields follow standard naming conventions (e.g., camelCase) and type definitions.</p>
+<p><strong>Standalone binary</strong>&#8201;&#8212;&#8201;build with <code>go build</code> and run directly</p>
 </li>
 <li>
-<p><strong>Structural Integrity:</strong> Verifying that required fields are present and that optional fields have appropriate default values.</p>
+<p><strong>golangci-lint module</strong>&#8201;&#8212;&#8201;integrates into an existing golangci-lint v2 workflow via a <code>.custom-gcl.yml</code> configuration</p>
 </li>
 <li>
-<p><strong>Performance:</strong> Well-defined schemas allow the <code>kube-apiserver</code> to perform efficient validation without needing to invoke external webhooks for simple type checking.</p>
-</li>
-<li>
-<p><strong>Developer Experience:</strong> Catching errors at development time (CI/CD) rather than at runtime when a user attempts to apply a YAML manifest.</p>
+<p><strong>golangci-lint plugin</strong>&#8201;&#8212;&#8201;loaded as a shared object by golangci-lint</p>
 </li>
 </ol>
 </div>
 </div>
-</div>
-<div class="sect1">
-<h2 id="_common_validation_approaches"><a class="anchor" href="#_common_validation_approaches"></a>Common Validation Approaches</h2>
-<div class="sectionbody">
 <div class="sect2">
-<h3 id="_1_openapiv3schema"><a class="anchor" href="#_1_openapiv3schema"></a>1. OpenAPIV3Schema</h3>
+<h3 id="_key_linters"><a class="anchor" href="#_key_linters"></a>Key Linters</h3>
 <div class="paragraph">
-<p>The primary method for validating Kubernetes resources is through the <code>validation</code> block in your CRD manifest. By defining an <code>OpenAPIV3Schema</code>, you provide the <code>kube-apiserver</code> with the constraints necessary to reject invalid requests before they reach your controller.</p>
+<p>KAL includes linters for the most common API convention violations:</p>
+</div>
+<table class="tableblock frame-all grid-all stretch">
+<colgroup>
+<col style="width: 33.3333%;">
+<col style="width: 66.6667%;">
+</colgroup>
+<thead>
+<tr>
+<th class="tableblock halign-left valign-top">Linter</th>
+<th class="tableblock halign-left valign-top">What It Checks</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>requiredfields</code></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Required fields are properly annotated</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>statusoptional</code></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">All status fields are marked <code>+optional</code></p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>statussubresource</code></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Types with status fields enable the <code>/status</code> subresource</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>conditions</code></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Condition fields follow the standard list/map conventions</p></td>
+</tr>
+</tbody>
+</table>
+</div>
+<div class="sect2">
+<h3 id="_auto_fix_support"><a class="anchor" href="#_auto_fix_support"></a>Auto-Fix Support</h3>
+<div class="paragraph">
+<p>Where fixes are straightforward, KAL can apply them automatically:</p>
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="highlightjs highlight"><code class="language-yaml hljs" data-lang="yaml">spec:
-  validation:
-    openAPIV3Schema:
-      type: object
-      properties:
-        spec:
-          type: object
-          properties:
-            replicas:
-              type: integer
-              minimum: 1
-              maximum: 10
-            image:
-              type: string
-              pattern: '^registry\.example\.com/.*'</code></pre>
+<pre class="highlightjs highlight"><code class="language-bash hljs" data-lang="bash">golangci-lint-kube-api-linter run path/to/api/types --fix</code></pre>
 </div>
+</div>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_common_validation_markers"><a class="anchor" href="#_common_validation_markers"></a>Common Validation Markers</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>Kubebuilder provides a rich set of markers for field-level validation.
+These translate directly into the OpenAPI schema in your CRD:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-go hljs" data-lang="go">// +kubebuilder:validation:Minimum=0
+// +kubebuilder:validation:Maximum=100
+Replicas int32 `json:"replicas"`
+
+// +kubebuilder:validation:MaxLength=256
+// +kubebuilder:validation:MinLength=1
+Name string `json:"name"`
+
+// +kubebuilder:validation:Enum=Allow;Forbid;Replace
+ConcurrencyPolicy string `json:"concurrencyPolicy"`
+
+// +optional
+Suspend *bool `json:"suspend,omitempty"`</code></pre>
 </div>
 </div>
 <div class="sect2">
-<h3 id="_2_kube_api_linter_kal"><a class="anchor" href="#_2_kube_api_linter_kal"></a>2. Kube-API-Linter (KAL)</h3>
+<h3 id="_validation_guidelines_from_api_conventions"><a class="anchor" href="#_validation_guidelines_from_api_conventions"></a>Validation Guidelines from API Conventions</h3>
 <div class="paragraph">
-<p>The Kubernetes API Linter (KAL) acts as a static analysis tool for your API definitions. It checks your CRD Go structs or manifests against a set of rules (e.g., <code>names-must-match</code>, <code>no-empty-fields</code>).</p>
+<p>The upstream API conventions document provides detailed guidance:</p>
 </div>
 <div class="ulist">
 <ul>
 <li>
-<p><strong>Rule Enforcement:</strong> Ensures that API groups follow the <code>v1alpha1</code> &#8594; <code>v1beta1</code> &#8594; <code>v1</code> progression.</p>
+<p><strong>String fields</strong>&#8201;&#8212;&#8201;almost all should be checked for format and maximum length.
+Never perform case-insensitive comparisons in validation.</p>
 </li>
 <li>
-<p><strong>Best Practices:</strong> Flags common mistakes, such as missing <code>json</code> tags in Go structs or missing <code>DeepCopy</code> methods.</p>
+<p><strong>Numeric fields</strong>&#8201;&#8212;&#8201;bound-check both minimum and maximum values.</p>
+</li>
+<li>
+<p><strong>List fields</strong>&#8201;&#8212;&#8201;set maximum size and declare <code>listType</code> tags.
+Lists with set or map semantics should enforce uniqueness.</p>
+</li>
+<li>
+<p><strong>Map fields</strong>&#8201;&#8212;&#8201;check maximum size and validate both keys and values.</p>
 </li>
 </ul>
+</div>
+<div class="admonitionblock tip">
+<table>
+<tr>
+<td class="icon">
+<i class="fa icon-tip" title="Tip"></i>
+</td>
+<td class="content">
+<div class="paragraph">
+<p>Run KAL as part of your CI pipeline alongside <code>go vet</code> and <code>golangci-lint</code>.
+Catching convention violations early avoids costly API redesigns after your CRD is in production.</p>
+</div>
+</td>
+</tr>
+</table>
 </div>
 </div>
 </div>
 </div>
 <div class="sect1">
-<h2 id="_hands_on_activity_integrating_linting_in_kubebuilder"><a class="anchor" href="#_hands_on_activity_integrating_linting_in_kubebuilder"></a>Hands-on Activity: Integrating Linting in Kubebuilder</h2>
+<h2 id="_references"><a class="anchor" href="#_references"></a>References</h2>
 <div class="sectionbody">
-<div class="paragraph">
-<p>In this activity, we will integrate linting practices into your <code>kubebuilder</code> workflow to ensure your API remains clean and production-ready.</p>
-</div>
-<div class="sect2">
-<h3 id="_prerequisites"><a class="anchor" href="#_prerequisites"></a>Prerequisites</h3>
 <div class="ulist">
 <ul>
 <li>
-<p>Ensure <code>kubebuilder</code> is installed.</p>
+<p><a href="https://github.com/kubernetes/community/blob/master/contributors/devel/sig-architecture/api-conventions.md">API Conventions</a></p>
 </li>
 <li>
-<p>An existing project scaffolded with <code>kubebuilder</code>.</p>
+<p><a href="https://github.com/kubernetes-sigs/kube-api-linter">Kube API Linter (KAL)</a></p>
 </li>
 </ul>
-</div>
-</div>
-<div class="sect2">
-<h3 id="_step_1_annotating_go_structs"><a class="anchor" href="#_step_1_annotating_go_structs"></a>Step 1: Annotating Go Structs</h3>
-<div class="paragraph">
-<p>Validation is not just about YAML; it is about Go code. Use <code>controller-gen</code> markers to enforce validation rules directly in your Go source code.</p>
-</div>
-<div class="paragraph">
-<p>Open your <code>api/v1/myresource_types.go</code> file and add validation markers:</p>
-</div>
-<div class="listingblock">
-<div class="content">
-<pre class="highlightjs highlight"><code class="language-go hljs" data-lang="go">type MyResourceSpec struct {
-    // +kubebuilder:validation:Minimum=1
-    // +kubebuilder:validation:Maximum=10
-    Replicas int32 `json:"replicas,omitempty"`
-
-    // +kubebuilder:validation:Pattern=`^registry\.example\.com/.*`
-    Image string `json:"image,omitempty"`
-}</code></pre>
-</div>
-</div>
-</div>
-<div class="sect2">
-<h3 id="_step_2_running_the_linting_pipeline"><a class="anchor" href="#_step_2_running_the_linting_pipeline"></a>Step 2: Running the Linting Pipeline</h3>
-<div class="paragraph">
-<p>Before building your manifests, run the generation tool to verify your changes:</p>
-</div>
-<div class="listingblock">
-<div class="content">
-<pre class="highlightjs highlight"><code class="language-bash hljs" data-lang="bash"># Run controller-gen to update CRD manifests with the validation markers
-make manifests
-
-# Verify that the generated config/crd/bases file contains the
-# OpenAPIV3Schema constraints you defined in Go.
-cat config/crd/bases/mygroup.example.com_myresources.yaml</code></pre>
-</div>
-</div>
-</div>
-<div class="sect2">
-<h3 id="_step_3_best_practice_tip"><a class="anchor" href="#_step_3_best_practice_tip"></a>Step 3: Best Practice Tip</h3>
-<div class="paragraph">
-<p>Always integrate <code>make manifests</code> into your CI pipeline. If a developer attempts to submit a PR that changes the API without satisfying the linting/validation criteria, the pipeline should fail before the code is ever merged into the main branch.</p>
-</div>
-</div>
-</div>
-</div>
-<div class="sect1">
-<h2 id="_summary"><a class="anchor" href="#_summary"></a>Summary</h2>
-<div class="sectionbody">
-<div class="paragraph">
-<p>While <code>OpenAPIV3Schema</code> handles runtime validation at the <code>kube-apiserver</code> level, tools like <code>kube-api-linter</code> ensure your codebase remains maintainable. Use these tools in tandem to shift left your validation process, catching API design flaws before they reach the cluster.</p>
 </div>
 </div>
 </div>
 <nav class="pagination">
-  <span class="prev"><a href="spec-vs-status-and-condition-management.html">Spec vs Status and condition management</a></span>
-  <span class="next"><a href="crud-operations-and-applypatchupdate-semantics.html">CRUD operations and apply/patch/update semantics</a></span>
+  <span class="prev"><a href="spec-status-and-conditions.html">Spec, Status, and Conditions</a></span>
+  <span class="next"><a href="update-patch-and-server-side-apply.html">Update, Patch, and Server-Side Apply</a></span>
 </nav>
 </article>
   </div>

@@ -1,0 +1,592 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width,initial-scale=1">
+    <title>Update, Patch, and Server-Side Apply :: Kubernetes Developer Learning Path</title>
+    <link rel="prev" href="api-validation-and-linting.html">
+    <link rel="next" href="../week-22-going-distributed-locks-leases-ownership-eventual-consistency/week-22-going-distributed-locks-leases-ownership-eventual-consistency.html">
+    <meta name="generator" content="Antora 3.2.0-alpha.12">
+    <link rel="stylesheet" href="../../../_/css/site.css">
+    <link rel="stylesheet" href="../../../_/css/vendor/tabs.css">
+    <link rel="stylesheet" href="../../../_/css/vendor/collapsible.css">
+    <link rel="stylesheet" href="../../../_/css/vendor/reading-time.css">
+    <link rel="stylesheet" href="../../../_/css/vendor/audio-transcript.css">
+    <script>var uiRootPath = '../../../_'</script>
+  </head>
+  <body class="article">
+<header class="header">
+  <nav class="navbar">
+    <div class="navbar-brand">
+      <a class="navbar-item" href="https://www.redhat.com" target="_blank"><img src="../../../_/img/redhat-logo.png" height="40px" alt="Red Hat"></a>
+      <a class="navbar-item" style="font-size: 24px; color: white" href="../../..">Kubernetes Developer Learning Path</a>
+      <button class="navbar-burger" data-target="topbar-nav">
+        <span></span>
+        <span></span>
+        <span></span>
+      </button>
+    </div>
+    <div id="topbar-nav" class="navbar-menu">
+      <div class="navbar-end">
+        <a class="navbar-item" href="https://github.com/RedHatQuickCourses/REPLACEREPONAME/issues" target="_blank">Report Issues</a>
+      </div>
+    </div>
+  </nav>
+</header>
+<div class="body">
+<div class="nav-container" data-component="k8s-dev-lmp" data-version="1.0.0">
+  <aside class="nav">
+    <div class="panels">
+<div class="nav-panel-menu is-active" data-panel="menu">
+  <nav class="nav-menu">
+    <h3 class="title"><a href="../index.html">Kubernetes Developer Learning Path</a></h3>
+<ul class="nav-list">
+  <li class="nav-item" data-depth="0">
+<ul class="nav-list">
+  <li class="nav-item" data-depth="1">
+    <a class="nav-link" href="../index.html">Home</a>
+  </li>
+</ul>
+  </li>
+  <li class="nav-item" data-depth="0">
+<ul class="nav-list">
+  <li class="nav-item" data-depth="1">
+    <a class="nav-link" href="../LABENV/index.html">Lab Environment</a>
+  </li>
+</ul>
+  </li>
+  <li class="nav-item" data-depth="0">
+<ul class="nav-list">
+  <li class="nav-item" data-depth="1">
+    <a class="nav-link" href="../overview/overview.html">Overview</a>
+  </li>
+</ul>
+  </li>
+  <li class="nav-item" data-depth="0">
+<ul class="nav-list">
+  <li class="nav-item" data-depth="1">
+    <a class="nav-link" href="../who-is-this-for-pre-requisites/who-is-this-for-pre-requisites.html">Who Is This For? Prerequisites</a>
+  </li>
+</ul>
+  </li>
+  <li class="nav-item" data-depth="0">
+<ul class="nav-list">
+  <li class="nav-item" data-depth="1">
+    <button class="nav-item-toggle"></button>
+    <a class="nav-link" href="../week-0-familiarizing-with-koobrnehteez/week-0-familiarizing-with-koobrnehteez.html">Week 0&#8201;&#8212;&#8201;Familiarizing with Kubernetes</a>
+<ul class="nav-list">
+  <li class="nav-item" data-depth="2">
+    <a class="nav-link" href="../week-0-familiarizing-with-koobrnehteez/what-kubernetes-really-is.html">What Kubernetes Really Is</a>
+  </li>
+  <li class="nav-item" data-depth="2">
+    <a class="nav-link" href="../week-0-familiarizing-with-koobrnehteez/control-plane-architecture-primer.html">Control Plane Architecture Primer</a>
+  </li>
+</ul>
+  </li>
+</ul>
+  </li>
+  <li class="nav-item" data-depth="0">
+<ul class="nav-list">
+  <li class="nav-item" data-depth="1">
+    <button class="nav-item-toggle"></button>
+    <a class="nav-link" href="../week-11-kubernetes-resource-model/week-11-kubernetes-resource-model.html">Week 1.1&#8201;&#8212;&#8201;Kubernetes Resource Model</a>
+<ul class="nav-list">
+  <li class="nav-item" data-depth="2">
+    <a class="nav-link" href="../week-11-kubernetes-resource-model/the-kubernetes-resource-model.html">The Kubernetes Resource Model</a>
+  </li>
+  <li class="nav-item" data-depth="2">
+    <a class="nav-link" href="../week-11-kubernetes-resource-model/api-request-lifecycle.html">API Request Lifecycle</a>
+  </li>
+  <li class="nav-item" data-depth="2">
+    <a class="nav-link" href="../week-11-kubernetes-resource-model/declarative-configuration-layers.html">Declarative Configuration Layers</a>
+  </li>
+</ul>
+  </li>
+</ul>
+  </li>
+  <li class="nav-item" data-depth="0">
+<ul class="nav-list">
+  <li class="nav-item" data-depth="1">
+    <button class="nav-item-toggle"></button>
+    <a class="nav-link" href="../week-12-controllers-informers-client-go/week-12-controllers-informers-client-go.html">Week 1.2&#8201;&#8212;&#8201;Controllers, Informers, client-go</a>
+<ul class="nav-list">
+  <li class="nav-item" data-depth="2">
+    <a class="nav-link" href="../week-12-controllers-informers-client-go/client-go-architecture.html">client-go Architecture</a>
+  </li>
+  <li class="nav-item" data-depth="2">
+    <a class="nav-link" href="../week-12-controllers-informers-client-go/informers-listers-workqueues.html">Informers, Listers, and Workqueues</a>
+  </li>
+  <li class="nav-item" data-depth="2">
+    <a class="nav-link" href="../week-12-controllers-informers-client-go/sample-controller-walkthrough.html">Sample Controller Walkthrough</a>
+  </li>
+  <li class="nav-item" data-depth="2">
+    <a class="nav-link" href="../week-12-controllers-informers-client-go/informer-pitfalls-and-error-handling.html">Informer Pitfalls and Error Handling</a>
+  </li>
+</ul>
+  </li>
+</ul>
+  </li>
+  <li class="nav-item" data-depth="0">
+<ul class="nav-list">
+  <li class="nav-item" data-depth="1">
+    <button class="nav-item-toggle"></button>
+    <a class="nav-link" href="week-21-controllers-contd.html">Week 2.1&#8201;&#8212;&#8201;Controllers with controller-runtime</a>
+<ul class="nav-list">
+  <li class="nav-item" data-depth="2">
+    <a class="nav-link" href="gvk-gvr-and-api-terminology.html">GVK, GVR, and API Terminology</a>
+  </li>
+  <li class="nav-item" data-depth="2">
+    <a class="nav-link" href="controller-runtime-and-kubebuilder.html">Controller-runtime and Kubebuilder</a>
+  </li>
+  <li class="nav-item" data-depth="2">
+    <a class="nav-link" href="spec-status-and-conditions.html">Spec, Status, and Conditions</a>
+  </li>
+  <li class="nav-item" data-depth="2">
+    <a class="nav-link" href="api-validation-and-linting.html">API Validation and Linting</a>
+  </li>
+  <li class="nav-item is-current-page" data-depth="2">
+    <a class="nav-link" href="update-patch-and-server-side-apply.html">Update, Patch, and Server-Side Apply</a>
+  </li>
+</ul>
+  </li>
+</ul>
+  </li>
+  <li class="nav-item" data-depth="0">
+<ul class="nav-list">
+  <li class="nav-item" data-depth="1">
+    <button class="nav-item-toggle"></button>
+    <a class="nav-link" href="../week-22-going-distributed-locks-leases-ownership-eventual-consistency/week-22-going-distributed-locks-leases-ownership-eventual-consistency.html">Week 2.2&#8201;&#8212;&#8201;Going Distributed</a>
+<ul class="nav-list">
+  <li class="nav-item" data-depth="2">
+    <a class="nav-link" href="../week-22-going-distributed-locks-leases-ownership-eventual-consistency/idempotent-reconciliation.html">Idempotent Reconciliation</a>
+  </li>
+  <li class="nav-item" data-depth="2">
+    <a class="nav-link" href="../week-22-going-distributed-locks-leases-ownership-eventual-consistency/distributed-locking-theory.html">Distributed Locking Theory</a>
+  </li>
+  <li class="nav-item" data-depth="2">
+    <a class="nav-link" href="../week-22-going-distributed-locks-leases-ownership-eventual-consistency/leader-election-in-kubernetes.html">Leader Election in Kubernetes</a>
+  </li>
+  <li class="nav-item" data-depth="2">
+    <a class="nav-link" href="../week-22-going-distributed-locks-leases-ownership-eventual-consistency/controller-sharding.html">Controller Sharding</a>
+  </li>
+</ul>
+  </li>
+</ul>
+  </li>
+  <li class="nav-item" data-depth="0">
+<ul class="nav-list">
+  <li class="nav-item" data-depth="1">
+    <button class="nav-item-toggle"></button>
+    <a class="nav-link" href="../week-31-taking-more-control-admissions-and-beyond-the-kube-apiserver-to-writing-your-own-api-server/week-31-taking-more-control-admissions-and-beyond-the-kube-apiserver-to-writing-your-own-api-server.html">Week 3.1 Overview</a>
+<ul class="nav-list">
+  <li class="nav-item" data-depth="2">
+    <a class="nav-link" href="../week-31-taking-more-control-admissions-and-beyond-the-kube-apiserver-to-writing-your-own-api-server/admission-control-webhooks.html">Admission Control Webhooks</a>
+  </li>
+  <li class="nav-item" data-depth="2">
+    <a class="nav-link" href="../week-31-taking-more-control-admissions-and-beyond-the-kube-apiserver-to-writing-your-own-api-server/policy-engines-and-gatekeeper.html">Policy Engines and Gatekeeper</a>
+  </li>
+  <li class="nav-item" data-depth="2">
+    <a class="nav-link" href="../week-31-taking-more-control-admissions-and-beyond-the-kube-apiserver-to-writing-your-own-api-server/api-discovery-and-aggregation.html">API Discovery and Aggregation</a>
+  </li>
+  <li class="nav-item" data-depth="2">
+    <a class="nav-link" href="../week-31-taking-more-control-admissions-and-beyond-the-kube-apiserver-to-writing-your-own-api-server/custom-api-servers.html">Custom API Servers</a>
+  </li>
+</ul>
+  </li>
+</ul>
+  </li>
+  <li class="nav-item" data-depth="0">
+<ul class="nav-list">
+  <li class="nav-item" data-depth="1">
+    <button class="nav-item-toggle"></button>
+    <a class="nav-link" href="../week-32-the-other-stuff/week-32-the-other-stuff.html">Week 3.2&#8201;&#8212;&#8201;The Other Stuff</a>
+<ul class="nav-list">
+  <li class="nav-item" data-depth="2">
+    <a class="nav-link" href="../week-32-the-other-stuff/ingress-and-gateway-api.html">Ingress and Gateway API</a>
+  </li>
+  <li class="nav-item" data-depth="2">
+    <a class="nav-link" href="../week-32-the-other-stuff/service-mesh-fundamentals.html">Service Mesh Fundamentals</a>
+  </li>
+  <li class="nav-item" data-depth="2">
+    <a class="nav-link" href="../week-32-the-other-stuff/authentication-and-authorization.html">Authentication and Authorization</a>
+  </li>
+  <li class="nav-item" data-depth="2">
+    <a class="nav-link" href="../week-32-the-other-stuff/security-context-and-hardening.html">Security Context and Hardening</a>
+  </li>
+</ul>
+  </li>
+</ul>
+  </li>
+  <li class="nav-item" data-depth="0">
+<ul class="nav-list">
+  <li class="nav-item" data-depth="1">
+    <button class="nav-item-toggle"></button>
+    <a class="nav-link" href="../week-41-all-about-kube-scheduler/week-41-all-about-kube-scheduler.html">Week 4.1&#8201;&#8212;&#8201;All About kube-scheduler</a>
+<ul class="nav-list">
+  <li class="nav-item" data-depth="2">
+    <a class="nav-link" href="../week-41-all-about-kube-scheduler/how-the-scheduler-works.html">How the Scheduler Works</a>
+  </li>
+  <li class="nav-item" data-depth="2">
+    <a class="nav-link" href="../week-41-all-about-kube-scheduler/resource-management.html">Resource Management</a>
+  </li>
+  <li class="nav-item" data-depth="2">
+    <a class="nav-link" href="../week-41-all-about-kube-scheduler/dynamic-resource-allocation.html">Dynamic Resource Allocation</a>
+  </li>
+</ul>
+  </li>
+</ul>
+  </li>
+  <li class="nav-item" data-depth="0">
+<ul class="nav-list">
+  <li class="nav-item" data-depth="1">
+    <button class="nav-item-toggle"></button>
+    <a class="nav-link" href="../week-42-ubiquitous-topics/week-42-ubiquitous-topics.html">Week 4.2&#8201;&#8212;&#8201;Ubiquitous Topics</a>
+<ul class="nav-list">
+  <li class="nav-item" data-depth="2">
+    <a class="nav-link" href="../week-42-ubiquitous-topics/operator-landscape.html">The Operator Landscape</a>
+  </li>
+  <li class="nav-item" data-depth="2">
+    <a class="nav-link" href="../week-42-ubiquitous-topics/alternative-control-planes-and-form-factors.html">Alternative Control Planes and Form Factors</a>
+  </li>
+</ul>
+  </li>
+</ul>
+  </li>
+  <li class="nav-item" data-depth="0">
+<ul class="nav-list">
+  <li class="nav-item" data-depth="1">
+    <button class="nav-item-toggle"></button>
+    <a class="nav-link" href="../exercises/exercises.html">Exercises</a>
+<ul class="nav-list">
+  <li class="nav-item" data-depth="2">
+    <a class="nav-link" href="../exercises/week-1-build-a-controller-using-client-go-from-scratch.html">Exercise 1: Build a Controller</a>
+  </li>
+  <li class="nav-item" data-depth="2">
+    <a class="nav-link" href="../exercises/week-2-implement-optimistic-locking-and-leader-election-via-lease.html">Exercise 2: Leader Election</a>
+  </li>
+  <li class="nav-item" data-depth="2">
+    <a class="nav-link" href="../exercises/week-3-develop-a-custom-validating-webhook-for-container-registry-enforcement.html">Exercise 3: Validating Webhook</a>
+  </li>
+</ul>
+  </li>
+</ul>
+  </li>
+  <li class="nav-item" data-depth="0">
+<ul class="nav-list">
+  <li class="nav-item" data-depth="1">
+    <a class="nav-link" href="../recommended-reading/recommended-reading.html">Recommended Reading</a>
+  </li>
+</ul>
+  </li>
+  <li class="nav-item" data-depth="0">
+<ul class="nav-list">
+  <li class="nav-item" data-depth="1">
+    <a class="nav-link" href="../suggested-reading/suggested-reading.html">Suggested Reading</a>
+  </li>
+</ul>
+  </li>
+  <li class="nav-item" data-depth="0">
+<ul class="nav-list">
+  <li class="nav-item" data-depth="1">
+    <a class="nav-link" href="../appendix/appendix.html">Appendix</a>
+  </li>
+</ul>
+  </li>
+</ul>
+  </nav>
+</div>
+<div class="nav-panel-explore" data-panel="explore">
+  <div class="context">
+    <span class="title">Kubernetes Developer Learning Path</span>
+    <span class="version">1.0.0</span>
+  </div>
+  <ul class="components">
+    <li class="component is-current">
+      <a class="title" href="../index.html">Kubernetes Developer Learning Path</a>
+      <ul class="versions">
+        <li class="version is-current is-latest">
+          <a href="../index.html">1.0.0</a>
+        </li>
+      </ul>
+    </li>
+  </ul>
+</div>
+    </div>
+  </aside>
+</div>
+<main class="article">
+<div class="toolbar" role="navigation">
+<button class="nav-toggle"></button>
+  <a href="../index.html" class="home-link"></a>
+<nav class="breadcrumbs" aria-label="breadcrumbs">
+  <ul>
+    <li><a href="../index.html">Kubernetes Developer Learning Path</a></li>
+    <li><a href="week-21-controllers-contd.html">Week 2.1&#8201;&#8212;&#8201;Controllers with controller-runtime</a></li>
+    <li><a href="update-patch-and-server-side-apply.html">Update, Patch, and Server-Side Apply</a></li>
+  </ul>
+</nav>
+</div>
+  <div class="content">
+<aside class="toc sidebar" data-title="Contents" data-levels="2">
+  <div class="toc-menu"></div>
+</aside>
+<article class="doc">
+<h1 class="page">Update, Patch, and Server-Side Apply</h1>
+<div id="preamble">
+<div class="sectionbody">
+<div class="paragraph">
+<p>Kubernetes provides several mechanisms for modifying API objects.
+Choosing the right one depends on whether you are a user, a controller, or a CI/CD system, and whether multiple actors write to the same object.</p>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_update_http_put"><a class="anchor" href="#_update_http_put"></a>Update (HTTP PUT)</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>An Update replaces the entire object.
+The client must GET the current object, modify it, and PUT the full object back.
+Kubernetes uses <strong>optimistic concurrency</strong>: the <code>resourceVersion</code> field is checked on every PUT, and the server rejects the write with a <code>409 Conflict</code> if the resource was modified since the GET.</p>
+</div>
+<div class="paragraph">
+<p>This is the simplest approach for single-owner resources.
+The downside is that in a system with N concurrent actors, up to N-1 PUTs may fail and need retries, leading to O(N^2) requests in the worst case.</p>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_patch_types"><a class="anchor" href="#_patch_types"></a>Patch Types</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>Patches send only the changes rather than the full object.
+Kubernetes supports three patch formats:</p>
+</div>
+<table class="tableblock frame-all grid-all stretch">
+<colgroup>
+<col style="width: 20%;">
+<col style="width: 40%;">
+<col style="width: 40%;">
+</colgroup>
+<thead>
+<tr>
+<th class="tableblock halign-left valign-top">Type</th>
+<th class="tableblock halign-left valign-top">Behavior</th>
+<th class="tableblock halign-left valign-top">Use When</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock">JSON Patch (RFC 6902)</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">A sequence of discrete operations: <code>add</code>, <code>remove</code>, <code>replace</code>, <code>move</code>, <code>copy</code>, <code>test</code>.
+Each operation targets a specific JSON pointer path.</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">You need precise, surgical changes to specific paths.</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock">JSON Merge Patch (RFC 7386)</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Merges a partial object into the existing one.
+Setting a field to <code>null</code> removes it.
+Lists are <strong>replaced</strong> entirely&#8201;&#8212;&#8201;there is no list merging.</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Simple field updates where you do not need to merge list elements.</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Strategic Merge Patch</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">A Kubernetes-specific format that uses <code>patchStrategy</code> and <code>patchMergeKey</code> struct tags to merge lists intelligently.
+For example, the <code>containers</code> list in a PodSpec merges on the <code>name</code> field.
+Lists without merge tags are replaced, just like JSON Merge Patch.</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Default for client-side <code>kubectl apply</code>.
+Preferred when you need list merging on built-in types.</p></td>
+</tr>
+</tbody>
+</table>
+<div class="admonitionblock note">
+<table>
+<tr>
+<td class="icon">
+<i class="fa icon-note" title="Note"></i>
+</td>
+<td class="content">
+<div class="paragraph">
+<p>Strategic Merge Patch is <strong>not supported</strong> for custom resources.
+CRDs use JSON Merge Patch or Server-Side Apply instead.</p>
+</div>
+</td>
+</tr>
+</table>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_server_side_apply"><a class="anchor" href="#_server_side_apply"></a>Server-Side Apply</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>Server-Side Apply (SSA) moves the merge algorithm from the client to the API server and introduces <strong>field ownership</strong> tracking.</p>
+</div>
+<div class="sect2">
+<h3 id="_how_it_works"><a class="anchor" href="#_how_it_works"></a>How It Works</h3>
+<div class="ulist">
+<ul>
+<li>
+<p>Each actor (called a <strong>field manager</strong>) sends a fully specified intent&#8201;&#8212;&#8201;the fields it cares about&#8201;&#8212;&#8201;via an Apply request.</p>
+</li>
+<li>
+<p>The API server records which field manager owns each field in <code>metadata.managedFields</code>.</p>
+</li>
+<li>
+<p>When two managers try to set the same field to different values, the server returns a <strong>conflict</strong> instead of silently overwriting.</p>
+</li>
+<li>
+<p>No-op applies (where the object already matches the intent) do not bump <code>resourceVersion</code> or trigger watch events.</p>
+</li>
+</ul>
+</div>
+</div>
+<div class="sect2">
+<h3 id="_two_controller_patterns"><a class="anchor" href="#_two_controller_patterns"></a>Two Controller Patterns</h3>
+<div class="paragraph">
+<p>Controllers that adopt SSA typically follow one of two patterns:</p>
+</div>
+<div class="sect3">
+<h4 id="_reconstructive"><a class="anchor" href="#_reconstructive"></a>Reconstructive</h4>
+<div class="paragraph">
+<p>Build the desired state from scratch on every reconcile and Apply it.
+The server computes the diff.
+This is the recommended approach for new controllers&#8201;&#8212;&#8201;it is less error-prone because you always declare your full intent.</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-go hljs" data-lang="go">applyConfig := batchv1ac.CronJob(name, namespace).
+    WithSpec(batchv1ac.CronJobSpec().
+        WithSchedule("*/5 * * * *").
+        WithJobTemplate(...))
+
+err := r.Patch(ctx, applyConfig, client.Apply, client.FieldOwner("my-controller"), client.ForceOwnership)</code></pre>
+</div>
+</div>
+</div>
+<div class="sect3">
+<h4 id="_extract_modify_apply"><a class="anchor" href="#_extract_modify_apply"></a>Extract-Modify-Apply</h4>
+<div class="paragraph">
+<p>For existing controllers migrating from GET-modify-PUT, client-go provides an <strong>extract</strong> workflow: retrieve the current apply configuration for your field manager, modify it, and re-apply.
+This avoids accidentally claiming ownership of every field in the object (which the server will reject).</p>
+</div>
+</div>
+</div>
+<div class="sect2">
+<h3 id="_force_conflicts"><a class="anchor" href="#_force_conflicts"></a>Force Conflicts</h3>
+<div class="ulist">
+<ul>
+<li>
+<p><strong>Controllers</strong> should typically use <code>Force: true</code> (force conflicts) because a controller is the sole authority for the fields it manages and does not have a convenient way to surface conflict errors.</p>
+</li>
+<li>
+<p><strong>CI/CD systems</strong> should <strong>not</strong> force conflicts.
+They need error paths to surface conflicts to humans&#8201;&#8212;&#8201;for example, when a hotfix applied by an SRE would be overwritten by an automated deployment.</p>
+</li>
+</ul>
+</div>
+</div>
+<div class="sect2">
+<h3 id="_when_to_use_ssa_vs_update"><a class="anchor" href="#_when_to_use_ssa_vs_update"></a>When to Use SSA vs Update</h3>
+<table class="tableblock frame-all grid-all stretch">
+<colgroup>
+<col style="width: 50%;">
+<col style="width: 50%;">
+</colgroup>
+<thead>
+<tr>
+<th class="tableblock halign-left valign-top">Scenario</th>
+<th class="tableblock halign-left valign-top">Recommendation</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Single-owner resource (one controller manages all fields)</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Traditional Update or full-object Patch is simpler</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Multi-controller resource (multiple actors write different sections)</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">SSA with distinct field managers to prevent conflicts</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock">CI/CD deploying manifests</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">SSA with conflict detection to catch drift and hotfixes</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Migrating from client-side <code>kubectl apply</code></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Server-side <code>kubectl apply --server-side</code> as a drop-in replacement</p></td>
+</tr>
+</tbody>
+</table>
+<div class="admonitionblock important">
+<table>
+<tr>
+<td class="icon">
+<i class="fa icon-important" title="Important"></i>
+</td>
+<td class="content">
+<div class="paragraph">
+<p>SSA is recommended for multi-controller resources where multiple actors write to the same object (e.g. one controller managing replicas while another manages annotations).
+For resources with a single owner, traditional Update is simpler and avoids the complexity of managed fields.</p>
+</div>
+</td>
+</tr>
+</table>
+</div>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_summary"><a class="anchor" href="#_summary"></a>Summary</h2>
+<div class="sectionbody">
+<div class="ulist">
+<ul>
+<li>
+<p><strong>Update (PUT)</strong>&#8201;&#8212;&#8201;full replacement with optimistic concurrency via <code>resourceVersion</code>.</p>
+</li>
+<li>
+<p><strong>JSON Patch</strong>&#8201;&#8212;&#8201;surgical operations on specific paths.</p>
+</li>
+<li>
+<p><strong>JSON Merge Patch</strong>&#8201;&#8212;&#8201;partial object merge; lists are replaced.</p>
+</li>
+<li>
+<p><strong>Strategic Merge Patch</strong>&#8201;&#8212;&#8201;Kubernetes-aware list merging (built-in types only).</p>
+</li>
+<li>
+<p><strong>Server-Side Apply</strong>&#8201;&#8212;&#8201;server-side merge with field ownership tracking and conflict detection; the recommended approach for multi-actor scenarios.</p>
+</li>
+</ul>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_references"><a class="anchor" href="#_references"></a>References</h2>
+<div class="sectionbody">
+<div class="ulist">
+<ul>
+<li>
+<p><a href="https://kubernetes.io/docs/tasks/manage-kubernetes-objects/update-api-object-kubectl-patch/">Update API Objects Using kubectl patch</a></p>
+</li>
+<li>
+<p><a href="https://opensource.googleblog.com/2021/10/server-side-apply-in-kubernetes.html">Server-Side Apply in Kubernetes</a></p>
+</li>
+</ul>
+</div>
+</div>
+</div>
+<nav class="pagination">
+  <span class="prev"><a href="api-validation-and-linting.html">API Validation and Linting</a></span>
+  <span class="next"><a href="../week-22-going-distributed-locks-leases-ownership-eventual-consistency/week-22-going-distributed-locks-leases-ownership-eventual-consistency.html">Week 2.2&#8201;&#8212;&#8201;Going Distributed</a></span>
+</nav>
+</article>
+  </div>
+</main>
+</div>
+<footer class="footer">
+  <img src="../../../_/img/rhl-logo-red.png" height="40px" alt="Red Hat"  href="https://redhat.com" >
+</footer><script id="site-script" src="../../../_/js/site.js" data-ui-root-path="../../../_"></script>
+<script async src="../../../_/js/vendor/highlight.js"></script>
+<script defer src="../../../_/js/vendor/tabs.js"></script>
+<script defer src="../../../_/js/vendor/reading-time.js"></script>
+  </body>
+</html>

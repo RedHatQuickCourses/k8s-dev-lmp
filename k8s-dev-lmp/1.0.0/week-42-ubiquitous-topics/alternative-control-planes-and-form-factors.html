@@ -1,0 +1,574 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width,initial-scale=1">
+    <title>Alternative Control Planes and Form Factors :: Kubernetes Developer Learning Path</title>
+    <link rel="prev" href="operator-landscape.html">
+    <link rel="next" href="../exercises/exercises.html">
+    <meta name="generator" content="Antora 3.2.0-alpha.12">
+    <link rel="stylesheet" href="../../../_/css/site.css">
+    <link rel="stylesheet" href="../../../_/css/vendor/tabs.css">
+    <link rel="stylesheet" href="../../../_/css/vendor/collapsible.css">
+    <link rel="stylesheet" href="../../../_/css/vendor/reading-time.css">
+    <link rel="stylesheet" href="../../../_/css/vendor/audio-transcript.css">
+    <script>var uiRootPath = '../../../_'</script>
+  </head>
+  <body class="article">
+<header class="header">
+  <nav class="navbar">
+    <div class="navbar-brand">
+      <a class="navbar-item" href="https://www.redhat.com" target="_blank"><img src="../../../_/img/redhat-logo.png" height="40px" alt="Red Hat"></a>
+      <a class="navbar-item" style="font-size: 24px; color: white" href="../../..">Kubernetes Developer Learning Path</a>
+      <button class="navbar-burger" data-target="topbar-nav">
+        <span></span>
+        <span></span>
+        <span></span>
+      </button>
+    </div>
+    <div id="topbar-nav" class="navbar-menu">
+      <div class="navbar-end">
+        <a class="navbar-item" href="https://github.com/RedHatQuickCourses/REPLACEREPONAME/issues" target="_blank">Report Issues</a>
+      </div>
+    </div>
+  </nav>
+</header>
+<div class="body">
+<div class="nav-container" data-component="k8s-dev-lmp" data-version="1.0.0">
+  <aside class="nav">
+    <div class="panels">
+<div class="nav-panel-menu is-active" data-panel="menu">
+  <nav class="nav-menu">
+    <h3 class="title"><a href="../index.html">Kubernetes Developer Learning Path</a></h3>
+<ul class="nav-list">
+  <li class="nav-item" data-depth="0">
+<ul class="nav-list">
+  <li class="nav-item" data-depth="1">
+    <a class="nav-link" href="../index.html">Home</a>
+  </li>
+</ul>
+  </li>
+  <li class="nav-item" data-depth="0">
+<ul class="nav-list">
+  <li class="nav-item" data-depth="1">
+    <a class="nav-link" href="../LABENV/index.html">Lab Environment</a>
+  </li>
+</ul>
+  </li>
+  <li class="nav-item" data-depth="0">
+<ul class="nav-list">
+  <li class="nav-item" data-depth="1">
+    <a class="nav-link" href="../overview/overview.html">Overview</a>
+  </li>
+</ul>
+  </li>
+  <li class="nav-item" data-depth="0">
+<ul class="nav-list">
+  <li class="nav-item" data-depth="1">
+    <a class="nav-link" href="../who-is-this-for-pre-requisites/who-is-this-for-pre-requisites.html">Who Is This For? Prerequisites</a>
+  </li>
+</ul>
+  </li>
+  <li class="nav-item" data-depth="0">
+<ul class="nav-list">
+  <li class="nav-item" data-depth="1">
+    <button class="nav-item-toggle"></button>
+    <a class="nav-link" href="../week-0-familiarizing-with-koobrnehteez/week-0-familiarizing-with-koobrnehteez.html">Week 0&#8201;&#8212;&#8201;Familiarizing with Kubernetes</a>
+<ul class="nav-list">
+  <li class="nav-item" data-depth="2">
+    <a class="nav-link" href="../week-0-familiarizing-with-koobrnehteez/what-kubernetes-really-is.html">What Kubernetes Really Is</a>
+  </li>
+  <li class="nav-item" data-depth="2">
+    <a class="nav-link" href="../week-0-familiarizing-with-koobrnehteez/control-plane-architecture-primer.html">Control Plane Architecture Primer</a>
+  </li>
+</ul>
+  </li>
+</ul>
+  </li>
+  <li class="nav-item" data-depth="0">
+<ul class="nav-list">
+  <li class="nav-item" data-depth="1">
+    <button class="nav-item-toggle"></button>
+    <a class="nav-link" href="../week-11-kubernetes-resource-model/week-11-kubernetes-resource-model.html">Week 1.1&#8201;&#8212;&#8201;Kubernetes Resource Model</a>
+<ul class="nav-list">
+  <li class="nav-item" data-depth="2">
+    <a class="nav-link" href="../week-11-kubernetes-resource-model/the-kubernetes-resource-model.html">The Kubernetes Resource Model</a>
+  </li>
+  <li class="nav-item" data-depth="2">
+    <a class="nav-link" href="../week-11-kubernetes-resource-model/api-request-lifecycle.html">API Request Lifecycle</a>
+  </li>
+  <li class="nav-item" data-depth="2">
+    <a class="nav-link" href="../week-11-kubernetes-resource-model/declarative-configuration-layers.html">Declarative Configuration Layers</a>
+  </li>
+</ul>
+  </li>
+</ul>
+  </li>
+  <li class="nav-item" data-depth="0">
+<ul class="nav-list">
+  <li class="nav-item" data-depth="1">
+    <button class="nav-item-toggle"></button>
+    <a class="nav-link" href="../week-12-controllers-informers-client-go/week-12-controllers-informers-client-go.html">Week 1.2&#8201;&#8212;&#8201;Controllers, Informers, client-go</a>
+<ul class="nav-list">
+  <li class="nav-item" data-depth="2">
+    <a class="nav-link" href="../week-12-controllers-informers-client-go/client-go-architecture.html">client-go Architecture</a>
+  </li>
+  <li class="nav-item" data-depth="2">
+    <a class="nav-link" href="../week-12-controllers-informers-client-go/informers-listers-workqueues.html">Informers, Listers, and Workqueues</a>
+  </li>
+  <li class="nav-item" data-depth="2">
+    <a class="nav-link" href="../week-12-controllers-informers-client-go/sample-controller-walkthrough.html">Sample Controller Walkthrough</a>
+  </li>
+  <li class="nav-item" data-depth="2">
+    <a class="nav-link" href="../week-12-controllers-informers-client-go/informer-pitfalls-and-error-handling.html">Informer Pitfalls and Error Handling</a>
+  </li>
+</ul>
+  </li>
+</ul>
+  </li>
+  <li class="nav-item" data-depth="0">
+<ul class="nav-list">
+  <li class="nav-item" data-depth="1">
+    <button class="nav-item-toggle"></button>
+    <a class="nav-link" href="../week-21-controllers-contd/week-21-controllers-contd.html">Week 2.1&#8201;&#8212;&#8201;Controllers with controller-runtime</a>
+<ul class="nav-list">
+  <li class="nav-item" data-depth="2">
+    <a class="nav-link" href="../week-21-controllers-contd/gvk-gvr-and-api-terminology.html">GVK, GVR, and API Terminology</a>
+  </li>
+  <li class="nav-item" data-depth="2">
+    <a class="nav-link" href="../week-21-controllers-contd/controller-runtime-and-kubebuilder.html">Controller-runtime and Kubebuilder</a>
+  </li>
+  <li class="nav-item" data-depth="2">
+    <a class="nav-link" href="../week-21-controllers-contd/spec-status-and-conditions.html">Spec, Status, and Conditions</a>
+  </li>
+  <li class="nav-item" data-depth="2">
+    <a class="nav-link" href="../week-21-controllers-contd/api-validation-and-linting.html">API Validation and Linting</a>
+  </li>
+  <li class="nav-item" data-depth="2">
+    <a class="nav-link" href="../week-21-controllers-contd/update-patch-and-server-side-apply.html">Update, Patch, and Server-Side Apply</a>
+  </li>
+</ul>
+  </li>
+</ul>
+  </li>
+  <li class="nav-item" data-depth="0">
+<ul class="nav-list">
+  <li class="nav-item" data-depth="1">
+    <button class="nav-item-toggle"></button>
+    <a class="nav-link" href="../week-22-going-distributed-locks-leases-ownership-eventual-consistency/week-22-going-distributed-locks-leases-ownership-eventual-consistency.html">Week 2.2&#8201;&#8212;&#8201;Going Distributed</a>
+<ul class="nav-list">
+  <li class="nav-item" data-depth="2">
+    <a class="nav-link" href="../week-22-going-distributed-locks-leases-ownership-eventual-consistency/idempotent-reconciliation.html">Idempotent Reconciliation</a>
+  </li>
+  <li class="nav-item" data-depth="2">
+    <a class="nav-link" href="../week-22-going-distributed-locks-leases-ownership-eventual-consistency/distributed-locking-theory.html">Distributed Locking Theory</a>
+  </li>
+  <li class="nav-item" data-depth="2">
+    <a class="nav-link" href="../week-22-going-distributed-locks-leases-ownership-eventual-consistency/leader-election-in-kubernetes.html">Leader Election in Kubernetes</a>
+  </li>
+  <li class="nav-item" data-depth="2">
+    <a class="nav-link" href="../week-22-going-distributed-locks-leases-ownership-eventual-consistency/controller-sharding.html">Controller Sharding</a>
+  </li>
+</ul>
+  </li>
+</ul>
+  </li>
+  <li class="nav-item" data-depth="0">
+<ul class="nav-list">
+  <li class="nav-item" data-depth="1">
+    <button class="nav-item-toggle"></button>
+    <a class="nav-link" href="../week-31-taking-more-control-admissions-and-beyond-the-kube-apiserver-to-writing-your-own-api-server/week-31-taking-more-control-admissions-and-beyond-the-kube-apiserver-to-writing-your-own-api-server.html">Week 3.1 Overview</a>
+<ul class="nav-list">
+  <li class="nav-item" data-depth="2">
+    <a class="nav-link" href="../week-31-taking-more-control-admissions-and-beyond-the-kube-apiserver-to-writing-your-own-api-server/admission-control-webhooks.html">Admission Control Webhooks</a>
+  </li>
+  <li class="nav-item" data-depth="2">
+    <a class="nav-link" href="../week-31-taking-more-control-admissions-and-beyond-the-kube-apiserver-to-writing-your-own-api-server/policy-engines-and-gatekeeper.html">Policy Engines and Gatekeeper</a>
+  </li>
+  <li class="nav-item" data-depth="2">
+    <a class="nav-link" href="../week-31-taking-more-control-admissions-and-beyond-the-kube-apiserver-to-writing-your-own-api-server/api-discovery-and-aggregation.html">API Discovery and Aggregation</a>
+  </li>
+  <li class="nav-item" data-depth="2">
+    <a class="nav-link" href="../week-31-taking-more-control-admissions-and-beyond-the-kube-apiserver-to-writing-your-own-api-server/custom-api-servers.html">Custom API Servers</a>
+  </li>
+</ul>
+  </li>
+</ul>
+  </li>
+  <li class="nav-item" data-depth="0">
+<ul class="nav-list">
+  <li class="nav-item" data-depth="1">
+    <button class="nav-item-toggle"></button>
+    <a class="nav-link" href="../week-32-the-other-stuff/week-32-the-other-stuff.html">Week 3.2&#8201;&#8212;&#8201;The Other Stuff</a>
+<ul class="nav-list">
+  <li class="nav-item" data-depth="2">
+    <a class="nav-link" href="../week-32-the-other-stuff/ingress-and-gateway-api.html">Ingress and Gateway API</a>
+  </li>
+  <li class="nav-item" data-depth="2">
+    <a class="nav-link" href="../week-32-the-other-stuff/service-mesh-fundamentals.html">Service Mesh Fundamentals</a>
+  </li>
+  <li class="nav-item" data-depth="2">
+    <a class="nav-link" href="../week-32-the-other-stuff/authentication-and-authorization.html">Authentication and Authorization</a>
+  </li>
+  <li class="nav-item" data-depth="2">
+    <a class="nav-link" href="../week-32-the-other-stuff/security-context-and-hardening.html">Security Context and Hardening</a>
+  </li>
+</ul>
+  </li>
+</ul>
+  </li>
+  <li class="nav-item" data-depth="0">
+<ul class="nav-list">
+  <li class="nav-item" data-depth="1">
+    <button class="nav-item-toggle"></button>
+    <a class="nav-link" href="../week-41-all-about-kube-scheduler/week-41-all-about-kube-scheduler.html">Week 4.1&#8201;&#8212;&#8201;All About kube-scheduler</a>
+<ul class="nav-list">
+  <li class="nav-item" data-depth="2">
+    <a class="nav-link" href="../week-41-all-about-kube-scheduler/how-the-scheduler-works.html">How the Scheduler Works</a>
+  </li>
+  <li class="nav-item" data-depth="2">
+    <a class="nav-link" href="../week-41-all-about-kube-scheduler/resource-management.html">Resource Management</a>
+  </li>
+  <li class="nav-item" data-depth="2">
+    <a class="nav-link" href="../week-41-all-about-kube-scheduler/dynamic-resource-allocation.html">Dynamic Resource Allocation</a>
+  </li>
+</ul>
+  </li>
+</ul>
+  </li>
+  <li class="nav-item" data-depth="0">
+<ul class="nav-list">
+  <li class="nav-item" data-depth="1">
+    <button class="nav-item-toggle"></button>
+    <a class="nav-link" href="week-42-ubiquitous-topics.html">Week 4.2&#8201;&#8212;&#8201;Ubiquitous Topics</a>
+<ul class="nav-list">
+  <li class="nav-item" data-depth="2">
+    <a class="nav-link" href="operator-landscape.html">The Operator Landscape</a>
+  </li>
+  <li class="nav-item is-current-page" data-depth="2">
+    <a class="nav-link" href="alternative-control-planes-and-form-factors.html">Alternative Control Planes and Form Factors</a>
+  </li>
+</ul>
+  </li>
+</ul>
+  </li>
+  <li class="nav-item" data-depth="0">
+<ul class="nav-list">
+  <li class="nav-item" data-depth="1">
+    <button class="nav-item-toggle"></button>
+    <a class="nav-link" href="../exercises/exercises.html">Exercises</a>
+<ul class="nav-list">
+  <li class="nav-item" data-depth="2">
+    <a class="nav-link" href="../exercises/week-1-build-a-controller-using-client-go-from-scratch.html">Exercise 1: Build a Controller</a>
+  </li>
+  <li class="nav-item" data-depth="2">
+    <a class="nav-link" href="../exercises/week-2-implement-optimistic-locking-and-leader-election-via-lease.html">Exercise 2: Leader Election</a>
+  </li>
+  <li class="nav-item" data-depth="2">
+    <a class="nav-link" href="../exercises/week-3-develop-a-custom-validating-webhook-for-container-registry-enforcement.html">Exercise 3: Validating Webhook</a>
+  </li>
+</ul>
+  </li>
+</ul>
+  </li>
+  <li class="nav-item" data-depth="0">
+<ul class="nav-list">
+  <li class="nav-item" data-depth="1">
+    <a class="nav-link" href="../recommended-reading/recommended-reading.html">Recommended Reading</a>
+  </li>
+</ul>
+  </li>
+  <li class="nav-item" data-depth="0">
+<ul class="nav-list">
+  <li class="nav-item" data-depth="1">
+    <a class="nav-link" href="../suggested-reading/suggested-reading.html">Suggested Reading</a>
+  </li>
+</ul>
+  </li>
+  <li class="nav-item" data-depth="0">
+<ul class="nav-list">
+  <li class="nav-item" data-depth="1">
+    <a class="nav-link" href="../appendix/appendix.html">Appendix</a>
+  </li>
+</ul>
+  </li>
+</ul>
+  </nav>
+</div>
+<div class="nav-panel-explore" data-panel="explore">
+  <div class="context">
+    <span class="title">Kubernetes Developer Learning Path</span>
+    <span class="version">1.0.0</span>
+  </div>
+  <ul class="components">
+    <li class="component is-current">
+      <a class="title" href="../index.html">Kubernetes Developer Learning Path</a>
+      <ul class="versions">
+        <li class="version is-current is-latest">
+          <a href="../index.html">1.0.0</a>
+        </li>
+      </ul>
+    </li>
+  </ul>
+</div>
+    </div>
+  </aside>
+</div>
+<main class="article">
+<div class="toolbar" role="navigation">
+<button class="nav-toggle"></button>
+  <a href="../index.html" class="home-link"></a>
+<nav class="breadcrumbs" aria-label="breadcrumbs">
+  <ul>
+    <li><a href="../index.html">Kubernetes Developer Learning Path</a></li>
+    <li><a href="week-42-ubiquitous-topics.html">Week 4.2&#8201;&#8212;&#8201;Ubiquitous Topics</a></li>
+    <li><a href="alternative-control-planes-and-form-factors.html">Alternative Control Planes and Form Factors</a></li>
+  </ul>
+</nav>
+</div>
+  <div class="content">
+<aside class="toc sidebar" data-title="Contents" data-levels="2">
+  <div class="toc-menu"></div>
+</aside>
+<article class="doc">
+<h1 class="page">Alternative Control Planes and Form Factors</h1>
+<div id="preamble">
+<div class="sectionbody">
+<div class="paragraph">
+<p>In a standard Kubernetes cluster the control plane&#8201;&#8212;&#8201;<code>kube-apiserver</code>, <code>etcd</code>, <code>kube-controller-manager</code>, and <code>kube-scheduler</code>&#8201;&#8212;&#8201;runs alongside the workload nodes, either on dedicated machines or as static pods on control-plane nodes.
+That model works well for general-purpose clusters, but it is not the only option.
+As Kubernetes expands into multi-tenant platforms, edge computing, and resource-constrained devices, you will encounter alternative architectures that trade off different properties: management overhead, resource footprint, provisioning speed, and operational simplicity.</p>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_hypershift"><a class="anchor" href="#_hypershift"></a>HyperShift</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>HyperShift implements <em>hosted control planes</em>: the control plane of each tenant cluster runs as a set of pods inside a central management cluster, while the tenant&#8217;s worker nodes form a separate workload cluster that joins over the network.</p>
+</div>
+<div class="paragraph">
+<p>The management cluster treats each hosted control plane like any other workload&#8201;&#8212;&#8201;scheduled by the management-cluster scheduler, monitored by its observability stack, and scaled by its autoscaler.
+The tenant cluster&#8217;s worker nodes run only the kubelet and kube-proxy; they connect back to the hosted API server through a secure tunnel.</p>
+</div>
+<div class="paragraph">
+<p>Benefits of this architecture:</p>
+</div>
+<div class="ulist">
+<ul>
+<li>
+<p><strong>Faster provisioning</strong>&#8201;&#8212;&#8201;creating a new cluster means deploying a set of pods rather than bootstrapping dedicated machines for the control plane.
+Clusters can be ready in seconds rather than minutes.</p>
+</li>
+<li>
+<p><strong>Reduced per-cluster overhead</strong>&#8201;&#8212;&#8201;control-plane nodes are shared across tenants, eliminating the three-machine minimum that a self-hosted etcd quorum typically requires.</p>
+</li>
+<li>
+<p><strong>Centralized management</strong>&#8201;&#8212;&#8201;upgrades, patches, and certificate rotations happen in one place for all hosted control planes.</p>
+</li>
+</ul>
+</div>
+<div class="paragraph">
+<p>HyperShift is the foundation of Red Hat OpenShift&#8217;s hosted control plane offerings, including ROSA with hosted control planes on AWS and HyperShift on bare metal.</p>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_kcp"><a class="anchor" href="#_kcp"></a>kcp</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>kcp is a Kubernetes-like control plane that serves as a generic API platform <em>without</em> scheduling workloads.
+It provides the Kubernetes API machinery&#8201;&#8212;&#8201;CRDs, controllers, RBAC, admission webhooks&#8201;&#8212;&#8201;but has no concept of nodes, pods, or kubelets.</p>
+</div>
+<div class="paragraph">
+<p>kcp introduces several concepts that go beyond a standard API server:</p>
+</div>
+<div class="ulist">
+<ul>
+<li>
+<p><strong>Workspaces</strong>&#8201;&#8212;&#8201;lightweight, isolated API scopes within a single kcp instance.
+Each workspace behaves like an independent Kubernetes API server, enabling massive multi-tenancy without spinning up separate clusters.</p>
+</li>
+<li>
+<p><strong>Transparent multi-cluster scheduling</strong>&#8201;&#8212;&#8201;a <em>syncer</em> agent running in each physical cluster watches resources in kcp workspaces and creates the corresponding objects on the target cluster.
+Users interact with kcp as if it were a single cluster; the syncer distributes work transparently.</p>
+</li>
+<li>
+<p><strong>API export and binding</strong>&#8201;&#8212;&#8201;workspace owners can export their CRDs as reusable APIs that other workspaces bind to, enabling a service-provider model where platform teams publish APIs consumed by application teams.</p>
+</li>
+</ul>
+</div>
+<div class="paragraph">
+<p>The result is a control plane that separates the <em>what</em> (API resources and their desired state) from the <em>where</em> (physical clusters that run the actual workloads).</p>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_microshift"><a class="anchor" href="#_microshift"></a>MicroShift</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>MicroShift is a minimal Kubernetes distribution from Red Hat designed for edge and resource-constrained environments.
+It packages the API server, controller manager, scheduler, and an embedded etcd into a single binary that runs as a systemd service on RHEL-based hosts.</p>
+</div>
+<div class="paragraph">
+<p>Key characteristics:</p>
+</div>
+<div class="ulist">
+<ul>
+<li>
+<p><strong>Minimal footprint</strong>&#8201;&#8212;&#8201;targets devices with as little as 2 CPU cores and 2 GB of RAM.</p>
+</li>
+<li>
+<p><strong>OpenShift API compatibility</strong>&#8201;&#8212;&#8201;exposes a subset of the OpenShift Container Platform APIs, so workloads and security policies developed for full OpenShift clusters deploy without modification.</p>
+</li>
+<li>
+<p><strong>Standalone operation</strong>&#8201;&#8212;&#8201;designed for locations with intermittent or no connectivity to a central management hub.
+Updates are delivered through <code>rpm-ostree</code> and applied atomically.</p>
+</li>
+<li>
+<p><strong>Integrated networking</strong>&#8201;&#8212;&#8201;ships with OVN-Kubernetes as its CNI plugin, providing the same network policy model as full OpenShift.</p>
+</li>
+</ul>
+</div>
+<div class="paragraph">
+<p>MicroShift is aimed at industrial IoT gateways, retail point-of-sale systems, and automotive platforms where a full control plane is too heavy but the OpenShift operational model is required.</p>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_k3s"><a class="anchor" href="#_k3s"></a>k3s</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>k3s is a lightweight, CNCF-certified Kubernetes distribution originally created by Rancher and now maintained by SUSE.
+It bundles all control-plane components and the kubelet into a single binary of roughly 70 MB.</p>
+</div>
+<div class="paragraph">
+<p>Key characteristics:</p>
+</div>
+<div class="ulist">
+<ul>
+<li>
+<p><strong>SQLite by default</strong>&#8201;&#8212;&#8201;k3s replaces etcd with SQLite for single-server deployments, significantly reducing memory overhead. External datastores (PostgreSQL, MySQL, etcd) are supported for high-availability setups.</p>
+</li>
+<li>
+<p><strong>Stripped-down components</strong>&#8201;&#8212;&#8201;legacy cloud-provider plugins, in-tree storage drivers, and alpha features are removed from the upstream Kubernetes source before compilation, keeping the binary small.</p>
+</li>
+<li>
+<p><strong>ARM support</strong>&#8201;&#8212;&#8201;first-class support for ARM64 and ARMv7 makes k3s a natural fit for Raspberry Pi and industrial ARM hardware.</p>
+</li>
+<li>
+<p><strong>Batteries included</strong>&#8201;&#8212;&#8201;k3s ships with Traefik as an ingress controller, CoreDNS, and a local-path storage provisioner out of the box. A single <code>curl | sh</code> command installs a working cluster.</p>
+</li>
+</ul>
+</div>
+<div class="paragraph">
+<p>k3s targets edge computing, IoT fleets, CI/CD environments, and developer workstations where a full <code>kubeadm</code>-bootstrapped cluster would be overkill.</p>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_comparison"><a class="anchor" href="#_comparison"></a>Comparison</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>The following table summarises how these architectures differ from standard Kubernetes.</p>
+</div>
+<table class="tableblock frame-all grid-all stretch">
+<colgroup>
+<col style="width: 20%;">
+<col style="width: 20%;">
+<col style="width: 20%;">
+<col style="width: 20%;">
+<col style="width: 20%;">
+</colgroup>
+<thead>
+<tr>
+<th class="tableblock halign-left valign-top">Aspect</th>
+<th class="tableblock halign-left valign-top">Standard K8s</th>
+<th class="tableblock halign-left valign-top">HyperShift</th>
+<th class="tableblock halign-left valign-top">MicroShift</th>
+<th class="tableblock halign-left valign-top">k3s</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Control plane</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Self-hosted on dedicated nodes</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Hosted as pods in a management cluster</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Single binary (systemd service)</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Single binary</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Storage backend</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">etcd (external or stacked)</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">etcd (hosted in management cluster)</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">etcd (embedded)</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">SQLite (default), etcd optional</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Target environment</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">General purpose</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Multi-tenant platforms at scale</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Edge and constrained devices</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Edge, dev, IoT, CI</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Minimum resources</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">3 control-plane nodes typical</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Management cluster handles overhead</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">2 CPU cores, 2 GB RAM</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">1 CPU core, 512 MB RAM</p></td>
+</tr>
+</tbody>
+</table>
+<div class="admonitionblock note">
+<table>
+<tr>
+<td class="icon">
+<i class="fa icon-note" title="Note"></i>
+</td>
+<td class="content">
+<div class="paragraph">
+<p>These architectures are not mutually exclusive.
+A platform team might run HyperShift in the data centre to manage hundreds of tenant clusters, while deploying MicroShift or k3s on edge devices that those tenants own.
+The choice depends on where the control plane lives, how many clusters you need, and what resources are available at each location.</p>
+</div>
+</td>
+</tr>
+</table>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_references"><a class="anchor" href="#_references"></a>References</h2>
+<div class="sectionbody">
+<div class="ulist">
+<ul>
+<li>
+<p><a href="https://github.com/openshift/hypershift/blob/main/README.md">HyperShift</a></p>
+</li>
+<li>
+<p><a href="https://github.com/kcp-dev/kcp/blob/main/README.md">kcp</a></p>
+</li>
+<li>
+<p><a href="https://microshift.io/docs/openshift-portability/">MicroShift: OpenShift Portability</a></p>
+</li>
+</ul>
+</div>
+</div>
+</div>
+<nav class="pagination">
+  <span class="prev"><a href="operator-landscape.html">The Operator Landscape</a></span>
+  <span class="next"><a href="../exercises/exercises.html">Exercises</a></span>
+</nav>
+</article>
+  </div>
+</main>
+</div>
+<footer class="footer">
+  <img src="../../../_/img/rhl-logo-red.png" height="40px" alt="Red Hat"  href="https://redhat.com" >
+</footer><script id="site-script" src="../../../_/js/site.js" data-ui-root-path="../../../_"></script>
+<script async src="../../../_/js/vendor/highlight.js"></script>
+<script defer src="../../../_/js/vendor/tabs.js"></script>
+<script defer src="../../../_/js/vendor/reading-time.js"></script>
+  </body>
+</html>
