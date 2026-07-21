@@ -125,3 +125,5 @@ For how controller-runtime abstracts this entire pipeline behind `ctrl.NewContro
 == References
 
 * https://github.com/kubernetes/client-go/tree/master/tools/cache[client-go tools/cache]
+* https://github.com/kubernetes/sample-controller/blob/master/docs/controller-client-go.md[client-go under the hood]
+* https://github.com/thejasn/presentations/blob/main/kubernetes-informers/presentation.slide[Kubernetes Informers Presentation]

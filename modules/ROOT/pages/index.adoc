@@ -16,7 +16,7 @@ Finally, the course explores advanced networking and traffic management concepts
 * xref:week-0-familiarizing-with-koobrnehteez:week-0-familiarizing-with-koobrnehteez.adoc[Week 0 — Familiarizing with Kubernetes] — What Kubernetes really is
 * xref:week-11-kubernetes-resource-model:week-11-kubernetes-resource-model.adoc[Week 1.1 — Kubernetes Resource Model] — The declarative intent and kube-apiserver essentials
 * xref:week-12-controllers-informers-client-go:week-12-controllers-informers-client-go.adoc[Week 1.2 — Controllers, Informers, client-go] — The building blocks behind operators
-* xref:week-21-controllers-contd:week-21-controllers-contd.adoc[Week 2.1 — Controllers contd.] — Writing Kube APIs and reconciling with controller-runtime
+* xref:week-21-controllers-contd:week-21-controllers-contd.adoc[Week 2.1 — Controllers with controller-runtime] — Writing Kube APIs and reconciling with controller-runtime
 * xref:week-22-going-distributed-locks-leases-ownership-eventual-consistency:week-22-going-distributed-locks-leases-ownership-eventual-consistency.adoc[Week 2.2 — Going Distributed] — Locks, leases, ownership, eventual consistency
 * xref:week-31-taking-more-control-admissions-and-beyond-the-kube-apiserver-to-writing-your-own-api-server:week-31-taking-more-control-admissions-and-beyond-the-kube-apiserver-to-writing-your-own-api-server.adoc[Week 3.1 — Taking More Control] — Admissions and custom API servers
 * xref:week-32-the-other-stuff:week-32-the-other-stuff.adoc[Week 3.2 — The Other Stuff] — Networking, security, and cluster hardening

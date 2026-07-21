@@ -108,4 +108,4 @@ Together, these tools close the feedback loop that the scheduler alone cannot pr
 == References
 
 * https://jvns.ca/blog/2017/07/27/how-does-the-kubernetes-scheduler-work/[How Does the Kubernetes Scheduler Work?]
-* https://www.akila.dev/kube-scheduler[A Deeper Dive of kube-scheduler]
+* https://www.awelm.com/posts/kube-scheduler/[A Deeper Dive of kube-scheduler]

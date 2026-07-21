@@ -80,4 +80,5 @@ For how kubebuilder generates resource schemas (CRDs), see xref:week-21-controll
 
 == References
 
+* https://github.com/kubernetes/design-proposals-archive/blob/main/architecture/resource-management.md[Kubernetes Resource Management Design Proposal]
 * https://blog.nelhage.com/post/declarative-configuration-management/[The Architecture of Declarative Configuration Management]

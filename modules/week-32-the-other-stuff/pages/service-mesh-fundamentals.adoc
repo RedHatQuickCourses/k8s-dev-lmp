@@ -90,3 +90,4 @@ Evaluate whether your application genuinely needs mesh-level traffic management,
 
 * https://www.baeldung.com/ops/istio-service-mesh[Service Mesh Architecture with Istio]
 * https://istio.io/latest/about/service-mesh/[The Istio Service Mesh]
+* https://gateway-api.sigs.k8s.io/mesh/[GAMMA: Gateway API for Service Mesh]

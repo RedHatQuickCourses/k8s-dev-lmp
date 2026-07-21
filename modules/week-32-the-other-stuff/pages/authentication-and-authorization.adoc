@@ -86,4 +86,5 @@ ReBAC is still experimental in the Kubernetes ecosystem, but it signals the dire
 == References
 
 * https://kubernetes.io/docs/reference/access-authn-authz/authentication/[Authenticating]
+* https://raesene.github.io/blog/2023/04/08/lets-talk-about-kubelet-authorization/[Let's Talk About Kubelet Authorization]
 * https://github.com/luxas/kube-rebac-authorizer[kube-rebac-authorizer]

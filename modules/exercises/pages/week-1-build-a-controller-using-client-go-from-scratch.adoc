@@ -148,3 +148,8 @@ Run the worker in a goroutine and block until `stopCh` closes.
 
 Extend your reconcile logic: if the Pod has no labels, log a warning `"Pod \{namespace\}/\{name\} is missing required labels!"`.
 Then try running two instances of your controller simultaneously and observe what happens -- this motivates the leader election exercise in xref:week-2-implement-optimistic-locking-and-leader-election-via-lease.adoc[Exercise 2].
+
+== References
+
+* https://sdk.operatorframework.io/docs/building-operators/golang/tutorial/[Operator SDK Go Tutorial]
+* https://github.com/kubernetes/community/blob/master/contributors/devel/sig-api-machinery/controllers.md#rough-structure[Controller Rough Structure]

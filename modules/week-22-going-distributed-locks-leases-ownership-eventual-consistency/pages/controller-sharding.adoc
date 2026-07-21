@@ -81,3 +81,4 @@ When multiple Ingress Controllers serve the same Route (overlapped mode), each c
 
 * https://github.com/timebertt/kubernetes-controller-sharding/blob/main/docs/getting-started.md[Controller Sharding Getting Started]
 * https://docs.redhat.com/en/documentation/openshift_container_platform/4.11/html/networking/ingress-sharding[Ingress Sharding in OpenShift]
+* https://gist.github.com/swghosh/5fe1dc5a04ce1db48f6bef837b11c0e6[OpenShift Ingress Controller Sharding Case Study Notes]

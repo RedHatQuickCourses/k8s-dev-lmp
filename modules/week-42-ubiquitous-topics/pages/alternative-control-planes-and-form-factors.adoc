@@ -104,3 +104,9 @@ These architectures are not mutually exclusive.
 A platform team might run HyperShift in the data centre to manage hundreds of tenant clusters, while deploying MicroShift or k3s on edge devices that those tenants own.
 The choice depends on where the control plane lives, how many clusters you need, and what resources are available at each location.
 ====
+
+== References
+
+* https://github.com/openshift/hypershift/blob/main/README.md[HyperShift]
+* https://github.com/kcp-dev/kcp/blob/main/README.md[kcp]
+* https://microshift.io/docs/openshift-portability/[MicroShift: OpenShift Portability]

@@ -145,4 +145,5 @@ While the workqueue retry mechanism will eventually resolve this, it is more eff
 == References
 
 * https://render.com/blog/kubernetes-informers[Kubernetes Informers Are So Easy... to Misuse!]
+* https://openkruise.io/blog/learning-concurrent-reconciling/[Learning Concurrent Reconciling]
 * https://github.com/kubernetes/community/blob/master/contributors/devel/sig-api-machinery/controllers.md[Writing Controllers]

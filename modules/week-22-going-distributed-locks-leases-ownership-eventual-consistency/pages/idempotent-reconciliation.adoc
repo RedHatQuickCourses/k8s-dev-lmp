@@ -93,3 +93,5 @@ This pattern is used by the core ReplicaSet and Job controllers, and by the Elas
 == References
 
 * https://github.com/kubernetes/community/blob/master/contributors/devel/sig-api-machinery/controllers.md[Writing Controllers]
+* https://kubernetes.io/blog/2022/10/20/advanced-server-side-apply/#get-modify-put-patch-controllers[Advanced Server-Side Apply: Patch vs Apply Controllers]
+* https://ahmet.im/blog/controller-pitfalls/[Common Pitfalls in Writing Kubernetes Controllers]

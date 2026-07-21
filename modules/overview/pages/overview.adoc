@@ -26,7 +26,7 @@ The basic building blocks behind operators -- client-go architecture, Informers,
 
 xref:week-12-controllers-informers-client-go:week-12-controllers-informers-client-go.adoc[Go to Week 1.2]
 
-=== Week 2.1: Controllers (continued)
+=== Week 2.1: Controllers with controller-runtime
 
 Writing concrete Kube APIs with controller-runtime -- Reconcile loop, kubebuilder, Spec vs Status, Conditions, API validation, CRUD operations, Apply vs Patch vs Update.
 

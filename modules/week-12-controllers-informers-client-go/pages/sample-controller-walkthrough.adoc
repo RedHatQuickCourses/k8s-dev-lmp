@@ -211,3 +211,4 @@ For a hands-on exercise building a controller from scratch using this same patte
 == References
 
 * https://chishengliu.com/posts/kubernetes-operator-sample-controller/[How to Write a Kubernetes Operator Using client-go]
+* https://www.youtube.com/watch?v=AUNPLQVxvmw[Writing Kube Controllers for Everyone - Maciej Szulik]
