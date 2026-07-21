@@ -1,0 +1,128 @@
+= Update, Patch, and Server-Side Apply
+:navtitle: Update, Patch, and Server-Side Apply
+
+Kubernetes provides several mechanisms for modifying API objects.
+Choosing the right one depends on whether you are a user, a controller, or a CI/CD system, and whether multiple actors write to the same object.
+
+== Update (HTTP PUT)
+
+An Update replaces the entire object.
+The client must GET the current object, modify it, and PUT the full object back.
+Kubernetes uses *optimistic concurrency*: the `resourceVersion` field is checked on every PUT, and the server rejects the write with a `409 Conflict` if the resource was modified since the GET.
+
+This is the simplest approach for single-owner resources.
+The downside is that in a system with N concurrent actors, up to N-1 PUTs may fail and need retries, leading to O(N^2) requests in the worst case.
+
+== Patch Types
+
+Patches send only the changes rather than the full object.
+Kubernetes supports three patch formats:
+
+[cols="1,2,2", options="header"]
+|===
+|Type |Behavior |Use When
+
+|JSON Patch (RFC 6902)
+|A sequence of discrete operations: `add`, `remove`, `replace`, `move`, `copy`, `test`.
+Each operation targets a specific JSON pointer path.
+|You need precise, surgical changes to specific paths.
+
+|JSON Merge Patch (RFC 7386)
+|Merges a partial object into the existing one.
+Setting a field to `null` removes it.
+Lists are *replaced* entirely -- there is no list merging.
+|Simple field updates where you do not need to merge list elements.
+
+|Strategic Merge Patch
+|A Kubernetes-specific format that uses `patchStrategy` and `patchMergeKey` struct tags to merge lists intelligently.
+For example, the `containers` list in a PodSpec merges on the `name` field.
+Lists without merge tags are replaced, just like JSON Merge Patch.
+|Default for client-side `kubectl apply`.
+Preferred when you need list merging on built-in types.
+|===
+
+[NOTE]
+====
+Strategic Merge Patch is *not supported* for custom resources.
+CRDs use JSON Merge Patch or Server-Side Apply instead.
+====
+
+== Server-Side Apply
+
+Server-Side Apply (SSA) moves the merge algorithm from the client to the API server and introduces *field ownership* tracking.
+
+=== How It Works
+
+* Each actor (called a *field manager*) sends a fully specified intent -- the fields it cares about -- via an Apply request.
+* The API server records which field manager owns each field in `metadata.managedFields`.
+* When two managers try to set the same field to different values, the server returns a *conflict* instead of silently overwriting.
+* No-op applies (where the object already matches the intent) do not bump `resourceVersion` or trigger watch events.
+
+=== Two Controller Patterns
+
+Controllers that adopt SSA typically follow one of two patterns:
+
+==== Reconstructive
+
+Build the desired state from scratch on every reconcile and Apply it.
+The server computes the diff.
+This is the recommended approach for new controllers -- it is less error-prone because you always declare your full intent.
+
+[source,go]
+----
+applyConfig := batchv1ac.CronJob(name, namespace).
+    WithSpec(batchv1ac.CronJobSpec().
+        WithSchedule("*/5 * * * *").
+        WithJobTemplate(...))
+
+err := r.Patch(ctx, applyConfig, client.Apply, client.FieldOwner("my-controller"), client.ForceOwnership)
+----
+
+==== Extract-Modify-Apply
+
+For existing controllers migrating from GET-modify-PUT, client-go provides an *extract* workflow: retrieve the current apply configuration for your field manager, modify it, and re-apply.
+This avoids accidentally claiming ownership of every field in the object (which the server will reject).
+
+=== Force Conflicts
+
+* *Controllers* should typically use `Force: true` (force conflicts) because a controller is the sole authority for the fields it manages and does not have a convenient way to surface conflict errors.
+* *CI/CD systems* should *not* force conflicts.
+They need error paths to surface conflicts to humans -- for example, when a hotfix applied by an SRE would be overwritten by an automated deployment.
+
+=== When to Use SSA vs Update
+
+[cols="1,1", options="header"]
+|===
+|Scenario |Recommendation
+
+|Single-owner resource (one controller manages all fields)
+|Traditional Update or full-object Patch is simpler
+
+|Multi-controller resource (multiple actors write different sections)
+|SSA with distinct field managers to prevent conflicts
+
+|CI/CD deploying manifests
+|SSA with conflict detection to catch drift and hotfixes
+
+|Migrating from client-side `kubectl apply`
+|Server-side `kubectl apply --server-side` as a drop-in replacement
+|===
+
+[IMPORTANT]
+====
+SSA is recommended for multi-controller resources where multiple actors write to the same object (e.g. one controller managing replicas while another manages annotations).
+For resources with a single owner, traditional Update is simpler and avoids the complexity of managed fields.
+====
+
+== Summary
+
+* *Update (PUT)* -- full replacement with optimistic concurrency via `resourceVersion`.
+* *JSON Patch* -- surgical operations on specific paths.
+* *JSON Merge Patch* -- partial object merge; lists are replaced.
+* *Strategic Merge Patch* -- Kubernetes-aware list merging (built-in types only).
+* *Server-Side Apply* -- server-side merge with field ownership tracking and conflict detection; the recommended approach for multi-actor scenarios.
+
+== References
+
+* https://kubernetes.io/docs/tasks/manage-kubernetes-objects/update-api-object-kubectl-patch/[Update API Objects Using kubectl patch]
+* https://opensource.googleblog.com/2021/10/server-side-apply-in-kubernetes.html[Server-Side Apply in Kubernetes]

@@ -1,0 +1,100 @@
+= Policy Engines and Gatekeeper
+:navtitle: Policy Engines and Gatekeeper
+
+== Webhooks vs Policy Engines
+
+Raw admission webhooks are powerful but operationally expensive.
+Each webhook requires writing Go code (or another language), building a container image, deploying and maintaining a service, and managing TLS certificates.
+When you need dozens of policies -- all images from approved registries, all pods with resource limits, all namespaces with a contact label -- the overhead multiplies quickly.
+
+Policy engines solve this by providing a declarative way to define admission policies using CRDs.
+Instead of deploying a new webhook for each rule, you deploy the engine once and express individual policies as Kubernetes objects.
+
+== OPA Gatekeeper
+
+https://github.com/open-policy-agent/gatekeeper[OPA Gatekeeper] v3 integrates the https://www.openpolicyagent.org/[Open Policy Agent] with Kubernetes using the OPA Constraint Framework.
+The architecture centers on two CRD types:
+
+*ConstraintTemplates* define the policy logic written in Rego (OPA's query language) along with a parameter schema.
+A template is reusable -- it describes _what_ to check and _what parameters_ can be customized.
+
+*Constraints* instantiate a template with specific parameters and a `match` block that scopes enforcement to particular resource kinds.
+
+The following example defines a template that requires specific labels, then creates a constraint enforcing it on namespaces:
+
+[source,yaml]
+----
+apiVersion: templates.gatekeeper.sh/v1beta1
+kind: ConstraintTemplate
+metadata:
+  name: k8srequiredlabels
+spec:
+  crd:
+    spec:
+      names:
+        kind: K8sRequiredLabels
+      validation:
+        openAPIV3Schema:
+          properties:
+            labels:
+              type: array
+              items:
+                type: string
+  targets:
+    - target: admission.k8s.gatekeeper.sh
+      rego: |
+        package k8srequiredlabels
+
+        deny[{"msg": msg, "details": {"missing_labels": missing}}] {
+          provided := {label | input.review.object.metadata.labels[label]}
+          required := {label | label := input.parameters.labels[_]}
+          missing := required - provided
+          count(missing) > 0
+          msg := sprintf("you must provide labels: %v", [missing])
+        }
+----
+
+[source,yaml]
+----
+apiVersion: constraints.gatekeeper.sh/v1beta1
+kind: K8sRequiredLabels
+metadata:
+  name: ns-must-have-owner
+spec:
+  match:
+    kinds:
+      - apiGroups: [""]
+        kinds: ["Namespace"]
+  parameters:
+    labels: ["owner"]
+----
+
+=== Audit
+
+Gatekeeper does not only evaluate new requests.
+Its audit functionality periodically scans existing resources in the cluster and checks them against enforced constraints.
+Violations are recorded in the `status` field of the corresponding Constraint object, making it easy to detect pre-existing misconfigurations that were created before a policy was applied.
+
+=== Data Replication
+
+Some policies require cross-resource visibility.
+For example, enforcing globally unique ingress hostnames means the policy engine needs access to all Ingress objects, not just the one being admitted.
+Gatekeeper supports data replication via a `Config` CRD that specifies which resource types should be cached into OPA for use in Rego rules.
+
+== ValidatingAdmissionPolicy (CEL-based)
+
+Starting in Kubernetes v1.30, `ValidatingAdmissionPolicy` reached stable status as a built-in alternative to external webhook infrastructure.
+Instead of calling out to an HTTP server, policies are expressed as https://kubernetes.io/docs/reference/using-api/cel/[CEL (Common Expression Language)] expressions evaluated directly inside the API server.
+
+This eliminates the need for a separate webhook deployment, TLS certificates, and network round-trips.
+CEL-based policies are best suited for straightforward validation rules -- such as checking label presence or resource limits -- where the full power of Rego or Go code is not needed.
+
+[TIP]
+====
+Use *Gatekeeper* when you need complex cross-resource policies, audit of existing resources, or Rego's full expressiveness.
+Use *ValidatingAdmissionPolicy* for simpler, latency-sensitive validations that benefit from running in-process within the API server.
+====
+
+== References
+
+* https://kubernetes.io/blog/2019/08/06/opa-gatekeeper-policy-and-governance-for-kubernetes/[OPA Gatekeeper: Policy and Governance for Kubernetes]

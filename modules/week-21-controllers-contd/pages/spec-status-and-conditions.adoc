@@ -1,0 +1,111 @@
+= Spec, Status, and Conditions
+:navtitle: Spec, Status, and Conditions
+
+== Spec vs Status Convention
+
+By convention, Kubernetes API objects separate desired state from observed state using two top-level fields:
+
+* `*spec*` describes the desired state.
+It is written by users (and sometimes by controllers such as autoscalers).
+The spec is a complete description of intent, including user-provided values, system-expanded defaults, and properties set by other ecosystem components.
+
+* `*status*` describes the observed state.
+It is written by the controller that manages the resource and should reflect the most recent observations of actual cluster state.
+
+These fields are updated through separate subresources (`/status`), which enables distinct RBAC policies.
+Users can be granted full write access to `spec` and read-only access to `status`, while controllers get read-only access to `spec` but full write access to `status`.
+
+The PUT and POST verbs on the main resource ignore `status` values to prevent accidental overwrites in read-modify-write scenarios.
+To update status, controllers use the `/status` subresource endpoint (via `r.Status().Update()` in controller-runtime).
+
+[NOTE]
+====
+The system is *level-based*, not edge-based.
+If `spec.replicas` changes from 2 to 5 and then to 3, the controller is not required to reach 5 before converging on 3.
+====
+
+== Conditions
+
+Conditions provide a standard mechanism for controllers to report higher-level status information.
+They allow tools and other controllers to collect summary data about a resource without understanding its internal details.
+
+The upstream `metav1.Condition` struct defines the standard schema:
+
+[source,go]
+----
+type Condition struct {
+    // Type in CamelCase (e.g. "Available", "Progressing", "Degraded")
+    Type               string
+    // Status is one of True, False, Unknown
+    Status             ConditionStatus
+    // The .metadata.generation this condition was based on
+    ObservedGeneration int64
+    // When the condition last transitioned between statuses
+    LastTransitionTime Time
+    // Machine-readable CamelCase reason for the transition
+    Reason             string
+    // Human-readable message with transition details
+    Message            string
+}
+----
+
+=== Condition Conventions
+
+* *Apply conditions early* -- controllers should set their conditions on first visit, even with status `Unknown`, so that other components know the controller is aware of the resource and is making progress.
+
+* *Positive polarity preferred* -- condition types like `Ready` and `Available` (where `True` means healthy) are generally easier to reason about than negative-polarity types, though exceptions exist (e.g. `MemoryExhausted`).
+
+* *Use PascalCase names* -- condition types should be short PascalCase identifiers (e.g. `Ready` rather than `MyResourceReady`).
+
+* *Top-level summary condition* -- it is helpful to have a common top-level condition (often `Ready` for long-running resources or `Succeeded` for batch resources) that summarizes more detailed conditions.
+
+* *Conditions over phase* -- the older `phase` field pattern is deprecated.
+New APIs should use conditions instead, because adding new enum values to a phase field breaks backward compatibility.
+
+=== Declaring Conditions in Your CRD
+
+Conditions should be declared as a list with merge semantics on the `type` key:
+
+[source,go]
+----
+// +listType=map
+// +listMapKey=type
+// +patchStrategy=merge
+// +patchMergeKey=type
+// +optional
+Conditions []metav1.Condition `json:"conditions,omitempty"`
+----
+
+== Controller Pitfalls for Status
+
+Several common mistakes arise when controllers report status:
+
+* *Always report conditions* -- silence from a controller is ambiguous.
+If a controller does not set any conditions, consumers cannot tell whether the controller has not yet reconciled the resource or whether everything is healthy.
+Initialize all conditions to `Unknown` at the start of reconciliation.
+
+* *Use observedGeneration* -- set `ObservedGeneration` on every condition to the resource's current `metadata.generation`.
+This lets consumers distinguish stale status from current status.
+A `Ready=True` condition means nothing on its own; it is meaningful only when `condition.observedGeneration == metadata.generation`.
+
+* *Re-fetch after status updates* -- Kubernetes uses optimistic concurrency via `resourceVersion`.
+After a status update changes the resource version, subsequent writes against the old version will fail with a conflict.
+Re-fetch the resource with `r.Get()` after calling `r.Status().Update()` to keep your reconciliation in sync.
+
+[source,go]
+----
+if err := r.Status().Update(ctx, &cronJob); err != nil {
+    return ctrl.Result{}, err
+}
+// Re-fetch to get the updated resourceVersion
+if err := r.Get(ctx, req.NamespacedName, &cronJob); err != nil {
+    return ctrl.Result{}, err
+}
+----
+
+* *Reconstruct status from the world* -- status should be derivable from the current state of child resources, not read from the previous status of the root object.
+This ensures correctness even after controller restarts.
+
+== References
+
+* https://github.com/kubernetes/community/blob/master/contributors/devel/sig-architecture/api-conventions.md[API Conventions]

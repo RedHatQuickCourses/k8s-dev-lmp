@@ -1,0 +1,93 @@
+= Service Mesh Fundamentals
+:navtitle: Service Mesh Fundamentals
+
+== What a service mesh solves
+
+In a microservices architecture every service needs service discovery, load balancing, retries, timeouts, mTLS, and telemetry.
+Implementing those cross-cutting concerns inside each application -- across multiple languages and frameworks -- is tedious and error-prone.
+A service mesh moves all of that logic into the infrastructure layer so that applications simply send and receive traffic on localhost without knowing about the network topology.
+
+The capabilities of a service mesh fall into three categories:
+
+* *Traffic management* -- dynamic service discovery, routing, traffic splitting for canary releases and A/B tests, retries, timeouts, circuit breaking, and rate limiting.
+* *Security* -- automatic mutual TLS (mTLS) for all service-to-service communication, certificate rotation, and fine-grained access policies based on service identity.
+* *Observability* -- uniform collection of golden-signal metrics (latency, traffic, errors, saturation), distributed traces, and access logs across every hop in the mesh.
+
+== Architecture: data plane + control plane
+
+A service mesh consists of two layers:
+
+* *Data plane* -- lightweight network proxies (typically https://www.envoyproxy.io/[Envoy]) deployed alongside each service instance.
+In the traditional sidecar model every pod gets its own proxy container.
+The proxies intercept all inbound and outbound traffic, apply routing rules, enforce mTLS, and emit telemetry.
+* *Control plane* -- a centralized component that configures the proxies at runtime.
+It converts high-level routing rules and security policies into proxy-specific configuration and distributes certificates for mTLS.
+
+== Istio: the most widely adopted mesh
+
+Istio is a CNCF graduated project originally created by Google, IBM, and Lyft.
+Its control plane is a single binary called `istiod` that consolidates the earlier Pilot, Citadel, and Galley components.
+Istiod handles service discovery, certificate generation, and configuration distribution to the Envoy sidecars.
+
+Istio provides two types of authentication:
+
+* *Peer authentication* -- service-to-service mTLS, enforced via a `PeerAuthentication` policy.
+* *Request authentication* -- end-user authentication using JWT validation or OIDC providers.
+
+=== Traffic splitting with VirtualService
+
+Istio uses CRDs -- `VirtualService` and `DestinationRule` -- to control traffic routing.
+The following example sends 90% of traffic to v1 of a service and 10% to v2:
+
+[source,yaml]
+----
+apiVersion: networking.istio.io/v1alpha3
+kind: VirtualService
+metadata:
+  name: shipping-service
+spec:
+  hosts:
+  - shipping-service
+  http:
+  - route:
+    - destination:
+        host: shipping-service
+        subset: v1
+      weight: 90
+    - destination:
+        host: shipping-service
+        subset: v2
+      weight: 10
+---
+apiVersion: networking.istio.io/v1alpha3
+kind: DestinationRule
+metadata:
+  name: shipping-service
+spec:
+  host: shipping-service
+  subsets:
+  - name: v1
+    labels:
+      version: v1
+  - name: v2
+    labels:
+      version: v2
+----
+
+=== Ambient mode: sidecar-less mesh
+
+Istio's newer *ambient mode* eliminates the sidecar container entirely.
+Instead, a per-node `ztunnel` proxy handles L4 concerns (mTLS, basic telemetry) for all pods on the node, while optional `waypoint` proxies handle L7 policies when needed.
+Ambient mode reduces resource overhead and simplifies the pod lifecycle because there is no longer a sidecar to inject, restart, or drain.
+
+[TIP]
+====
+A service mesh adds real operational complexity.
+Evaluate whether your application genuinely needs mesh-level traffic management, mTLS, and observability before adopting one -- for simpler deployments, Kubernetes-native NetworkPolicies and Gateway API may be sufficient.
+====
+
+== References
+
+* https://www.baeldung.com/ops/istio-service-mesh[Service Mesh Architecture with Istio]
+* https://istio.io/latest/about/service-mesh/[The Istio Service Mesh]
+* https://gateway-api.sigs.k8s.io/mesh/[GAMMA: Gateway API for Service Mesh]

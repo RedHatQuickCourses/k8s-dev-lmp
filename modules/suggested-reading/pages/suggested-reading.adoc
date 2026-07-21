@@ -1,8 +1,20 @@
-#  Suggested Reading
-
 = Suggested Reading
+:navtitle: Suggested Reading
 
-To deepen your understanding of Kubernetes internals, distributed systems design, and cluster security, refer to the following curated resources:
+The following resources provide additional depth on topics covered in this course.
+While not required, they are valuable references that complement specific weekly modules.
 
-* *Kubernetes Security and Observability* (Creane & Gupta, 2021): A practical guide for implementing robust security postures and effective monitoring strategies.
-* *Designing Distributed Systems* (Burns, 2024): An exploration of reusable software patterns and paradigms for building scalable and reliable systems on Kubernetes.
+== Kubernetes Security and Observability
+
+*Brendan Creane and Amit Gupta* (O'Reilly, 2021)
+
+This book is a practical guide to implementing robust security postures and effective monitoring strategies in Kubernetes clusters.
+It covers network policies, RBAC design, runtime security, and observability patterns in detail.
+It serves as an excellent companion to xref:week-32-the-other-stuff:week-32-the-other-stuff.adoc[Week 3.2], where you will study networking, authentication, authorization, and cluster hardening.
+
+== Designing Distributed Systems
+
+*Brendan Burns* (O'Reilly, 2024)
+
+This book explores common distributed systems patterns -- sidecar, ambassador, adapter -- and shows how they are implemented with Kubernetes.
+It provides a strong conceptual foundation for understanding the distributed challenges covered in xref:week-22-going-distributed-locks-leases-ownership-eventual-consistency:week-22-going-distributed-locks-leases-ownership-eventual-consistency.adoc[Week 2.2], including idempotency, leader election, and controller sharding.

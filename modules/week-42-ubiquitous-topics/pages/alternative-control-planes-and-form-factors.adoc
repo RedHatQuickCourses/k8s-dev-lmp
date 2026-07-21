@@ -1,0 +1,112 @@
+= Alternative Control Planes and Form Factors
+:navtitle: Alternative Control Planes and Form Factors
+
+In a standard Kubernetes cluster the control plane -- `kube-apiserver`, `etcd`, `kube-controller-manager`, and `kube-scheduler` -- runs alongside the workload nodes, either on dedicated machines or as static pods on control-plane nodes.
+That model works well for general-purpose clusters, but it is not the only option.
+As Kubernetes expands into multi-tenant platforms, edge computing, and resource-constrained devices, you will encounter alternative architectures that trade off different properties: management overhead, resource footprint, provisioning speed, and operational simplicity.
+
+== HyperShift
+
+HyperShift implements _hosted control planes_: the control plane of each tenant cluster runs as a set of pods inside a central management cluster, while the tenant's worker nodes form a separate workload cluster that joins over the network.
+
+The management cluster treats each hosted control plane like any other workload -- scheduled by the management-cluster scheduler, monitored by its observability stack, and scaled by its autoscaler.
+The tenant cluster's worker nodes run only the kubelet and kube-proxy; they connect back to the hosted API server through a secure tunnel.
+
+Benefits of this architecture:
+
+* *Faster provisioning* -- creating a new cluster means deploying a set of pods rather than bootstrapping dedicated machines for the control plane.
+Clusters can be ready in seconds rather than minutes.
+* *Reduced per-cluster overhead* -- control-plane nodes are shared across tenants, eliminating the three-machine minimum that a self-hosted etcd quorum typically requires.
+* *Centralized management* -- upgrades, patches, and certificate rotations happen in one place for all hosted control planes.
+
+HyperShift is the foundation of Red Hat OpenShift's hosted control plane offerings, including ROSA with hosted control planes on AWS and HyperShift on bare metal.
+
+== kcp
+
+kcp is a Kubernetes-like control plane that serves as a generic API platform _without_ scheduling workloads.
+It provides the Kubernetes API machinery -- CRDs, controllers, RBAC, admission webhooks -- but has no concept of nodes, pods, or kubelets.
+
+kcp introduces several concepts that go beyond a standard API server:
+
+* *Workspaces* -- lightweight, isolated API scopes within a single kcp instance.
+Each workspace behaves like an independent Kubernetes API server, enabling massive multi-tenancy without spinning up separate clusters.
+* *Transparent multi-cluster scheduling* -- a _syncer_ agent running in each physical cluster watches resources in kcp workspaces and creates the corresponding objects on the target cluster.
+Users interact with kcp as if it were a single cluster; the syncer distributes work transparently.
+* *API export and binding* -- workspace owners can export their CRDs as reusable APIs that other workspaces bind to, enabling a service-provider model where platform teams publish APIs consumed by application teams.
+
+The result is a control plane that separates the _what_ (API resources and their desired state) from the _where_ (physical clusters that run the actual workloads).
+
+== MicroShift
+
+MicroShift is a minimal Kubernetes distribution from Red Hat designed for edge and resource-constrained environments.
+It packages the API server, controller manager, scheduler, and an embedded etcd into a single binary that runs as a systemd service on RHEL-based hosts.
+
+Key characteristics:
+
+* *Minimal footprint* -- targets devices with as little as 2 CPU cores and 2 GB of RAM.
+* *OpenShift API compatibility* -- exposes a subset of the OpenShift Container Platform APIs, so workloads and security policies developed for full OpenShift clusters deploy without modification.
+* *Standalone operation* -- designed for locations with intermittent or no connectivity to a central management hub.
+Updates are delivered through `rpm-ostree` and applied atomically.
+* *Integrated networking* -- ships with OVN-Kubernetes as its CNI plugin, providing the same network policy model as full OpenShift.
+
+MicroShift is aimed at industrial IoT gateways, retail point-of-sale systems, and automotive platforms where a full control plane is too heavy but the OpenShift operational model is required.
+
+== k3s
+
+k3s is a lightweight, CNCF-certified Kubernetes distribution originally created by Rancher and now maintained by SUSE.
+It bundles all control-plane components and the kubelet into a single binary of roughly 70 MB.
+
+Key characteristics:
+
+* *SQLite by default* -- k3s replaces etcd with SQLite for single-server deployments, significantly reducing memory overhead. External datastores (PostgreSQL, MySQL, etcd) are supported for high-availability setups.
+* *Stripped-down components* -- legacy cloud-provider plugins, in-tree storage drivers, and alpha features are removed from the upstream Kubernetes source before compilation, keeping the binary small.
+* *ARM support* -- first-class support for ARM64 and ARMv7 makes k3s a natural fit for Raspberry Pi and industrial ARM hardware.
+* *Batteries included* -- k3s ships with Traefik as an ingress controller, CoreDNS, and a local-path storage provisioner out of the box. A single `curl | sh` command installs a working cluster.
+
+k3s targets edge computing, IoT fleets, CI/CD environments, and developer workstations where a full `kubeadm`-bootstrapped cluster would be overkill.
+
+== Comparison
+
+The following table summarises how these architectures differ from standard Kubernetes.
+
+[cols="1,1,1,1,1", options="header"]
+|===
+|Aspect |Standard K8s |HyperShift |MicroShift |k3s
+
+|Control plane
+|Self-hosted on dedicated nodes
+|Hosted as pods in a management cluster
+|Single binary (systemd service)
+|Single binary
+
+|Storage backend
+|etcd (external or stacked)
+|etcd (hosted in management cluster)
+|etcd (embedded)
+|SQLite (default), etcd optional
+
+|Target environment
+|General purpose
+|Multi-tenant platforms at scale
+|Edge and constrained devices
+|Edge, dev, IoT, CI
+
+|Minimum resources
+|3 control-plane nodes typical
+|Management cluster handles overhead
+|2 CPU cores, 2 GB RAM
+|1 CPU core, 512 MB RAM
+|===
+
+[NOTE]
+====
+These architectures are not mutually exclusive.
+A platform team might run HyperShift in the data centre to manage hundreds of tenant clusters, while deploying MicroShift or k3s on edge devices that those tenants own.
+The choice depends on where the control plane lives, how many clusters you need, and what resources are available at each location.
+====
+
+== References
+
+* https://github.com/openshift/hypershift/blob/main/README.md[HyperShift]
+* https://github.com/kcp-dev/kcp/blob/main/README.md[kcp]
+* https://microshift.io/docs/openshift-portability/[MicroShift: OpenShift Portability]

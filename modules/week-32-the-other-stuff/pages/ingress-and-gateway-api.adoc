@@ -1,0 +1,111 @@
+= Ingress and Gateway API
+:navtitle: Ingress and Gateway API
+
+== Ingress: the original HTTP routing API
+
+The `Ingress` resource (stable since Kubernetes v1.19) exposes HTTP and HTTPS routes from outside the cluster to Services inside it.
+An Ingress controller -- typically NGINX, HAProxy, or a cloud load balancer -- watches Ingress objects and configures the underlying data plane accordingly.
+
+Key concepts you should know:
+
+* *IngressClass* -- selects which controller handles a given Ingress.
+If `ingressClassName` is omitted, the cluster's default IngressClass is used.
+* *Path types* -- `Exact` matches a path literally, `Prefix` matches by path prefix, and `ImplementationSpecific` defers the interpretation to the controller.
+* *TLS termination* -- an Ingress can terminate TLS using a Secret that contains the certificate and private key, offloading encryption from backend pods.
+* *Default backend* -- a catch-all Service that handles requests that match no rule.
+
+A minimal Ingress looks like this:
+
+[source,yaml]
+----
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: minimal-ingress
+spec:
+  ingressClassName: nginx-example
+  rules:
+  - http:
+      paths:
+      - path: /testpath
+        pathType: Prefix
+        backend:
+          service:
+            name: test
+            port:
+              number: 80
+----
+
+[IMPORTANT]
+====
+The Ingress API has been frozen.
+The Kubernetes project recommends the Gateway API for all new work and will make no further changes to the Ingress spec.
+====
+
+== Gateway API: the role-oriented successor
+
+The Gateway API is a family of CRDs that provide dynamic infrastructure provisioning and advanced traffic routing.
+It was designed around four principles -- role-oriented, portable, expressive, and extensible -- and has four stable kinds: `GatewayClass`, `Gateway`, `HTTPRoute`, and `GRPCRoute`.
+
+=== Role-oriented resource model
+
+The key improvement over Ingress is the separation of concerns across organizational roles:
+
+. *Infrastructure provider* manages `GatewayClass` -- defines the controller implementation (analogous to a StorageClass for volumes).
+. *Cluster operator* manages `Gateway` -- provisions an instance of the load balancer, configures listeners, ports, and TLS.
+. *Application developer* manages `HTTPRoute` / `GRPCRoute` -- defines routing rules that attach to a Gateway.
+
+This separation means platform teams can manage load balancers while developers manage their own application routing independently.
+
+=== Gateway + HTTPRoute example
+
+[source,yaml]
+----
+apiVersion: gateway.networking.k8s.io/v1
+kind: Gateway
+metadata:
+  name: example-gateway
+spec:
+  gatewayClassName: example-class
+  listeners:
+  - name: http
+    protocol: HTTP
+    port: 80
+    hostname: "www.example.com"
+    allowedRoutes:
+      namespaces:
+        from: Same
+---
+apiVersion: gateway.networking.k8s.io/v1
+kind: HTTPRoute
+metadata:
+  name: example-httproute
+spec:
+  parentRefs:
+  - name: example-gateway
+  hostnames:
+  - "www.example.com"
+  rules:
+  - matches:
+    - path:
+        type: PathPrefix
+        value: /login
+    backendRefs:
+    - name: example-svc
+      port: 8080
+----
+
+By default a Gateway only accepts Routes from the same namespace.
+Cross-namespace routing requires configuring `allowedRoutes` on the listener.
+
+=== Migrating from Ingress
+
+The Gateway API does not include an Ingress kind, so migration is a one-time conversion.
+The upstream https://gateway-api.sigs.k8s.io/guides/getting-started/migrating-from-ingress[migration guide] walks through the process step by step.
+
+For more on how ingress controllers can be sharded across nodes in large clusters, see xref:week-22-going-distributed-locks-leases-ownership-eventual-consistency:controller-sharding.adoc[Week 2.2 on controller sharding].
+
+== References
+
+* https://kubernetes.io/docs/concepts/services-networking/ingress/[Ingress]
+* https://kubernetes.io/docs/concepts/services-networking/gateway/[Gateway API]

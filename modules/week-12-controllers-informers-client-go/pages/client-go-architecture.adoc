@@ -1,0 +1,129 @@
+= client-go Architecture
+:navtitle: client-go Architecture
+
+== What is client-go?
+
+client-go is the official Go client library for the Kubernetes API server.
+It provides the event-driven programming primitives that every controller and operator is built on -- even `kubectl` uses client-go under the hood.
+If you are building a Kubernetes controller, this is the library you need to understand.
+
+Conceptually, three layers sit between a developer and the API server:
+
+. *API server* -- the source of truth for cluster state.
+. *client-go* (`k8s.io/client-go`) -- provides typed clients, informers, listers, caches, and workqueues.
+. *controller-runtime* -- a higher-level framework (covered in xref:week-21-controllers-contd:week-21-controllers-contd.adoc[Week 2.1]) that masks the details of client-go's event-oriented architecture.
+
+The key packages within client-go are `tools/cache` (informers, reflectors, indexers, DeltaFIFO), `kubernetes` (typed clientsets), `dynamic` (untyped clients), and `discovery` (API group discovery).
+
+== Core Components
+
+Every client-go-based controller relies on the following components, all defined under `tools/cache`.
+
+=== Reflector
+
+The *Reflector* (defined in `tools/cache/reflector.go`) mirrors API server state into a local store using `ListAndWatch`.
+On startup it performs an initial LIST to fetch all existing objects and records the `resourceVersion`.
+It then opens a long-running WATCH connection starting from that `resourceVersion` to receive incremental updates.
+When a new or modified resource is detected through the WATCH, the Reflector places the object -- along with the type of change -- into a DeltaFIFO queue inside its `watchHandler` function.
+
+=== DeltaFIFO
+
+*DeltaFIFO* is a producer-consumer queue that stores resource events as incremental deltas.
+Each entry records the change type (Added, Updated, Deleted, Replaced, Sync) along with the object itself.
+The Reflector is the producer; the Informer's `processLoop` is the consumer.
+
+DeltaFIFO provides two guarantees that matter for controller correctness:
+
+* *Exactly-once, in-order processing* per resource -- deltas for a given key are consumed in the order they arrived.
+* *Deduplication* -- if multiple updates arrive for the same key before the consumer processes it, the queue coalesces them so the consumer sees the latest state.
+
+=== Indexer
+
+The *Indexer* (defined in `tools/cache/index.go`) is a thread-safe local cache that stores objects popped from DeltaFIFO.
+It uses the default key function `MetaNamespaceKeyFunc` (from `tools/cache/store.go`) to generate keys in the format `<namespace>/<name>`.
+
+[WARNING]
+====
+Multiple controllers within the same process share the Indexer cache.
+Mutating a cached object -- even a shallow field like `Annotations` -- without a deep copy corrupts the object for every controller that reads it.
+Always use `api.Scheme.Copy` or the generated `DeepCopy()` method before modifying a cached object.
+====
+
+[NOTE]
+====
+Each resource stored in etcd has a hard size limit of approximately 1.5 MB.
+Keep this in mind when designing custom resources with large specs or status fields.
+====
+
+=== SharedInformerFactory
+
+A *SharedInformerFactory* multiplexes watchers across controllers so that only one API server connection is maintained per resource type within a process.
+This saves API connections, serialization and deserialization costs, and server-side memory.
+Factory methods are available in `k8s.io/client-go/informers/factory.go`.
+
+[source,go]
+----
+type SharedInformer interface {
+    // AddEventHandler registers handler functions that are called
+    // when objects are added, updated, or deleted.
+    AddEventHandler(handler ResourceEventHandler) (ResourceEventHandlerRegistration, error)
+
+    // HasSynced returns true after the initial LIST has been
+    // fully processed and the cache is populated.
+    HasSynced() bool
+
+    // LastSyncResourceVersion returns the resourceVersion observed
+    // during the most recent sync with the API server.
+    LastSyncResourceVersion() string
+
+    // Run starts the informer and blocks until the stop channel is closed.
+    Run(stopCh <-chan struct{})
+}
+----
+
+The `SharedInformer` interface is the contract that all informers implement.
+Calling `AddEventHandler` registers your controller's callbacks; calling `Run` starts the Reflector and begins populating the cache.
+
+== The Data Flow Pipeline
+
+The following diagram shows how data flows from the API server through client-go into your controller logic:
+
+----
+API Server
+    |
+    | (ListAndWatch)
+    v
+Reflector
+    |
+    | (Enqueue deltas)
+    v
+DeltaFIFO
+    |
+    | (Pop + store)
+    v
+Informer (Indexer / Cache)
+    |
+    | (Invoke registered callbacks)
+    v
+Event Handlers (AddFunc / UpdateFunc / DeleteFunc)
+    |
+    | (Enqueue namespace/name key)
+    v
+Workqueue
+    |
+    | (Dequeue key)
+    v
+Controller Sync Handler (your reconciliation logic)
+----
+
+The top half of this pipeline -- Reflector, DeltaFIFO, Indexer -- is managed entirely by client-go.
+The bottom half -- event handlers, workqueue, and sync handler -- is what you write as a controller author.
+
+For a walkthrough of a controller that implements the bottom half, see xref:sample-controller-walkthrough.adoc[].
+For how controller-runtime abstracts this entire pipeline behind `ctrl.NewControllerManagedBy()`, see xref:week-21-controllers-contd:week-21-controllers-contd.adoc[Week 2.1].
+
+== References
+
+* https://github.com/kubernetes/client-go/tree/master/tools/cache[client-go tools/cache]
+* https://github.com/kubernetes/sample-controller/blob/master/docs/controller-client-go.md[client-go under the hood]
+* https://github.com/thejasn/presentations/blob/main/kubernetes-informers/presentation.slide[Kubernetes Informers Presentation]

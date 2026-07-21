@@ -1,0 +1,84 @@
+= Controller Sharding
+:navtitle: Controller Sharding
+
+Leader election provides high availability -- if the active replica fails, a standby takes over.
+But it does not provide horizontal scaling: only one replica does work at any time.
+Controller sharding distributes reconciliation across multiple instances, each responsible for a subset of resources.
+
+== Beyond Leader Election
+
+In a leader-elected controller with thousands of resources, a single reconciler becomes the bottleneck. Sharding divides the resource space so that multiple replicas can reconcile concurrently without conflicting with each other. The challenge is assigning resources to shards consistently, rebalancing when shards are added or removed, and ensuring that owned child resources follow their parent's assignment.
+
+== Sharding via Labels
+
+The https://github.com/timebertt/kubernetes-controller-sharding[kubernetes-controller-sharding] project implements a label-based sharding mechanism:
+
+* Each shard instance announces itself by maintaining a `Lease` object with a state label (`ready` or `dead`).
+* A *sharder webhook* (`MutatingWebhookConfiguration`) intercepts `CREATE` and `UPDATE` requests for the sharded resource types.
+* The webhook assigns a shard label to each object using *consistent hashing* -- it hashes the object key and shard names onto a virtual ring, assigning the object to the nearest shard.
+* Each controller instance watches only objects labeled with its own shard identity.
+* Owned objects (those with `ownerReferences`) inherit their parent's shard assignment by hashing the owner's key instead of their own.
+
+=== Scale-Down: Removing a Shard
+
+When a shard instance is terminated:
+
+. The shard releases its Lease by clearing `holderIdentity`.
+. The sharder marks the shard as `dead`.
+. Orphaned objects have their shard label removed; the webhook reassigns them to remaining shards on the next update.
+
+=== Scale-Up: Adding a Shard
+
+When a new shard instance starts:
+
+. The new shard acquires a Lease and is marked `ready`.
+. The sharder identifies objects that should move to the new shard and adds a `drain` label.
+. The current shard stops reconciling drained objects, removes the drain and shard labels.
+. The webhook reassigns drained objects to the new shard.
+
+This coordinated handoff prevents two shards from reconciling the same object simultaneously.
+
+== Case Study: OpenShift Ingress Controller Sharding
+
+OpenShift supports running multiple Ingress Controllers, each responsible for a subset of Routes. This is a production example of sharding at the infrastructure level.
+
+Sharding is configured via `routeSelector` and `namespaceSelector` on the `IngressController` resource:
+
+[source,yaml]
+----
+apiVersion: operator.openshift.io/v1
+kind: IngressController
+metadata:
+  name: internal
+  namespace: openshift-ingress-operator
+spec:
+  routeSelector:
+    matchLabels:
+      type: internal
+  domain: internal.example.com
+----
+
+OpenShift defines two sharding models:
+
+* *Traditional (non-overlapping):* Each route is served by exactly one Ingress Controller. Shards are defined with mutually exclusive selectors.
+* *Overlapped:* Routes can match multiple Ingress Controllers. This enables complex routing topologies but requires careful planning.
+
+Use cases for ingress sharding include:
+
+* Separating internal traffic from external traffic
+* Isolating workloads that require different reliability guarantees
+* Load-balancing across multiple router instances
+* Implementing blue-green deployment strategies
+
+[IMPORTANT]
+====
+Each Ingress Controller requires its own DNS entry. Routers do not forward unknown routes to other routers -- if a route does not match any selector, it is unreachable.
+====
+
+When multiple Ingress Controllers serve the same Route (overlapped mode), each controller writes its own entry into the `status.ingress` array using atomic list types in the `routeIngress` status field. This prevents concurrent writers from corrupting each other's status entries.
+
+== References
+
+* https://github.com/timebertt/kubernetes-controller-sharding/blob/main/docs/getting-started.md[Controller Sharding Getting Started]
+* https://docs.redhat.com/en/documentation/openshift_container_platform/4.11/html/networking/ingress-sharding[Ingress Sharding in OpenShift]
+* https://gist.github.com/swghosh/5fe1dc5a04ce1db48f6bef837b11c0e6[OpenShift Ingress Controller Sharding Case Study Notes]

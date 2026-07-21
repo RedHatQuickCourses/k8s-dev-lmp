@@ -1,10 +1,35 @@
-#  Who is this for? pre-requisites.
+= Who Is This For? Prerequisites
+:navtitle: Who Is This For? Prerequisites
 
-= Who is this for? Pre-requisites
+== Target Audience
 
-This learning path is designed for engineers, system administrators, and developers who already possess practical experience working with containerized environments.
+This learning path is designed for engineers, system administrators, and developers who already possess practical experience working with containerized environments and Kubernetes.
+If you have deployed applications on Kubernetes and want to move beyond basic usage into platform-level development, this course is for you.
 
-To ensure success, participants should have:
+== Recommended Prerequisites
 
-* **Recommended background:** Basic knowledge of distributed systems principles.
-* **Baseline competency:** Proficiency equivalent to the Certified Kubernetes Application Developer (CKAD) certification, or completion of Red Hat DO-180 and DO-280 training tracks.
+A foundational understanding of distributed systems principles is strongly recommended before beginning this course.
+Familiarity with concepts such as concurrency, leasing, and synchronization will help you get the most out of the material on controllers, leader election, and eventual consistency.
+
+== Ideal Baseline
+
+The ideal starting point is proficiency equivalent to one of the following:
+
+* *Certified Kubernetes Application Developer (CKAD)* certification
+* Completion of Red Hat *DO-180* (Introduction to Containers, Kubernetes, and Red Hat OpenShift) and *DO-280* (Red Hat OpenShift Administration) training tracks
+
+Either path ensures you have the hands-on Kubernetes experience needed to engage with the advanced topics in this course.
+
+== Self-Assessment Checklist
+
+Before starting, review the checklist below.
+You should be comfortable with most of these items:
+
+* [ ] You can create and manage Deployments, Services, and ConfigMaps
+* [ ] You understand container image building and registries
+* [ ] You are comfortable reading and writing YAML manifests
+* [ ] You have basic familiarity with Go programming
+* [ ] You can use `kubectl` to inspect and debug cluster resources
+* [ ] You understand the difference between a Pod, a ReplicaSet, and a Deployment
+* [ ] You have worked with namespaces and resource quotas
+* [ ] You are familiar with basic RBAC concepts (Roles, RoleBindings)

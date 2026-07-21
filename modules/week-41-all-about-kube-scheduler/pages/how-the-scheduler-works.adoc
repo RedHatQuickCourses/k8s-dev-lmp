@@ -1,0 +1,111 @@
+= How the Scheduler Works
+:navtitle: How the Scheduler Works
+
+== What the scheduler does
+
+The kube-scheduler is a controller that watches for Pods with no `.spec.nodeName` and assigns them to nodes.
+Its core loop is deceptively simple: pop a pod off the queue, find the best node, write a Binding object back to the API server.
+The kubelet on the chosen node then takes over and actually starts the containers.
+
+Internally the scheduler uses an informer to populate a priority queue of unscheduled pods.
+When new pods appear, an event handler pushes them onto the queue.
+The scheduler pulls pods one at a time and runs the full scheduling cycle for each.
+
+== The scheduling cycle
+
+Every pod passes through three phases:
+
+. *Filtering (predicates)* -- the scheduler evaluates every node to determine which ones _can_ run the pod.
+  Nodes that lack sufficient CPU, violate taints and tolerations, or fail node-affinity rules are eliminated.
+  If no node survives filtering, the scheduler moves to the PostFilter stage to attempt preemption.
+
+. *Scoring (priorities)* -- the remaining feasible nodes are ranked.
+  Scoring functions consider factors like balanced resource utilization, pod spreading across zones, and inter-pod affinity preferences.
+  Each scoring plugin returns a value, and the framework sums them to produce a final rank per node.
+
+. *Binding* -- the scheduler assigns the pod to the highest-scoring node by creating a Binding object in the API server.
+  Binding runs asynchronously so the main scheduling loop is not blocked, which increases throughput.
+
+== Scheduling Framework extension points
+
+The modern scheduler is built on the _Scheduling Framework_, a plugin architecture where every built-in feature -- resource fit checks, taint toleration, node affinity -- is implemented as a plugin.
+The framework exposes the following extension points, executed in order:
+
+[cols="1,3", options="header"]
+|===
+| Extension Point | Purpose
+
+| QueueSort
+| Determines the order pods are dequeued for scheduling (default: by priority).
+
+| PreFilter
+| Initializes per-cycle plugin state before filtering begins.
+
+| Filter
+| Decides whether a node is feasible for the pod (replaces the old predicate functions).
+
+| PostFilter
+| Runs when _no_ node passes filtering -- typically triggers preemption.
+
+| PreScore
+| Prepares state needed by scoring plugins.
+
+| Score
+| Ranks each feasible node (replaces the old priority functions).
+
+| Reserve
+| Claims resources on the chosen node optimistically before binding.
+
+| Permit
+| Gates binding -- a plugin can approve, deny, or ask the pod to wait.
+
+| PreBind
+| Runs setup that must succeed before the bind (e.g., provisioning a volume).
+
+| Bind
+| Writes the Binding object to the API server.
+
+| PostBind
+| Runs cleanup or notification logic after a successful bind.
+|===
+
+Because native features use the same plugin API, custom scheduler plugins can introduce new constraints or scoring logic without forking the scheduler.
+
+== Preemption
+
+When the Filter stage finds no feasible node, the PostFilter extension point fires.
+The default implementation -- `DefaultPreemption` -- searches for a node where evicting lower-priority pods would make room for the pending pod.
+
+The algorithm works roughly like this:
+
+. For each node, remove all pods with a lower priority than the pending pod and check whether the pod now passes all Filter plugins.
+. Try to add back as many removed pods as possible (preferring PDB-protected pods and higher-priority victims) while still allowing the pending pod to schedule.
+. The minimal remaining set of pods that must be evicted becomes the _eviction candidate_ for that node.
+. The best candidate across all nodes is selected -- preferring fewer PDB violations, lower total victim priority, and less churn.
+. The victim pods are deleted, and the pending pod is re-queued to schedule once the victims terminate.
+
+The scheduler also takes a snapshot of cluster state at the start of each cycle so that all plugins see a consistent view, even as the real cluster changes under them.
+
+== Why the scheduler does not resync
+
+Most Kubernetes controllers periodically resync their informers to recover from missed events.
+The scheduler intentionally sets its resync period to zero.
+As the maintainers explained when a resync was proposed, they prefer correctness bugs to be surfaced and fixed rather than silently masked by a periodic full re-list.
+If a pod gets stuck in `Pending` because an event was lost, the fix belongs in the event-handling code, not in a retry band-aid.
+
+== Complementary tools
+
+The kube-scheduler only acts at pod-creation time -- it never moves a running pod.
+Several companion tools fill the gaps:
+
+* *Descheduler* -- an add-on that identifies pods whose placement has become suboptimal (e.g., under-utilized or over-loaded nodes) and evicts them so the scheduler can place them again.
+* *Horizontal Pod Autoscaler (HPA)* -- adjusts the number of pod replicas based on observed CPU, memory, or custom metrics.
+* *Vertical Pod Autoscaler (VPA)* -- adjusts resource requests and limits on existing pods to match actual usage.
+* *Cluster Autoscaler* -- provisions or removes nodes when the scheduler cannot place pods (or when nodes are persistently idle).
+
+Together, these tools close the feedback loop that the scheduler alone cannot provide.
+
+== References
+
+* https://jvns.ca/blog/2017/07/27/how-does-the-kubernetes-scheduler-work/[How Does the Kubernetes Scheduler Work?]
+* https://www.awelm.com/posts/kube-scheduler/[A Deeper Dive of kube-scheduler]

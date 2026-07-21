@@ -1,0 +1,114 @@
+= The Kubernetes Resource Model
+:navtitle: The Kubernetes Resource Model
+
+== Kubernetes is API-Centric
+
+Kubernetes is not just API-driven -- it is *API-centric*.
+At the center of the control plane is the apiserver, which implements common functionality for all of the system's APIs.
+Both user clients and components implementing business logic (called controllers) interact through the same APIs.
+All persistent cluster state is stored in one or more instances of etcd.
+
+This means the distinction between being part of the system and being built on top of the system is deliberately blurred.
+With the growth of API extension mechanisms such as Custom Resource Definitions (CRDs) and aggregated API servers, the number of resource types can be extended without modifying Kubernetes itself.
+Any API using the same mechanisms and patterns automatically works with libraries and tools that already integrate support for the model -- making integration O(M) work for M tools rather than O(NM) for N APIs and M tools.
+
+== Declarative Control
+
+Kubernetes supports declarative control by recording user intent as the desired state in its API resources.
+The intent is carried out by asynchronous controllers, which interact through the Kubernetes API -- they do not access etcd directly, nor do they communicate via private internal APIs.
+
+Controllers continuously strive to make the observed state match the desired state and report back their status to the apiserver asynchronously.
+All state -- desired and observed -- is visible through the API to users and to other controllers.
+The API resources serve as coordination points, common intermediate representation, and shared state.
+
+Controllers are *level-based* rather than edge-based to maximize fault tolerance.
+This means a controller operates correctly given just the desired state and the observed state, regardless of how many intermediate state updates may have been missed.
+However, controllers can achieve the benefits of an edge-triggered implementation by monitoring changes via the watch API, which minimizes reaction latency and redundant work.
+
+== Resource Model Properties
+
+The Kubernetes resource model encodes several properties that reinforce the system's resilience and extensibility:
+
+* *No hidden internal APIs* -- all APIs are visible and available, subject only to authorization policy. There are few direct inter-component APIs. To handle complex use cases, one can access lower-level APIs in a fully transparent manner or add new APIs as necessary.
+
+* *No atomic cross-resource transactions* -- desired state is updated immediately but actuated asynchronously and eventually. Kubernetes does not support atomic transactions across multiple resources, pessimistic locking, or synchronous success preconditions based on actuation results. Providing stronger semantics would compromise resilience, extensibility, and observability.
+
+* *No exclusive owners* -- resources may be read and written by multiple parties and components, often responsible for orthogonal concerns. Controllers cannot assume their decisions will not be overridden and must continually verify assumptions.
+
+* *Status is reconstructable by observation* -- controllers reconcile observed and desired state and repair discrepancies. Kubernetes avoids maintaining opaque, internal persistent state.
+
+* *Object references use predictable names* -- references use client-provided, immutable names to facilitate loose coupling, declarative references, disaster recovery, and deletion and re-creation. References are represented as tuples of name, namespace, API version, and resource type rather than URLs.
+
+== API Topology
+
+The API URL structure follows this form:
+
+----
+/prefix/group/version/namespaces/namespace/resourcetype/name
+----
+
+The API is divided into *groups* of related resource types that co-evolve together across API *versions*.
+Resource instances are grouped by user-created *namespaces*, which scope names, references, and some policies.
+
+All resources contain common *metadata*, including the information in the URL path.
+Metadata also includes user-provided key-value pairs in the form of *labels* (for filtering and grouping by identifying attributes) and *annotations* (generally used by extensions for configuration and checkpointing).
+
+Most resources contain a *spec* (desired state) and *status* (observed state).
+Status is written using the `/status` subresource, using the same API schema, to enable distinct authorization policies for users and controllers.
+
+[source,yaml]
+----
+apiVersion: v1
+kind: Pod
+metadata:
+  namespace: default
+  name: explorer
+  labels:
+    category: demo
+  annotations:
+    commit: 483ac937f496b2f36a8ff34c3b3ba84f70ac5782
+spec:
+  containers:
+    - name: explorer
+      image: gcr.io/google_containers/explorer:1.1.3
+      args: ["-port=8080"]
+      ports:
+        - containerPort: 8080
+          protocol: TCP
+status:
+----
+
+Each API server supports a discovery API to enable clients to discover available API groups, versions, and types, and also publishes OpenAPI schemas for documentation and validation.
+
+== Resource Lifecycle
+
+Each API resource undergoes a common sequence of behaviors upon mutation:
+
+. *Authentication* -- verifies the caller's identity
+. *Authorization* -- applies identity-based policies (built-in RBAC or administrator-defined webhook)
+. *Defaulting* -- API-version-specific default values are made explicit and persisted
+. *Conversion* -- the apiserver converts between the client-requested API version and the storage version
+. *Admission control* -- built-in and administrator-defined resource-type-specific policies
+. *Validation* -- resource field values are validated
+. *Idempotence* -- resources are accessed via immutable, client-provided names
+. *Optimistic concurrency* -- writes may specify a precondition that the `resourceVersion` has not changed
+. *Audit logging* -- records the sequence of changes by all actors
+
+Additional behaviors are supported upon deletion:
+
+* *Graceful termination* -- some resources support delayed deletion, indicated by `deletionTimestamp` and `deletionGracePeriodSeconds`
+* *Finalizers* -- a block on deletion placed by an external controller, which must be removed before deletion can complete
+* *Garbage collection* -- a resource may specify `ownerReferences`; the resource is deleted once all referenced owners have been deleted
+
+And for reads:
+
+* *List* -- all resources of a type within a namespace may be requested; response chunking is supported
+* *Label selection* -- lists may be filtered by label keys and values
+* *Watch* -- a client may subscribe to changes using the `resourceVersion` returned with list results
+
+For how controllers interact with these APIs, see xref:week-12-controllers-informers-client-go:client-go-architecture.adoc[Week 1.2].
+For conditions and status conventions in depth, see xref:week-21-controllers-contd:spec-status-and-conditions.adoc[Week 2.1].
+
+== References
+
+* https://docs.google.com/document/d/1RmHXdLhNbyOWPW_AtnnowaRfGejw-qlKQIuLKQWlwzs/edit#[Kubernetes Resource Model (KRM)]

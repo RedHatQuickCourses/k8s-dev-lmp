@@ -1,12 +1,9 @@
-#  Week 2.2 — Going distributed: locks, leases, ownership, eventual consistency
+= Week 2.2 -- Going Distributed: Locks, Leases, Ownership, Eventual Consistency
+:navtitle: Week 2.2 -- Going Distributed
 
-= Week 2.2 — Going distributed: locks, leases, ownership, eventual consistency
-
-This module focuses on the challenges of operating multiple controllers in a distributed environment. It emphasizes building resilient, eventually consistent state machines by applying foundational distributed system principles to prevent conflicts and ensure reliable orchestration.
-
-Key concepts include:
-
-*   **Idempotency:** Designing state machines that ensure multiple executions lead to the same result without side effects.
-*   **Synchronization Mechanisms:** Utilizing locks and Leases to manage access to shared resources and coordinate activities.
-*   **Leader Election:** Implementing patterns to ensure that only one controller instance performs a specific task at a given time.
-*   **Controller Sharding:** Distributing workload across multiple controller instances to improve scalability, utilizing strategies like resource sharding to handle large-scale clusters.
+When multiple controller replicas manage shared resources, you step squarely into the territory of distributed systems.
+Race conditions, stale caches, and split-brain scenarios are no longer theoretical -- they are daily operational realities.
+This week examines four layers of defense against these challenges.
+First, you will learn to structure your Reconcile loop so that every invocation is idempotent and tolerant of stale data.
+Next, you will study the theory behind distributed locks and understand why naive locking is insufficient for correctness.
+From there, you will implement Kubernetes-native leader election using Lease objects, and finally explore controller sharding as a strategy for scaling reconciliation beyond a single active replica.

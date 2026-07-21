@@ -1,0 +1,97 @@
+= Idempotent Reconciliation
+:navtitle: Idempotent Reconciliation
+
+A controller that cannot be safely re-run on the same input is a controller waiting to break.
+This section covers the structure, return semantics, and cache-awareness patterns that make reconciliation robust.
+
+== The Shape of Reconcile()
+
+A well-structured `Reconcile` method follows a predictable flow that separates concerns and makes the logic easy to reason about:
+
+. *Fetch the resource* from the informer cache. If it is not found, it has been deleted -- return early.
+. *Check for deletion*: if `metadata.deletionTimestamp` is set, run finalizer logic (clean up external resources), remove the finalizer, and return.
+. *Initialize the resource*: add a finalizer if missing, set default values, initialize status conditions.
+. *Perform core reconciliation*: create, update, or delete owned child resources to match the desired state declared in `spec`.
+. *Update status*: patch `status` to reflect the outcome. Compare against a `DeepCopy` taken before reconciliation to avoid unnecessary writes.
+
+[source,go]
+----
+func (r *FooController) Reconcile(ctx context.Context, req ctrl.Request) (ctrl.Result, error) {
+    var obj v1alpha1.Foo
+    if err := r.Get(ctx, req.NamespacedName, &obj); err != nil {
+        return ctrl.Result{}, client.IgnoreNotFound(err)
+    }
+    if !obj.DeletionTimestamp.IsZero() {
+        return r.finalize(ctx, &obj)
+    }
+    if err := r.ensureFinalizer(ctx, &obj); err != nil {
+        return ctrl.Result{}, err
+    }
+    orig := obj.DeepCopy()
+    reconcileErr := r.reconcileKind(ctx, &obj)
+    if err := r.patchStatus(ctx, orig, &obj); err != nil {
+        return ctrl.Result{}, err
+    }
+    return ctrl.Result{}, reconcileErr
+}
+----
+
+== Design for Idempotency
+
+Every call to `Reconcile` should produce the same outcome for the same input state, regardless of how many times it runs or what event triggered it.
+
+* *Do not depend on the triggering event.* The reconciler receives only a name and namespace -- not the event type. Treat every invocation as "make reality match the spec."
+* *Avoid unnecessary API calls.* Compare `status.observedGeneration` against `metadata.generation`. If they match and no external drift is possible, skip reconciliation entirely.
+* *Make external calls conditional.* If your controller provisions cloud resources, check whether the resource already exists in the desired state before calling the provider API. A reconcile of an up-to-date object should be fast and make zero external calls.
+
+== Reconcile Return Values
+
+The return value of `Reconcile` controls requeueing behavior:
+
+[cols="2,3", options="header"]
+|===
+| Return Value | Meaning
+
+| `return ctrl.Result{}, nil`
+| Success. The object is not requeued unless a new event arrives.
+
+| `return ctrl.Result{}, err`
+| Error. The object is requeued with rate-limited exponential backoff.
+
+| `return ctrl.Result{Requeue: true}, nil`
+| Explicit requeue without error. Use sparingly -- typically when an operation is in progress but has not failed.
+
+| `return ctrl.Result{RequeueAfter: time.Minute}, nil`
+| Periodic reconciliation on a wall-clock interval. Useful for polling external state that does not generate Kubernetes events.
+|===
+
+[IMPORTANT]
+====
+Returning an error is the standard way to request a retry. Do not use `Requeue: true` as a substitute for proper error handling.
+====
+
+== The Expectations Pattern
+
+Because controller-runtime serves reads from a local informer cache, there is a window after a successful write where the cache has not yet observed the change.
+
+*Problem:* You create a Pod, but the informer cache has not seen it yet. The next reconcile reads stale state, sees zero Pods, and creates a duplicate. This class of bug affects any controller that creates or deletes child resources.
+
+*Solution:* The _expectations pattern_ tracks expected writes in memory. After creating a Pod, the controller records an "expected create." On the next reconcile, it checks whether expectations are satisfied (the cache has caught up) before acting.
+
+[source,go]
+----
+// Before creating children:
+if !r.expectations.SatisfiedExpectations(key) {
+    return ctrl.Result{}, nil // wait for cache to catch up
+}
+// After creating a child:
+r.expectations.ExpectCreations(key, 1)
+----
+
+This pattern is used by the core ReplicaSet and Job controllers, and by the Elastic Cloud on Kubernetes operator. It is essential for any controller that manages a dynamic number of child resources.
+
+== References
+
+* https://github.com/kubernetes/community/blob/master/contributors/devel/sig-api-machinery/controllers.md[Writing Controllers]
+* https://kubernetes.io/blog/2022/10/20/advanced-server-side-apply/#get-modify-put-patch-controllers[Advanced Server-Side Apply: Patch vs Apply Controllers]
+* https://ahmet.im/blog/controller-pitfalls/[Common Pitfalls in Writing Kubernetes Controllers]

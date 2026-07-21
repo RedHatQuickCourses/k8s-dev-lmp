@@ -1,0 +1,84 @@
+= Declarative Configuration Layers
+:navtitle: Declarative Configuration Layers
+
+Declarative configuration management tools let you declare a desired state for some system and then automatically compare that desired state to reality, updating the managed system to match.
+The https://blog.nelhage.com/post/declarative-configuration-management/[three-layer model] provides a useful framework for understanding how these tools are structured -- and why Kubernetes makes the architectural choices it does.
+
+== A Three-Layer Model
+
+Any declarative configuration management system can be decomposed into three distinct layers:
+
+*Layer 1: Resource Schema*
+
+The resource schema defines which types of resources the tool can manage and what properties they have.
+For Puppet, this includes types like `file` and `mount`; for Terraform, it includes `aws_instance` and `google_compute_network`.
+
+Kubernetes has perhaps the most explicit resource schema of all: it publishes the schema of all core resource types as a https://github.com/kubernetes/api/blob/master/core/v1/generated.proto[protocol buffer definition], and custom resource types may provide an OpenAPIv3 validation schema to document and enforce their shape.
+CRDs extend this schema dynamically without requiring a new API server.
+
+*Layer 2: Concrete Resource Syntax*
+
+The resource schema tells us what types of resources exist, but we need a concrete syntax to express specific instances -- something we can type into an editor, check into version control, and pass to the tool.
+
+In systems like Puppet and Terraform, this problem is solved with a custom language that supports both defining resources and providing abstraction (modules, variables, loops).
+This approach is convenient but often results in the slow, ad-hoc growth of "real language" features as the DSL accumulates complexity.
+
+Kubernetes takes a radically different approach: the only concrete syntax the tool itself accepts is raw JSON or YAML defining fully concrete resources.
+The problem of abstraction -- parameterization, iteration, composition -- is pushed entirely to external tools.
+The open-source community has produced several such tools, including Helm, Kustomize, and Jsonnet.
+
+*Layer 3: Convergence Engine*
+
+On the far side from the concrete syntax is the convergence engine, whose job is to take a concrete resource catalog and update the managed system to match.
+Declarative configuration management derives both its power and many of its operational pitfalls from this layer: the configuration specifies only the desired state, and the engine must figure out how to get there.
+
+Of all the systems in this space, Kubernetes has perhaps the most explicit notion of this layer as a distinct concern, under the name of *controllers*.
+Each controller watches a specific set of resource types and continuously reconciles observed state with desired state.
+
+== Why Strict Layering Matters
+
+The strict separation between these layers -- especially the boundary between concrete syntax and the resource schema -- has several important implications:
+
+*Testability:* If you can run configuration generation entirely separately from convergence, you can write tests that generate a catalog and make assertions about it without ever touching a live cluster.
+A CI pipeline can diff the generated manifests against a known-good baseline to catch unintended changes before they reach production.
+
+*Confidence in refactors:* Pure refactors can be pursued with exceptional confidence.
+As long as a new version of your configuration tooling produces the same resource catalog, you can be certain the change had no functional effect on the cluster.
+
+*Separation of concerns:* Kubernetes handles resource schemas (what types exist and what shape they have) and convergence (controllers that reconcile state).
+Users are free to choose whatever abstraction tool best fits their needs -- a general-purpose programming language, a templating engine, or plain YAML for simple cases.
+The problem of "defining 10 pods with similar shapes but some parameters filled in" is a problem entirely like those encountered in other programming domains, and one adequately solved by functions and variables in any language.
+
+== Comparison with Other Systems
+
+The three-layer model clarifies the differences between declarative configuration management tools:
+
+[cols="1,2,2", options="header"]
+|===
+| System
+| Concrete Syntax
+| Convergence Engine
+
+| Puppet / Chef
+| Custom DSL with built-in abstraction primitives (modules, recipes). Conflates resource definition with abstraction, leading to ad-hoc language growth.
+| Built-in agent applies a catalog to a single host.
+
+| Terraform
+| HCL provides its own abstraction layer (modules, variables, for_each). Tightly coupled to the resource schema through providers.
+| Built-in plan/apply engine compares state files against reality.
+
+| Kubernetes
+| Raw JSON/YAML only. Abstraction is pushed to external tools (Helm, Kustomize, Jsonnet, or any programming language).
+| Controllers -- decoupled, per-resource-type convergence engines that run as independent control loops.
+|===
+
+Kubernetes achieves the purest separation of the three.
+By refusing to embed abstraction into its core, it keeps the API surface simple and lets developers write abstractions in tools and styles they already understand.
+
+For the initial orientation on what Kubernetes really is, see xref:week-0-familiarizing-with-koobrnehteez:what-kubernetes-really-is.adoc[Week 0].
+For how kubebuilder generates resource schemas (CRDs), see xref:week-21-controllers-contd:controller-runtime-and-kubebuilder.adoc[Week 2.1].
+
+== References
+
+* https://github.com/kubernetes/design-proposals-archive/blob/main/architecture/resource-management.md[Kubernetes Resource Management Design Proposal]
+* https://blog.nelhage.com/post/declarative-configuration-management/[The Architecture of Declarative Configuration Management]

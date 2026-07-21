@@ -1,13 +1,9 @@
-#  Week 2.1 — Controllers contd.
+= Week 2.1 -- Controllers with controller-runtime
+:navtitle: Week 2.1 -- Controllers with controller-runtime
 
-= Week 2.1 — Controllers contd.
-
-This module focuses on developing robust Kubernetes controllers using the `controller-runtime` abstraction and `kubebuilder` framework. It emphasizes the practical implementation of the reconciliation loop to manage the lifecycle of custom resources.
-
-Key topics include:
-
-*   **Spec vs. Status:** Managing the delta between desired state (Spec) and actual state (Status) via conditions.
-*   **API Lifecycle:** Implementing comprehensive CRUD operations using `get`, `list`, `watch`, `create`, `delete`, `update`, and `patch` semantics.
-*   **Best Practices:** Differentiating between `Apply`, `Patch`, and `Update` operations.
-*   **Validation:** Ensuring API integrity using `kube-api-linter` (KAL) and built-in validation rules.
-*   **Tooling:** Using `kubebuilder` to scaffold and streamline the development of production-ready controllers.
+This week moves from the raw client-go informer and workqueue machinery covered in Week 1.2 to the higher-level abstractions that most production controllers use.
+We begin with the foundational terminology -- Groups, Versions, Kinds, and Resources -- that underpins every Kubernetes API interaction.
+From there we explore controller-runtime and Kubebuilder, which replace boilerplate informer setup with a single `Reconcile` method.
+We then cover API design conventions: the spec/status split, condition reporting, and the `observedGeneration` pattern that prevents stale status.
+Validation and linting ensure your CRD schemas follow upstream Kubernetes conventions before they reach review.
+Finally, we compare Update, the three Patch types, and Server-Side Apply, explaining when each is appropriate for controllers and CI/CD systems alike.

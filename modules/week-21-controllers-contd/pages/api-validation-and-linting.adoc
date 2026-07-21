@@ -1,88 +1,121 @@
-#  API validation and linting
-
 = API Validation and Linting
+:navtitle: API Validation and Linting
 
-In the Kubernetes Resource Model, ensuring the integrity and quality of your Custom Resource Definitions (CRDs) is paramount. Because Kubernetes relies on declarative state, "bad" API definitions can lead to fragmented control planes, broken reconciliation loops, and unpredictable cluster behavior.
+Well-designed CRD schemas catch invalid input before it reaches your controller.
+Kubernetes offers multiple layers of validation, from declarative schema constraints to programmatic admission webhooks.
 
-API validation and linting ensure that your CRDs adhere to community standards, follow best practices for API design, and minimize runtime errors.
+== Validation Approaches
 
-== Why Validation and Linting Matter
+=== OpenAPI v3 Schema Validation
 
-1.  **Semantic Consistency:** Ensuring that `Spec` fields follow standard naming conventions (e.g., camelCase) and type definitions.
-2.  **Structural Integrity:** Verifying that required fields are present and that optional fields have appropriate default values.
-3.  **Performance:** Well-defined schemas allow the `kube-apiserver` to perform efficient validation without needing to invoke external webhooks for simple type checking.
-4.  **Developer Experience:** Catching errors at development time (CI/CD) rather than at runtime when a user attempts to apply a YAML manifest.
+Every CRD includes an OpenAPI v3 schema that the API server enforces automatically.
+Kubebuilder generates this schema from your Go struct definitions and marker comments.
+Fields without proper validation markers accept any value that matches their Go type, which is rarely what you want.
 
-== Common Validation Approaches
+=== CEL Validation Rules
 
-### 1. OpenAPIV3Schema
-The primary method for validating Kubernetes resources is through the `validation` block in your CRD manifest. By defining an `OpenAPIV3Schema`, you provide the `kube-apiserver` with the constraints necessary to reject invalid requests before they reach your controller.
-
-[source,yaml]
-----
-spec:
-  validation:
-    openAPIV3Schema:
-      type: object
-      properties:
-        spec:
-          type: object
-          properties:
-            replicas:
-              type: integer
-              minimum: 1
-              maximum: 10
-            image:
-              type: string
-              pattern: '^registry\.example\.com/.*'
-----
-
-### 2. Kube-API-Linter (KAL)
-The Kubernetes API Linter (KAL) acts as a static analysis tool for your API definitions. It checks your CRD Go structs or manifests against a set of rules (e.g., `names-must-match`, `no-empty-fields`).
-
-*   **Rule Enforcement:** Ensures that API groups follow the `v1alpha1` -> `v1beta1` -> `v1` progression.
-*   **Best Practices:** Flags common mistakes, such as missing `json` tags in Go structs or missing `DeepCopy` methods.
-
-== Hands-on Activity: Integrating Linting in Kubebuilder
-
-In this activity, we will integrate linting practices into your `kubebuilder` workflow to ensure your API remains clean and production-ready.
-
-### Prerequisites
-*   Ensure `kubebuilder` is installed.
-*   An existing project scaffolded with `kubebuilder`.
-
-### Step 1: Annotating Go Structs
-Validation is not just about YAML; it is about Go code. Use `controller-gen` markers to enforce validation rules directly in your Go source code.
-
-Open your `api/v1/myresource_types.go` file and add validation markers:
+Common Expression Language (CEL) rules let you express cross-field validation directly in the CRD schema.
+Kubebuilder supports these through the `+kubebuilder:validation:XValidation` marker:
 
 [source,go]
 ----
-type MyResourceSpec struct {
-    // +kubebuilder:validation:Minimum=1
-    // +kubebuilder:validation:Maximum=10
-    Replicas int32 `json:"replicas,omitempty"`
-
-    // +kubebuilder:validation:Pattern=`^registry\.example\.com/.*`
-    Image string `json:"image,omitempty"`
+// +kubebuilder:validation:XValidation:rule="self.minReplicas <= self.maxReplicas",message="minReplicas must not exceed maxReplicas"
+type AutoscalerSpec struct {
+    MinReplicas int32 `json:"minReplicas"`
+    MaxReplicas int32 `json:"maxReplicas"`
 }
 ----
 
-### Step 2: Running the Linting Pipeline
-Before building your manifests, run the generation tool to verify your changes:
+CEL rules run on the API server and do not require a webhook deployment.
+
+=== Admission Webhooks
+
+For validation logic that cannot be expressed declaratively -- such as checking external state or enforcing complex business rules -- you can implement validating admission webhooks.
+These are covered in more detail in Week 3.1.
+
+== Kube API Linter (KAL)
+
+The https://github.com/kubernetes-sigs/kube-api-linter[Kube API Linter (KAL)] is a Go-based static analysis tool that checks your CRD struct definitions against upstream Kubernetes API conventions.
+It catches mechanical API review issues so that human reviewers can focus on design.
+
+=== Installation Options
+
+KAL ships in three forms:
+
+. *Standalone binary* -- build with `go build` and run directly
+. *golangci-lint module* -- integrates into an existing golangci-lint v2 workflow via a `.custom-gcl.yml` configuration
+. *golangci-lint plugin* -- loaded as a shared object by golangci-lint
+
+=== Key Linters
+
+KAL includes linters for the most common API convention violations:
+
+[cols="1,2", options="header"]
+|===
+|Linter |What It Checks
+
+|`requiredfields`
+|Required fields are properly annotated
+
+|`statusoptional`
+|All status fields are marked `+optional`
+
+|`statussubresource`
+|Types with status fields enable the `/status` subresource
+
+|`conditions`
+|Condition fields follow the standard list/map conventions
+|===
+
+=== Auto-Fix Support
+
+Where fixes are straightforward, KAL can apply them automatically:
 
 [source,bash]
 ----
-# Run controller-gen to update CRD manifests with the validation markers
-make manifests
-
-# Verify that the generated config/crd/bases file contains the 
-# OpenAPIV3Schema constraints you defined in Go.
-cat config/crd/bases/mygroup.example.com_myresources.yaml
+golangci-lint-kube-api-linter run path/to/api/types --fix
 ----
 
-### Step 3: Best Practice Tip
-Always integrate `make manifests` into your CI pipeline. If a developer attempts to submit a PR that changes the API without satisfying the linting/validation criteria, the pipeline should fail before the code is ever merged into the main branch.
+== Common Validation Markers
 
-== Summary
-While `OpenAPIV3Schema` handles runtime validation at the `kube-apiserver` level, tools like `kube-api-linter` ensure your codebase remains maintainable. Use these tools in tandem to shift left your validation process, catching API design flaws before they reach the cluster.
+Kubebuilder provides a rich set of markers for field-level validation.
+These translate directly into the OpenAPI schema in your CRD:
+
+[source,go]
+----
+// +kubebuilder:validation:Minimum=0
+// +kubebuilder:validation:Maximum=100
+Replicas int32 `json:"replicas"`
+
+// +kubebuilder:validation:MaxLength=256
+// +kubebuilder:validation:MinLength=1
+Name string `json:"name"`
+
+// +kubebuilder:validation:Enum=Allow;Forbid;Replace
+ConcurrencyPolicy string `json:"concurrencyPolicy"`
+
+// +optional
+Suspend *bool `json:"suspend,omitempty"`
+----
+
+=== Validation Guidelines from API Conventions
+
+The upstream API conventions document provides detailed guidance:
+
+* *String fields* -- almost all should be checked for format and maximum length.
+Never perform case-insensitive comparisons in validation.
+* *Numeric fields* -- bound-check both minimum and maximum values.
+* *List fields* -- set maximum size and declare `listType` tags.
+Lists with set or map semantics should enforce uniqueness.
+* *Map fields* -- check maximum size and validate both keys and values.
+
+[TIP]
+====
+Run KAL as part of your CI pipeline alongside `go vet` and `golangci-lint`.
+Catching convention violations early avoids costly API redesigns after your CRD is in production.
+====
+
+== References
+
+* https://github.com/kubernetes/community/blob/master/contributors/devel/sig-architecture/api-conventions.md[API Conventions]
+* https://github.com/kubernetes-sigs/kube-api-linter[Kube API Linter (KAL)]
