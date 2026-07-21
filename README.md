@@ -1,60 +1,31 @@
-## Getting started with a new training content repository
+# Kubernetes Developer Learning Path
 
-- Open the [course-starter-template](https://github.com/RedHatQuickCourses/course-starter-template)
+Course: https://redhatquickcourses.github.io/k8s-dev-lmp/
 
-- Click on `Use This template` button and select `Create a new repository` option.
+## Overview
 
-![use-this-template.png](./images/use-this-template.png)
+This course provides a comprehensive overview of the Kubernetes architecture and its powerful extensibility mechanisms. We will start by learning how the Kubernetes API functions behind the scenes, exploring how cluster requests are authenticated, authorized, and validated by the control plane. The core of the course focuses on platform automation, teaching you how to extend Kubernetes by defining custom resources and writing custom controllers or operators to automatically manage different workloads. To ensure these extensions are robust, we will also cover essential distributed system principles required to build these highly available components and safely handle concurrent updates. Finally, the course explores advanced networking and traffic management concepts while broadening the focus into essential cluster-wide concerns, teaching us how to harden your environments alongside an exploration of alternative control plane architectures like HyperShift and kcp.
 
-- On `Create a new repository` page, Select the options as highlighted in the below image and then click `Create repository` button at the bottom of the page.
+## Who is this for?
 
-![create-new-repo.png](./images/create-new-repo.png)
+This course is tailor-made for engineers, sys admins, developers who already possess some experience running and managing container workloads within Kubernetes environments.
+Additionally, a basic primer on distributed systems is highly recommended to easily grasp the complex concurrency, leasing, and synchronization mechanics covered in the modules.
+Ideally, readers should have a baseline equivalent to holding a CKAD (Certified Kubernetes Application Developer) certification or having completed Red Hat's DO-180 and DO-280 tracks.
 
-- Clone this repository on your local system:
-```
-git clone git@github.com:RedHatQuickCourses/my-training-repository.git
-```
-NOTE: Use your repository url in the above command.
+## Modules
 
-- Go in to the course repository directory and initialize the course.
-``` 
-cd my-training-repository/
-sh course-init.sh --type bfx --lab demo
-```
-NOTE: If you are using Mac, use *zsh* in place of *sh* in the above command.
+- **Week 0** — Familiarizing with koo·br·neh·teez
+- **Week 1.1** — Kubernetes Resource Model
+- **Week 1.2** — Controllers, informers, client-go
+- **Week 2.1** — Controllers contd. (controller-runtime, kubebuilder)
+- **Week 2.2** — Going distributed: locks, leases, ownership, eventual consistency
+- **Week 3.1** — Taking more control: Admissions and beyond the kube-apiserver
+- **Week 3.2** — The other stuff (Networking, Service Mesh, Security)
+- **Week 4.1** — All about kube-scheduler
+- **Week 4.2** — Ubiquitous topics! (HyperShift, kcp, microshift, k3s)
 
-Sample output:
-```
-Initializing my-training-repository . . . done
+## Recommended Reading
 
-Please replace the specified strings in the files below and commit the changes before proceeding with the course development.
-antora.yml:title: REPLACE Course Title
-```
-
-- Edit the files prompted by course initialization script.
-
-- Commit the changes done by course initialization script and your manual edits.
-```
- git status 
- git add -A; git commit -m "course initialization"
- git push origin main 
-```
-
-- Browse your git repository url 
-
-- On your github repo page, on left hand side pane, click on settings gear icon near `About` heading.
-
-- Click `Use your GitHub Pages website` option to select (checked) it and then click `Save changes` button.
-
-![github-pages-setting](./images/github-pages-setting.png)
-
-- You should now see the link to access the rendered content within that same block.
-
-![quickcourse-rendered-url](./images/quickcourse-rendered-url.png)
-
-FIXME: highlight the relevant area on images.
-
-**SEE ALSO**
-
-- [Development using devspace](./DEVSPACE.md)
-- [Guideline for editing your content](./USAGEGUIDE.adoc)
+- *Programming Kubernetes: Developing Cloud-Native Applications* — Hausenblas, Michael, and Stefan Schimanski (O'Reilly Media, 2019)
+- *Kubernetes Operators: Automating the Container Orchestration Platform* — Dobies, Jason, and Joshua Wood (O'Reilly Media, 2020)
+- CNCF Operator Whitepaper: https://tag-app-delivery.cncf.io/whitepapers/operator/
