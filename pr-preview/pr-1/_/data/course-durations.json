@@ -1,5 +1,5 @@
 {
-  "totalSeconds": 5693,
+  "totalSeconds": 5724,
   "pageCount": 51,
   "pages": [
     {
@@ -50,12 +50,12 @@
     {
       "module": "week-11-kubernetes-resource-model",
       "page": "api-request-lifecycle.adoc",
-      "seconds": 71
+      "seconds": 73
     },
     {
       "module": "week-11-kubernetes-resource-model",
       "page": "declarative-configuration-layers.adoc",
-      "seconds": 231
+      "seconds": 233
     },
     {
       "module": "week-12-controllers-informers-client-go",
@@ -65,7 +65,7 @@
     {
       "module": "week-12-controllers-informers-client-go",
       "page": "client-go-architecture.adoc",
-      "seconds": 173
+      "seconds": 176
     },
     {
       "module": "week-12-controllers-informers-client-go",
@@ -75,12 +75,12 @@
     {
       "module": "week-12-controllers-informers-client-go",
       "page": "sample-controller-walkthrough.adoc",
-      "seconds": 147
+      "seconds": 150
     },
     {
       "module": "week-12-controllers-informers-client-go",
       "page": "informer-pitfalls-and-error-handling.adoc",
-      "seconds": 232
+      "seconds": 233
     },
     {
       "module": "week-21-controllers-contd",
@@ -120,7 +120,7 @@
     {
       "module": "week-22-going-distributed-locks-leases-ownership-eventual-consistency",
       "page": "idempotent-reconciliation.adoc",
-      "seconds": 47
+      "seconds": 52
     },
     {
       "module": "week-22-going-distributed-locks-leases-ownership-eventual-consistency",
@@ -135,7 +135,7 @@
     {
       "module": "week-22-going-distributed-locks-leases-ownership-eventual-consistency",
       "page": "controller-sharding.adoc",
-      "seconds": 109
+      "seconds": 111
     },
     {
       "module": "week-31-taking-more-control-admissions-and-beyond-the-kube-apiserver-to-writing-your-own-api-server",
@@ -160,7 +160,7 @@
     {
       "module": "week-31-taking-more-control-admissions-and-beyond-the-kube-apiserver-to-writing-your-own-api-server",
       "page": "custom-api-servers.adoc",
-      "seconds": 155
+      "seconds": 158
     },
     {
       "module": "week-32-the-other-stuff",
@@ -175,12 +175,12 @@
     {
       "module": "week-32-the-other-stuff",
       "page": "service-mesh-fundamentals.adoc",
-      "seconds": 139
+      "seconds": 141
     },
     {
       "module": "week-32-the-other-stuff",
       "page": "authentication-and-authorization.adoc",
-      "seconds": 195
+      "seconds": 197
     },
     {
       "module": "week-32-the-other-stuff",
@@ -220,7 +220,7 @@
     {
       "module": "week-42-ubiquitous-topics",
       "page": "alternative-control-planes-and-form-factors.adoc",
-      "seconds": 270
+      "seconds": 273
     },
     {
       "module": "exercises",
@@ -230,7 +230,7 @@
     {
       "module": "exercises",
       "page": "week-1-build-a-controller-using-client-go-from-scratch.adoc",
-      "seconds": 73
+      "seconds": 76
     },
     {
       "module": "exercises",

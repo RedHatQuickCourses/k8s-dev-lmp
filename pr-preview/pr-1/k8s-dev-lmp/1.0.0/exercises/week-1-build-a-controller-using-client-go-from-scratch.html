@@ -130,7 +130,7 @@
 <ul class="nav-list">
   <li class="nav-item" data-depth="1">
     <button class="nav-item-toggle"></button>
-    <a class="nav-link" href="../week-21-controllers-contd/week-21-controllers-contd.html">Week 2.1&#8201;&#8212;&#8201;Controllers (Continued)</a>
+    <a class="nav-link" href="../week-21-controllers-contd/week-21-controllers-contd.html">Week 2.1&#8201;&#8212;&#8201;Controllers with controller-runtime</a>
 <ul class="nav-list">
   <li class="nav-item" data-depth="2">
     <a class="nav-link" href="../week-21-controllers-contd/gvk-gvr-and-api-terminology.html">GVK, GVR, and API Terminology</a>
@@ -524,6 +524,21 @@ On success, call <code>queue.Forget(key)</code> to reset the backoff counter.</p
 <div class="paragraph">
 <p>Extend your reconcile logic: if the Pod has no labels, log a warning <code>"Pod {namespace}/{name} is missing required labels!"</code>.
 Then try running two instances of your controller simultaneously and observe what happens&#8201;&#8212;&#8201;this motivates the leader election exercise in <a href="week-2-implement-optimistic-locking-and-leader-election-via-lease.html" class="xref page">Exercise 2</a>.</p>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_references"><a class="anchor" href="#_references"></a>References</h2>
+<div class="sectionbody">
+<div class="ulist">
+<ul>
+<li>
+<p><a href="https://sdk.operatorframework.io/docs/building-operators/golang/tutorial/">Operator SDK Go Tutorial</a></p>
+</li>
+<li>
+<p><a href="https://github.com/kubernetes/community/blob/master/contributors/devel/sig-api-machinery/controllers.md#rough-structure">Controller Rough Structure</a></p>
+</li>
+</ul>
 </div>
 </div>
 </div>
