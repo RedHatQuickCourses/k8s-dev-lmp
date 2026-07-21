@@ -80,3 +80,9 @@ They serve different needs:
 For the majority of use cases, CRDs are the right choice.
 Reach for an aggregated API server only when you need a non-etcd storage backend, custom subresources beyond `/status` and `/scale`, or protocol buffer support.
 ====
+
+== References
+
+* https://kubernetes.io/docs/concepts/overview/kubernetes-api/[The Kubernetes API]
+* https://github.com/kubernetes/enhancements/tree/master/keps/sig-api-machinery/3352-aggregated-discovery[KEP-3352: Aggregated Discovery]
+* https://kubernetes.io/docs/concepts/extend-kubernetes/api-extension/custom-resources/[Custom Resources]

@@ -78,3 +78,8 @@ Always set `failurePolicy: Fail` in production to avoid silently skipping valida
 ====
 
 Ready to build one yourself? See xref:exercises:week-3-develop-a-custom-validating-webhook-for-container-registry-enforcement.adoc[Exercise 3: Develop a Custom Validating Webhook].
+
+== References
+
+* https://kubernetes.io/docs/reference/access-authn-authz/admission-controllers[Admission Controllers Reference]
+* https://github.com/openshift/generic-admission-server[generic-admission-server]

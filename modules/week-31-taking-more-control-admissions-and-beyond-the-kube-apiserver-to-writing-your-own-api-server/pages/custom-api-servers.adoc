@@ -74,3 +74,8 @@ Other OpenShift components follow the same pattern:
 Before committing to a custom API server, consider the operational cost: you must build, deploy, and maintain a separate binary; handle upgrades and version skew with the kube-apiserver; and implement health checks so the aggregation layer can detect failures.
 Choose this path only when the technical requirements genuinely demand it.
 ====
+
+== References
+
+* https://github.com/kubernetes/sample-apiserver[sample-apiserver]
+* https://github.com/openshift/operator-framework-olm/tree/main/cmd/package-server-manager[package-server-manager]

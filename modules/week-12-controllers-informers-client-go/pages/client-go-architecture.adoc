@@ -5,6 +5,7 @@
 
 client-go is the official Go client library for the Kubernetes API server.
 It provides the event-driven programming primitives that every controller and operator is built on -- even `kubectl` uses client-go under the hood.
+If you are building a Kubernetes controller, this is the library you need to understand.
 
 Conceptually, three layers sit between a developer and the API server:
 
@@ -120,3 +121,7 @@ The bottom half -- event handlers, workqueue, and sync handler -- is what you wr
 
 For a walkthrough of a controller that implements the bottom half, see xref:sample-controller-walkthrough.adoc[].
 For how controller-runtime abstracts this entire pipeline behind `ctrl.NewControllerManagedBy()`, see xref:week-21-controllers-contd:week-21-controllers-contd.adoc[Week 2.1].
+
+== References
+
+* https://github.com/kubernetes/client-go/tree/master/tools/cache[client-go tools/cache]

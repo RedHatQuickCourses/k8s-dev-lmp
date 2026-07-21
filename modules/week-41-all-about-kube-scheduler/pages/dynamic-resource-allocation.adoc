@@ -98,3 +98,7 @@ DRA is a rapidly evolving area.
 Some features like workload-level claims and device taints are still in alpha or beta.
 Check the upstream https://kubernetes.io/docs/concepts/scheduling-eviction/dynamic-resource-allocation/[DRA documentation] for the latest API stability and feature gates.
 ====
+
+== References
+
+* https://kubernetes.io/docs/concepts/scheduling-eviction/dynamic-resource-allocation/[Dynamic Resource Allocation]

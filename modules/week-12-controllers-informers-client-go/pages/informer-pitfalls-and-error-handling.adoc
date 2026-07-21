@@ -2,7 +2,7 @@
 :navtitle: Informer Pitfalls and Error Handling
 
 Informers are elegant in small clusters but introduce subtle failure modes at scale.
-This page covers the most common pitfalls, drawing from the upstream Kubernetes controller guidelines and from production experience at companies running large clusters.
+This page covers the most common pitfalls, drawn from the upstream Kubernetes controller guidelines and from production experience running large clusters.
 
 == Level-Driven, Not Edge-Driven
 
@@ -110,7 +110,7 @@ func (c *Controller) processNextWorkItem(ctx context.Context) bool {
 
 == Common Mistakes
 
-The following mistakes are observed frequently in production controllers and during code reviews.
+The following mistakes come up frequently in production controllers and during code reviews.
 
 === Mutating cached objects without deep copy
 
@@ -141,3 +141,8 @@ The Informer cache is eventually consistent.
 Before performing a write (update or patch), re-GET the resource from the API server to get the latest `resourceVersion`.
 Writing with a stale `resourceVersion` results in a conflict error.
 While the workqueue retry mechanism will eventually resolve this, it is more efficient to re-GET first.
+
+== References
+
+* https://render.com/blog/kubernetes-informers[Kubernetes Informers Are So Easy... to Misuse!]
+* https://github.com/kubernetes/community/blob/master/contributors/devel/sig-api-machinery/controllers.md[Writing Controllers]

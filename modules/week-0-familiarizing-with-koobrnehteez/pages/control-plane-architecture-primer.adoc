@@ -1,8 +1,8 @@
 = Control Plane Architecture Primer
 :navtitle: Control Plane Architecture Primer
 
-The Kubernetes control plane is the set of components responsible for maintaining the desired state of the cluster.
-Below is a brief overview of each core component.
+The Kubernetes control plane is the set of components responsible for maintaining the desired state of your cluster.
+Here is a brief overview of each core component.
 
 == Core Components
 
@@ -39,4 +39,4 @@ Every request that reaches the API server passes through a well-defined pipeline
 . *Storage* -- Upon successful admission, the resource is persisted to etcd.
 
 This lifecycle is the gateway through which all cluster state changes flow.
-For a detailed walkthrough of each stage, see xref:week-11-kubernetes-resource-model:api-request-lifecycle.adoc[Week 1.1].
+You will walk through each stage in detail in xref:week-11-kubernetes-resource-model:api-request-lifecycle.adoc[Week 1.1].

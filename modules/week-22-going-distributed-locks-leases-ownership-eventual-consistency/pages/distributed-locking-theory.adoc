@@ -2,7 +2,7 @@
 :navtitle: Distributed Locking Theory
 
 Distributed locks appear simple but conceal subtle failure modes.
-This section draws on Martin Kleppmann's analysis to explain why locks are harder than they look and what guarantees are actually achievable.
+This section explains why locks are harder than they look and what guarantees are actually achievable.
 
 == Why Distributed Locks?
 
@@ -25,7 +25,7 @@ These failures are not edge cases. In production environments with garbage-colle
 
 == Fencing Tokens
 
-Kleppmann's recommended solution for correctness-critical locking is the *fencing token* pattern:
+The recommended solution for correctness-critical locking is the *fencing token* pattern:
 
 . The lock service issues a monotonically increasing _fencing token_ each time a lock is acquired.
 . The client includes this token with every write to the shared resource.
@@ -67,3 +67,8 @@ kubectl get leases -n kube-system
 ====
 Kubernetes leader election via Leases does *not* provide fencing token guarantees. Brief periods of dual leadership are possible -- a paused leader can resume alongside a newly elected one. For most controllers, this is acceptable because reconciliation is designed to be idempotent (see xref:idempotent-reconciliation.adoc[Idempotent Reconciliation]). The Kubernetes API server's conflict detection on stale `resourceVersion` values provides an additional layer of safety against state regression.
 ====
+
+== References
+
+* https://martin.kleppmann.com/2016/02/08/how-to-do-distributed-locking.html[How to Do Distributed Locking]
+* https://kubernetes.io/docs/concepts/architecture/leases[Leases]

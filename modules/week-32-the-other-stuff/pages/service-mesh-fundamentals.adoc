@@ -85,3 +85,8 @@ Ambient mode reduces resource overhead and simplifies the pod lifecycle because 
 A service mesh adds real operational complexity.
 Evaluate whether your application genuinely needs mesh-level traffic management, mTLS, and observability before adopting one -- for simpler deployments, Kubernetes-native NetworkPolicies and Gateway API may be sufficient.
 ====
+
+== References
+
+* https://www.baeldung.com/ops/istio-service-mesh[Service Mesh Architecture with Istio]
+* https://istio.io/latest/about/service-mesh/[The Istio Service Mesh]

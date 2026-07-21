@@ -114,3 +114,8 @@ Lists with set or map semantics should enforce uniqueness.
 Run KAL as part of your CI pipeline alongside `go vet` and `golangci-lint`.
 Catching convention violations early avoids costly API redesigns after your CRD is in production.
 ====
+
+== References
+
+* https://github.com/kubernetes/community/blob/master/contributors/devel/sig-architecture/api-conventions.md[API Conventions]
+* https://github.com/kubernetes-sigs/kube-api-linter[Kube API Linter (KAL)]

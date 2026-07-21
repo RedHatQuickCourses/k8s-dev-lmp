@@ -2,7 +2,7 @@
 :navtitle: API Request Lifecycle
 
 Every interaction with a Kubernetes cluster -- whether from `kubectl`, an internal controller, or an external operator -- passes through the kube-apiserver's request pipeline.
-Understanding the stages of this pipeline is essential for building secure, efficient, and extension-ready Kubernetes applications.
+Understanding these stages is essential for building secure, efficient, and extension-ready Kubernetes applications.
 
 == The Request Pipeline
 
@@ -76,3 +76,7 @@ curl -s http://localhost:8001/api/v1/namespaces/default/pods | jq '.items[].meta
 
 These commands confirm that your request successfully passes through the authentication and authorization stages described above.
 The discovery endpoints are also what client libraries like client-go use under the hood to negotiate API versions and resource schemas.
+
+== References
+
+* https://kubernetes.io/docs/reference/access-authn-authz/admission-controllers[Admission Controllers Reference]

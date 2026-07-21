@@ -6,7 +6,7 @@
 The `Ingress` resource (stable since Kubernetes v1.19) exposes HTTP and HTTPS routes from outside the cluster to Services inside it.
 An Ingress controller -- typically NGINX, HAProxy, or a cloud load balancer -- watches Ingress objects and configures the underlying data plane accordingly.
 
-Key concepts every developer should know:
+Key concepts you should know:
 
 * *IngressClass* -- selects which controller handles a given Ingress.
 If `ingressClassName` is omitted, the cluster's default IngressClass is used.
@@ -104,3 +104,8 @@ The Gateway API does not include an Ingress kind, so migration is a one-time con
 The upstream https://gateway-api.sigs.k8s.io/guides/getting-started/migrating-from-ingress[migration guide] walks through the process step by step.
 
 For more on how ingress controllers can be sharded across nodes in large clusters, see xref:week-22-going-distributed-locks-leases-ownership-eventual-consistency:controller-sharding.adoc[Week 2.2 on controller sharding].
+
+== References
+
+* https://kubernetes.io/docs/concepts/services-networking/ingress/[Ingress]
+* https://kubernetes.io/docs/concepts/services-networking/gateway/[Gateway API]

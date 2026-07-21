@@ -1,7 +1,7 @@
 = Informers, Listers, and Workqueues
 :navtitle: Informers, Listers, and Workqueues
 
-A controller needs three things: *eyes* to watch for changes, *memory* to recall current state, and a *task list* to schedule work.
+Your controller needs three things: *eyes* to watch for changes, *memory* to recall current state, and a *task list* to schedule work.
 In client-go, these roles map to Informers, Listers, and Workqueues.
 
 == Informers -- The Eyes
@@ -64,7 +64,7 @@ while true:
 == Controller Guidelines
 
 The upstream Kubernetes project maintains a set of guidelines for writing correct controllers.
-The most important ones are summarized here.
+Here are the most important ones.
 
 . *Operate on one item at a time via workqueue.* Use `workqueue.Interface` for deduplication and safe concurrent processing. When a secondary resource (such as a Pod) triggers an event, find its owning resource (such as a ReplicaSet) and enqueue that instead.
 
@@ -96,3 +96,7 @@ A resync does *not* make a new LIST call to the API server.
 It simply re-delivers the existing cached objects to the event handlers.
 If you need to avoid redundant reconciliations during resync, compare the `ResourceVersion` of the old and new objects in your `UpdateFunc` handler and skip processing if they are equal -- but be careful, because skipping too aggressively can prevent retries of previously failed items.
 ====
+
+== References
+
+* https://medium.com/@dhruvbhl/informers-listers-workqueues-the-brain-behind-your-controller-f5b0967026de[Informers, Listers & Workqueues]

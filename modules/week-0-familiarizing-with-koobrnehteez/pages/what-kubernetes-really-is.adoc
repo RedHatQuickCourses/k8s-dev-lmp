@@ -2,18 +2,18 @@
 :navtitle: What Kubernetes Really Is
 
 At its core, Kubernetes is an API-centric, declarative configuration management and container orchestration system.
-Rather than issuing imperative commands to instruct the server what to do, users interact with the system by declaring the desired state of their resources as pure data.
+Rather than issuing imperative commands to tell the server what to do, you interact with the system by declaring the desired state of your resources as pure data.
 
-The heart of the Kubernetes control plane is the API server, which acts as a central coordination point and persists this desired state into a key-value store called etcd.
+The heart of the control plane is the API server, which acts as a central coordination point and persists this desired state into a key-value store called etcd.
 
-To make reality match these expectations, Kubernetes relies on an ecosystem of asynchronous controllers.
+To make reality match those declarations, Kubernetes relies on an ecosystem of asynchronous controllers.
 These controllers continuously watch the API server for changes, compare the current observed state of the world to your desired state, and actively reconcile any differences.
 
-This powerful separation of responsibilities -- where the API server maintains the shared state and independent controllers actuate it -- forms the exact same fundamental architecture you will utilize and extend when building your own custom operators.
+This separation of responsibilities -- where the API server maintains shared state and independent controllers actuate it -- is the same fundamental architecture you will use and extend when building your own custom operators.
 
 == A Three-Layer Mental Model
 
-It is useful to think of any declarative configuration management system -- Kubernetes included -- as composed of three distinct layers:
+It helps to think of any declarative configuration management system -- Kubernetes included -- as composed of three distinct layers:
 
 * *Layer 1 -- Resource Schema:* The definition of which types of resources exist and what shape they take.
 In Kubernetes, this is expressed through API group-version-kind (GVK) definitions, Protocol Buffer schemas for built-in types, and OpenAPI v3 validation schemas for custom resources.

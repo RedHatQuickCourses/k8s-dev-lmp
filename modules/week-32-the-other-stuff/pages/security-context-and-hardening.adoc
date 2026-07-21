@@ -104,3 +104,8 @@ Prevents running as root, drops all capabilities, and requires a seccomp profile
 Granting the `privileged` SCC to a workload effectively disables all pod-level security controls.
 Use it only for infrastructure components that genuinely require host-level access, and always through a dedicated service account.
 ====
+
+== References
+
+* https://kubernetes.io/docs/tasks/configure-pod-container/security-context/[Configure a Security Context]
+* https://github.com/kubernetes-sigs/security-profiles-operator[Security Profiles Operator]

@@ -107,3 +107,7 @@ Together, LimitRange and ResourceQuota let platform teams give development teams
 
 * High `container_cpu_cfs_throttled_seconds_total` in Prometheus indicates CPU throttling.
   Consider raising the CPU limit or removing it entirely if the node has spare capacity.
+
+== References
+
+* https://kubernetes.io/docs/concepts/configuration/manage-resources-containers/[Resource Management for Pods and Containers]

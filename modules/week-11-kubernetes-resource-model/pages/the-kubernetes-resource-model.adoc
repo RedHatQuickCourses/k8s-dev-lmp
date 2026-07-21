@@ -8,7 +8,7 @@ At the center of the control plane is the apiserver, which implements common fun
 Both user clients and components implementing business logic (called controllers) interact through the same APIs.
 All persistent cluster state is stored in one or more instances of etcd.
 
-This design means that the distinction between being part of the system and being built on top of the system is deliberately blurred.
+This means the distinction between being part of the system and being built on top of the system is deliberately blurred.
 With the growth of API extension mechanisms such as Custom Resource Definitions (CRDs) and aggregated API servers, the number of resource types can be extended without modifying Kubernetes itself.
 Any API using the same mechanisms and patterns automatically works with libraries and tools that already integrate support for the model -- making integration O(M) work for M tools rather than O(NM) for N APIs and M tools.
 
@@ -108,3 +108,7 @@ And for reads:
 
 For how controllers interact with these APIs, see xref:week-12-controllers-informers-client-go:client-go-architecture.adoc[Week 1.2].
 For conditions and status conventions in depth, see xref:week-21-controllers-contd:spec-status-and-conditions.adoc[Week 2.1].
+
+== References
+
+* https://docs.google.com/document/d/1RmHXdLhNbyOWPW_AtnnowaRfGejw-qlKQIuLKQWlwzs/edit#[Kubernetes Resource Model (KRM)]

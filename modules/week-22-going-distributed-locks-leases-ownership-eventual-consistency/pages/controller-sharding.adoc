@@ -76,3 +76,8 @@ Each Ingress Controller requires its own DNS entry. Routers do not forward unkno
 ====
 
 When multiple Ingress Controllers serve the same Route (overlapped mode), each controller writes its own entry into the `status.ingress` array using atomic list types in the `routeIngress` status field. This prevents concurrent writers from corrupting each other's status entries.
+
+== References
+
+* https://github.com/timebertt/kubernetes-controller-sharding/blob/main/docs/getting-started.md[Controller Sharding Getting Started]
+* https://docs.redhat.com/en/documentation/openshift_container_platform/4.11/html/networking/ingress-sharding[Ingress Sharding in OpenShift]

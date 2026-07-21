@@ -81,3 +81,8 @@ When using controller-runtime, `client.Get` resolves the GVK through the Scheme 
 |`runtime.Scheme`
 |Maps Go types to GVKs for (de)serialization
 |===
+
+== References
+
+* https://book.kubebuilder.io/cronjob-tutorial/gvks[Groups and Versions and Kinds, oh my!]
+* https://github.com/kubernetes/community/blob/master/contributors/devel/sig-architecture/api-conventions.md[API Conventions]

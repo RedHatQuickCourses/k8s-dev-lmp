@@ -105,3 +105,8 @@ The `leaderelection` package provides a `HealthzAdaptor` that integrates with th
 ====
 For a hands-on exercise implementing leader election with Lease objects, see xref:exercises:week-2-implement-optimistic-locking-and-leader-election-via-lease.adoc[Exercise 2: Implement Optimistic Locking and Leader Election via Lease].
 ====
+
+== References
+
+* https://sklar.rocks/kubernetes-leader-election/[Kubernetes-Powered Leader Election in Go]
+* https://pkg.go.dev/k8s.io/client-go/tools/leaderelection[leaderelection package reference]

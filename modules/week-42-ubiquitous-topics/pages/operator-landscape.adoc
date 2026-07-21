@@ -1,12 +1,12 @@
 = The Operator Landscape
 :navtitle: The Operator Landscape
 
-The CNCF Operator White Paper formalises what the community learned from years of building controllers for stateful workloads.
-This page distils the paper's key ideas: a precise definition, a maturity model, the major frameworks, and the design patterns that keep operators maintainable at scale.
+The operator concept has been formalised through years of building controllers for stateful workloads.
+Below you will find a precise definition, a maturity model, the major frameworks, and the design patterns that keep operators maintainable at scale.
 
 == What is an Operator?
 
-The CNCF white paper defines an operator as _a Kubernetes extension that uses custom resources to manage applications and their components_.
+An operator is formally defined as _a Kubernetes extension that uses custom resources to manage applications and their components_.
 More concretely, an operator encodes domain-specific operational knowledge -- installation sequences, upgrade migrations, backup procedures, failure recovery -- into software that runs inside the cluster.
 
 An operator combines three things:
@@ -20,7 +20,7 @@ A controller that creates a Pod when a custom resource appears is a simple contr
 
 == Operator Capability Model
 
-The white paper defines a five-level maturity model that describes what an operator can do at each stage.
+A five-level maturity model describes what an operator can do at each stage.
 Teams use the model to scope an operator's initial release and to plan future investment.
 
 [cols="1,2", options="header"]
@@ -73,7 +73,7 @@ No custom binary needs to be compiled or deployed -- the webhook can even run as
 
 == Design Patterns
 
-The white paper and the broader community converge on several patterns for keeping operators focused and composable.
+The community has converged on several patterns for keeping operators focused and composable.
 
 === One CRD per Controller
 
@@ -102,3 +102,7 @@ When choosing a framework, start with the language your team already knows.
 If you need OLM integration for catalog publishing and dependency management, Operator SDK is the natural choice.
 If you want to avoid compiling a binary entirely, Metacontroller's webhook model removes that step.
 ====
+
+== References
+
+* https://tag-app-delivery.cncf.io/whitepapers/operator/[CNCF Operator White Paper]

@@ -2,7 +2,7 @@
 :navtitle: Sample Controller Walkthrough
 
 The https://github.com/kubernetes/sample-controller[sample-controller] is the official Kubernetes example operator.
-It demonstrates how to build a controller using client-go from scratch, managing a custom resource called *Foo* that creates and manages Deployments.
+It shows you how to build a controller using client-go from scratch, managing a custom resource called *Foo* that creates and manages Deployments.
 
 == The Foo Custom Resource
 
@@ -207,3 +207,7 @@ func (c *Controller) syncHandler(ctx context.Context, objectRef cache.ObjectName
 This pattern -- get from cache, compare desired vs. actual, create or update, then update status -- is the standard reconciliation loop that every client-go controller follows.
 
 For a hands-on exercise building a controller from scratch using this same pattern, see xref:exercises:week-1-build-a-controller-using-client-go-from-scratch.adoc[Exercise 1].
+
+== References
+
+* https://chishengliu.com/posts/kubernetes-operator-sample-controller/[How to Write a Kubernetes Operator Using client-go]

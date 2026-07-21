@@ -95,3 +95,9 @@ Operator SDK adds several features on top of the Kubebuilder baseline:
 
 For pure Go operators, the choice between `kubebuilder init` and `operator-sdk init` is largely a matter of which ecosystem tools you need.
 The underlying reconciler code, RBAC markers, and CRD generation are the same.
+
+== References
+
+* https://book.kubebuilder.io/cronjob-tutorial/controller-overview.html[What's in a Controller?]
+* https://book.kubebuilder.io/cronjob-tutorial/controller-implementation.html[Implementing a Controller]
+* https://sdk.operatorframework.io/docs/faqs/[Operator SDK FAQ]

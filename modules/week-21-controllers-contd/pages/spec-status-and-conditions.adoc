@@ -105,3 +105,7 @@ if err := r.Get(ctx, req.NamespacedName, &cronJob); err != nil {
 
 * *Reconstruct status from the world* -- status should be derivable from the current state of child resources, not read from the previous status of the root object.
 This ensures correctness even after controller restarts.
+
+== References
+
+* https://github.com/kubernetes/community/blob/master/contributors/devel/sig-architecture/api-conventions.md[API Conventions]

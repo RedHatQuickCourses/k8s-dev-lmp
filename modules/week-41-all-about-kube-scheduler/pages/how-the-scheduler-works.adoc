@@ -104,3 +104,8 @@ Several companion tools fill the gaps:
 * *Cluster Autoscaler* -- provisions or removes nodes when the scheduler cannot place pods (or when nodes are persistently idle).
 
 Together, these tools close the feedback loop that the scheduler alone cannot provide.
+
+== References
+
+* https://jvns.ca/blog/2017/07/27/how-does-the-kubernetes-scheduler-work/[How Does the Kubernetes Scheduler Work?]
+* https://www.akila.dev/kube-scheduler[A Deeper Dive of kube-scheduler]

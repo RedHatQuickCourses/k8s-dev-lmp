@@ -82,3 +82,8 @@ Key advantages over RBAC include:
 * *Cross-system integration* -- external permission sources (LDAP groups, cloud IAM roles) can be projected into the same graph as Kubernetes RBAC objects.
 
 ReBAC is still experimental in the Kubernetes ecosystem, but it signals the direction that SIG-Auth is exploring for fine-grained, graph-aware authorization.
+
+== References
+
+* https://kubernetes.io/docs/reference/access-authn-authz/authentication/[Authenticating]
+* https://github.com/luxas/kube-rebac-authorizer[kube-rebac-authorizer]

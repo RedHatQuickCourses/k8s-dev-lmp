@@ -1,8 +1,8 @@
 = Declarative Configuration Layers
 :navtitle: Declarative Configuration Layers
 
-Declarative configuration management tools allow operators to declare a desired state of some system and then let the tool automatically compare that desired state to reality and update the managed system to match.
-Nelson Elhage's https://blog.nelhage.com/post/declarative-configuration-management/[three-layer model] provides a useful framework for understanding how these tools are structured -- and why Kubernetes makes the architectural choices it does.
+Declarative configuration management tools let you declare a desired state for some system and then automatically compare that desired state to reality, updating the managed system to match.
+The https://blog.nelhage.com/post/declarative-configuration-management/[three-layer model] provides a useful framework for understanding how these tools are structured -- and why Kubernetes makes the architectural choices it does.
 
 == A Three-Layer Model
 
@@ -77,3 +77,7 @@ By refusing to embed abstraction into its core, it keeps the API surface simple 
 
 For the initial orientation on what Kubernetes really is, see xref:week-0-familiarizing-with-koobrnehteez:what-kubernetes-really-is.adoc[Week 0].
 For how kubebuilder generates resource schemas (CRDs), see xref:week-21-controllers-contd:controller-runtime-and-kubebuilder.adoc[Week 2.1].
+
+== References
+
+* https://blog.nelhage.com/post/declarative-configuration-management/[The Architecture of Declarative Configuration Management]

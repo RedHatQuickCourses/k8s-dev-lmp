@@ -121,3 +121,8 @@ For resources with a single owner, traditional Update is simpler and avoids the 
 * *JSON Merge Patch* -- partial object merge; lists are replaced.
 * *Strategic Merge Patch* -- Kubernetes-aware list merging (built-in types only).
 * *Server-Side Apply* -- server-side merge with field ownership tracking and conflict detection; the recommended approach for multi-actor scenarios.
+
+== References
+
+* https://kubernetes.io/docs/tasks/manage-kubernetes-objects/update-api-object-kubectl-patch/[Update API Objects Using kubectl patch]
+* https://opensource.googleblog.com/2021/10/server-side-apply-in-kubernetes.html[Server-Side Apply in Kubernetes]

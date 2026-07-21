@@ -3,7 +3,7 @@
 
 In a standard Kubernetes cluster the control plane -- `kube-apiserver`, `etcd`, `kube-controller-manager`, and `kube-scheduler` -- runs alongside the workload nodes, either on dedicated machines or as static pods on control-plane nodes.
 That model works well for general-purpose clusters, but it is not the only option.
-As Kubernetes expands into multi-tenant platforms, edge computing, and resource-constrained devices, alternative architectures trade off different properties: management overhead, resource footprint, provisioning speed, and operational simplicity.
+As Kubernetes expands into multi-tenant platforms, edge computing, and resource-constrained devices, you will encounter alternative architectures that trade off different properties: management overhead, resource footprint, provisioning speed, and operational simplicity.
 
 == HyperShift
 

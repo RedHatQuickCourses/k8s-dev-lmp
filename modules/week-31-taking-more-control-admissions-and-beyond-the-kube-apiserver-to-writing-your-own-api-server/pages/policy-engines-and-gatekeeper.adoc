@@ -94,3 +94,7 @@ CEL-based policies are best suited for straightforward validation rules -- such 
 Use *Gatekeeper* when you need complex cross-resource policies, audit of existing resources, or Rego's full expressiveness.
 Use *ValidatingAdmissionPolicy* for simpler, latency-sensitive validations that benefit from running in-process within the API server.
 ====
+
+== References
+
+* https://kubernetes.io/blog/2019/08/06/opa-gatekeeper-policy-and-governance-for-kubernetes/[OPA Gatekeeper: Policy and Governance for Kubernetes]
