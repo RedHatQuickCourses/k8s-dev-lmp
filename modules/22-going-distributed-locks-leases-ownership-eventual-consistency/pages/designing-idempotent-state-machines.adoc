@@ -1,0 +1,70 @@
+#  Designing idempotent state machines
+
+= Designing Idempotent State Machines in Kubernetes
+
+In a distributed system like Kubernetes, the controller model operates on the principle of **eventual consistency**. Because network partitions, pod restarts, and API server latencies are inevitable, your controllers must be resilient to repeated, redundant, or out-of-order events. 
+
+The mechanism that enables this resilience is the **Idempotent State Machine**.
+
+== The Core Principle: Idempotency
+An operation is idempotent if performing it multiple times yields the same result as performing it once. In the context of a Kubernetes controller, your `Reconcile` function must be designed so that:
+
+*   **Current State == Desired State:** If the system is already in the correct state, the controller performs no action.
+*   **Partial Failure Recovery:** If a controller crashes halfway through a task, restarting the reconcile loop should complete the remaining steps without duplicating side effects.
+
+== Designing for Atomicity and Consistency
+
+To build an idempotent state machine, you must transition from thinking in "commands" to thinking in "states."
+
+### 1. Spec vs. Status Pattern
+The `Spec` represents the desired state (what the user wants), while the `Status` represents the observed state (what the controller has achieved). Your logic should flow as follows:
+
+1.  **Observe:** Read the `Spec` and the current state of the infrastructure (e.g., existing ConfigMaps, Deployments).
+2.  **Diff:** Calculate the difference between the `Spec` and the observed state.
+3.  **Act:** Only apply the minimal change required to move the observed state closer to the `Spec`.
+4.  **Report:** Update the `Status` to reflect the new state.
+
+### 2. Guarding against side effects
+When your controller interacts with external systems (like cloud APIs or databases), you cannot simply "update" as you would with a K8s resource. You must implement protective guards:
+
+*   **Pre-flight checks:** Before creating a resource, check if it already exists by a unique identifier (e.g., a standard Kubernetes label or a generated name).
+*   **Resource Versioning:** Utilize the `metadata.resourceVersion` to perform optimistic locking. If the resource changed since you last read it, the API server will reject your update, preventing "lost updates."
+*   **Finalizers:** Use finalizers to ensure that cleanup logic (like deleting an external cloud load balancer) is handled idempotently when a resource is deleted.
+
+== Practical Implementation Strategy
+
+When writing your logic, follow this pseudo-code pattern to maintain idempotency:
+
+[source,go]
+----
+func (r *Reconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctrl.Result, error) {
+    // 1. Fetch the custom resource
+    instance := &v1alpha1.MyCustomResource{}
+    if err := r.Get(ctx, req.NamespacedName, instance); err != nil {
+        return ctrl.Result{}, client.IgnoreNotFound(err)
+    }
+
+    // 2. Determine what needs to be done
+    // Logic: Do we already have the sub-resource?
+    if !r.exists(instance) {
+        // 3. Act: Only perform the creation if it doesn't exist
+        if err := r.create(instance); err != nil {
+            return ctrl.Result{}, err
+        }
+    }
+
+    // 4. Update status to match current reality
+    instance.Status.Phase = "Ready"
+    return ctrl.Result{}, r.Status().Update(ctx, instance)
+}
+----
+
+== Key Takeaways for Distributed Controllers
+*   **Avoid Statefulness:** Store as much information as possible in the Kubernetes API itself, rather than in local memory or local files.
+*   **Handle Requeues:** Always expect the `Reconcile` function to be called again for the same resource. Do not assume the world has stayed the same since the last execution.
+*   **Don't ignore errors:** If your controller fails to reach an external API, return the error so the `workqueue` can implement an exponential backoff.
+
+[TIP]
+====
+When designing your state machine, ask yourself: *"If I ran this logic 100 times in a row without changing the input, would the environment change after the first time?"* If the answer is yes, your logic is not yet idempotent.
+====

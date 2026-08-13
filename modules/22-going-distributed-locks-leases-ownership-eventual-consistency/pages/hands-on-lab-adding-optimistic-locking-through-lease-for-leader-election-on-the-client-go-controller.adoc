@@ -1,0 +1,90 @@
+#  Hands-on Lab: Adding optimistic locking through Lease for leader election on the client-go controller.
+
+= Hands-on Lab: Implementing Leader Election with `client-go`
+
+In a distributed environment, running multiple instances of the same controller can lead to race conditions, double-processing of events, and conflicting state updates. To prevent this, we use **Leader Election**, which ensures that only one instance of your controller acts as the "Leader" and executes the reconciliation loop, while others stand by as "Followers."
+
+In this lab, we will use the `k8s.io/client-go/tools/leaderelection` package to implement a leader election mechanism using Kubernetes `Lease` objects.
+
+== Prerequisites
+* A working `client-go` controller (from Exercise 1).
+* `k8s.io/client-go` and `k8s.io/apimachinery` modules initialized in your `go.mod`.
+* A running Kubernetes cluster (or `kind`).
+
+== Step 1: Define the Lock Configuration
+The `leaderelection` package requires a `LeaderElectionConfig`. This struct defines the identity of your controller, the resource lock (Lease), and the callback functions for when the controller gains or loses leadership.
+
+Add the following configuration to your `main.go` or controller initialization logic:
+
+[source,go]
+----
+import (
+    "k8s.io/client-go/tools/leaderelection"
+    "k8s.io/client-go/tools/leaderelection/resourcelock"
+    metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+)
+
+// Define the lease lock
+lock := &resourcelock.LeaseLock{
+    LeaseMeta: metav1.ObjectMeta{
+        Name:      "my-controller-lock",
+        Namespace: "default",
+    },
+    Client: clientset.CoordinationV1(),
+    LockConfig: resourcelock.ResourceLockConfig{
+        Identity: podName, // Unique identifier for this instance (e.g., hostname)
+    },
+}
+----
+
+== Step 2: Implement the Leader Election Loop
+Instead of starting your controller's `Run()` method directly, wrap it within the `leaderelection.RunOrDie` function. This function handles the logic of acquiring the lease and calling your reconciliation logic only when leadership is held.
+
+[source,go]
+----
+leaderelection.RunOrDie(ctx, leaderelection.LeaderElectionConfig{
+    Lock:            lock,
+    ReleaseOnCancel: true,
+    LeaseDuration:   15 * time.Second,
+    RenewDeadline:   10 * time.Second,
+    RetryPeriod:     2 * time.Second,
+    Callbacks: leaderelection.LeaderCallbacks{
+        OnStartedLeading: func(ctx context.Context) {
+            // This is where your controller's main loop starts
+            runMyController(ctx)
+        },
+        OnStoppedLeading: func() {
+            log.Printf("Leader lost; exiting.")
+            os.Exit(0)
+        },
+        OnNewLeader: func(identity string) {
+            log.Printf("New leader elected: %s", identity)
+        },
+    },
+})
+----
+
+== Step 3: Understanding the Leases
+When you run this controller:
+1. The `client-go` library creates a `Lease` object in the `coordination.k8s.io` API group.
+2. The controller attempts to acquire the lock by updating the `HolderIdentity` field in the Lease.
+3. If successful, it proceeds to start the `Informer` and `Workqueue`.
+4. If it fails to renew the lease within the `RenewDeadline`, it loses leadership and stops the controller logic.
+
+== Step 4: Verification
+1. **Deploy the controller:** Deploy two replicas of your controller pod in the same namespace.
+2. **Check the logs:** Observe that only one pod logs "New leader elected" and begins processing items.
+3. **Inspect the Lease:**
++
+[source,bash]
+----
+kubectl get lease my-controller-lock -o yaml
+----
++
+*Observe the `holderIdentity` field matching the pod name of the current leader.*
+
+4. **Simulate Failure:** Delete the leader pod. Notice how the second pod automatically detects the expiry of the lease, assumes leadership, and begins the reconciliation loop.
+
+== Troubleshooting
+* **RBAC:** Ensure the ServiceAccount used by your pod has `get`, `create`, `update`, and `patch` permissions on `leases` resources in the `coordination.k8s.io` group.
+* **Clock Skew:** Ensure your nodes are NTP-synchronized, as leader election relies heavily on timeouts and lease durations.

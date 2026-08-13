@@ -1,40 +1,52 @@
-= Kubernetes Developer Learning Path
+=  Kubernetes Developer Learning Path
 :navtitle: Home
 
 == Introduction
 
-This course provides a comprehensive overview of the Kubernetes architecture and its powerful extensibility mechanisms.
-We start by learning how the Kubernetes API functions behind the scenes, exploring how cluster requests are authenticated, authorized, and validated by the control plane.
-The core of the course focuses on platform automation, teaching you how to extend Kubernetes by defining custom resources and writing custom controllers or operators to automatically manage different workloads.
-To ensure these extensions are robust, we also cover essential distributed system principles required to build highly available components and safely handle concurrent updates.
-Finally, the course explores advanced networking and traffic management concepts alongside an exploration of alternative control plane architectures like HyperShift and kcp.
+Course Title:  Kubernetes Developer Learning Path
 
-== Topics Covered
+Description:
+Course description FIXME
 
-* xref:overview:overview.adoc[Overview] — Course roadmap and weekly module previews
-* xref:who-is-this-for-pre-requisites:who-is-this-for-pre-requisites.adoc[Who is this for?] — Target audience and prerequisites
-* xref:week-0-familiarizing-with-koobrnehteez:week-0-familiarizing-with-koobrnehteez.adoc[Week 0 — Familiarizing with Kubernetes] — What Kubernetes really is
-* xref:week-11-kubernetes-resource-model:week-11-kubernetes-resource-model.adoc[Week 1.1 — Kubernetes Resource Model] — The declarative intent and kube-apiserver essentials
-* xref:week-12-controllers-informers-client-go:week-12-controllers-informers-client-go.adoc[Week 1.2 — Controllers, Informers, client-go] — The building blocks behind operators
-* xref:week-21-controllers-contd:week-21-controllers-contd.adoc[Week 2.1 — Controllers with controller-runtime] — Writing Kube APIs and reconciling with controller-runtime
-* xref:week-22-going-distributed-locks-leases-ownership-eventual-consistency:week-22-going-distributed-locks-leases-ownership-eventual-consistency.adoc[Week 2.2 — Going Distributed] — Locks, leases, ownership, eventual consistency
-* xref:week-31-taking-more-control-admissions-and-beyond-the-kube-apiserver-to-writing-your-own-api-server:week-31-taking-more-control-admissions-and-beyond-the-kube-apiserver-to-writing-your-own-api-server.adoc[Week 3.1 — Taking More Control] — Admissions and custom API servers
-* xref:week-32-the-other-stuff:week-32-the-other-stuff.adoc[Week 3.2 — The Other Stuff] — Networking, security, and cluster hardening
-* xref:week-41-all-about-kube-scheduler:week-41-all-about-kube-scheduler.adoc[Week 4.1 — All About kube-scheduler] — Scheduling, resources, and DRA
-* xref:week-42-ubiquitous-topics:week-42-ubiquitous-topics.adoc[Week 4.2 — Ubiquitous Topics] — Operator landscape and alternative control planes
-* xref:exercises:exercises.adoc[Exercises] — Hands-on labs for weeks 1, 2, and 3
+Duration: FIXME hours
+
+== Topics covered in this course
+
+
+*  Overview
+
+*  Who is this for? pre-requisites.
+
+*  Familiarizing with koo·br·neh·teez
+
+*  1.1 — Kubernetes Resource Model
+
+*  1.2 — Controllers, informers, client-go
+
+*  2.1 — Controllers contd.
+
+*  2.2 — Going distributed: locks, leases, ownership, eventual consistency
+
+*  3.1 — Taking more control: Admissions and beyond the kube-apiserver to writing your own API Server
+
+*  3.2 — The other stuff
+
+*  4.1 — All about kube-scheduler
+
+*  4.2 — Ubiquitous topics!
+
+*  Exercises
+
+*  Recommended Reading
+
+*  Suggested Reading
+
+
 
 == Prerequisites
 
-This course assumes the following prior experience:
+This course assumes that you have the following prior experience:
 
-* Familiarity running and managing container workloads within Kubernetes environments
-* A basic primer on distributed systems (concurrency, leasing, synchronization)
-* A baseline equivalent to holding a CKAD certification or completing Red Hat's DO-180 and DO-280 tracks
-
-See xref:who-is-this-for-pre-requisites:who-is-this-for-pre-requisites.adoc[Who is this for?] for the full prerequisites and self-assessment checklist.
-
-== Reading Lists
-
-* xref:recommended-reading:recommended-reading.adoc[Recommended Reading] — Core texts for this course
-* xref:suggested-reading:suggested-reading.adoc[Suggested Reading] — Supplementary references
+* Course or experience...
+* Course or experience...
+* Course or experience...

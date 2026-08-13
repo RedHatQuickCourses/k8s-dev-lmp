@@ -7,3 +7,12 @@ Each exercise builds a small but complete Go program that you can run against a 
 * xref:week-1-build-a-controller-using-client-go-from-scratch.adoc[] -- Wire up the client-go pipeline from scratch
 * xref:week-2-implement-optimistic-locking-and-leader-election-via-lease.adoc[] -- Add leader election to your controller
 * xref:week-3-develop-a-custom-validating-webhook-for-container-registry-enforcement.adoc[] -- Build and deploy a validating admission webhook
+#  Exercises
+
+= Exercises
+
+The practical curriculum focuses on reinforcing Kubernetes controller development and extensibility through the following hands-on labs:
+
+* **Controller Fundamentals:** Build a functional controller using `client-go` from scratch to understand event propagation and synchronization primitives.
+* **Distributed Coordination:** Implement optimistic locking and leader election mechanisms using the `Lease` API to ensure state consistency.
+* **Admission Control:** Develop a custom Validating Webhook to enforce organizational security policies, specifically restricting container image sources to approved registries.

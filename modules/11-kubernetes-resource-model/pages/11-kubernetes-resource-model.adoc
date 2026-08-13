@@ -1,0 +1,12 @@
+#  1.1 — Kubernetes Resource Model
+
+= 1.1 — Kubernetes Resource Model
+
+The Kubernetes Resource Model centers on declarative configuration, where users define the desired state of the system rather than executing imperative commands. The `kube-apiserver` acts as the primary gateway for these definitions, processing requests through a rigorous pipeline.
+
+Key aspects include:
+
+*   **Declarative Intent:** Resources represent a persistent record of intent, allowing the system to reconcile the current state with the declared configuration.
+*   **Request Lifecycle:** Every write operation (CREATE/UPDATE) flows through a sequence of plugin layers, including authentication, authorization, audit logging, and admission control.
+*   **Admission Webhooks:** Both Mutating and Validating webhooks intercept write requests to enforce policies or modify objects before they are persisted to `etcd`.
+*   **Scalability:** Control plane components like the `kube-apiserver` and `etcd` primarily support vertical scaling to maintain performance under load.

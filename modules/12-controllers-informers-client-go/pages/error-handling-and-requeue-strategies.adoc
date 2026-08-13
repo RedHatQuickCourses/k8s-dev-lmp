@@ -1,0 +1,62 @@
+#  Error handling and requeue strategies
+
+= Error Handling and Requeue Strategies in Controllers
+
+In a Kubernetes controller, the `Reconcile` function is rarely a "one-and-done" operation. Due to the distributed nature of the system, network partitions, API conflicts, and dependency delays, your reconciliation logic must be resilient. Effective error handling ensures that your controller eventually brings the cluster state to the desired configuration without crashing or entering an infinite loop.
+
+== The Role of the Workqueue
+The `client-go` workqueue is the heartbeat of your controller. When an `Informer` detects a change (Add, Update, or Delete), it pushes the object key (namespace/name) onto the queue. Your worker processes these keys by calling `Reconcile(key)`.
+
+=== The Reconciliation Pattern
+A robust `Reconcile` function should always follow this pattern:
+
+1.  **Retrieve:** Fetch the object from the `Lister` (local cache).
+2.  **Validate/Execute:** Perform the necessary business logic.
+3.  **Handle Result:** Determine the outcome:
+    *   **Success:** Return `nil` (no error).
+    *   **Transient Error:** Return an error to trigger a retry.
+    *   **Terminal Error:** Log the error and do not requeue (e.g., invalid configuration).
+
+== Requeue Strategies
+
+When your reconciliation logic fails, you must decide how to handle the next attempt. In `client-go`, you return an error, and the controller infrastructure manages the backoff.
+
+=== 1. Rate-Limited Requeuing
+To prevent "hot-looping" (constantly trying to reconcile a broken object and consuming all CPU), you should use a rate-limiter. The `workqueue` package provides implementations like `DefaultControllerRateLimiter`, which uses an exponential backoff strategy.
+
+*   **First failure:** Wait a short time.
+*   **Subsequent failures:** Exponentially increase the wait time (e.g., 5s, 10s, 20s, up to a cap).
+
+=== 2. Requeue After Duration
+Sometimes, your controller isn't failing, but it needs to wait for a state that isn't triggered by an event. For example, if you are waiting for an external API to become available, you might return a result with a specific delay.
+
+[source,go]
+----
+// Example of requeuing after a delay
+return ctrl.Result{RequeueAfter: time.Second * 30}, nil
+----
+
+== Implementation: Best Practices
+
+*   **Avoid infinite loops:** Never requeue immediately (without delay) if the error is persistent. Always allow the rate-limiter to intervene.
+*   **Use `Forget`:** Once a key is successfully processed, ensure you call `queue.Forget(key)` so the rate-limiter resets the failure count for that object.
+*   **Handle Conflict Errors:** If you encounter `k8s.io/apimachinery/pkg/api/errors.IsConflict`, it means another controller or a user modified the object while you were working. A simple retry is usually the correct response.
+
+== Hands-on Activity: Implementing Error Handling
+
+In this exercise, you will modify your basic controller to handle a "simulated" API error using exponential backoff.
+
+. **Identify the Reconcile loop:** Find your worker loop where you invoke `Reconcile()`.
+. **Add Error Logic:** Introduce a conditional check that returns an error if a specific field in your custom resource is missing.
+. **Configure the Queue:** When calling `queue.AddRateLimited(item)` in your event handler, ensure you are using the `RateLimitingInterface`.
+. **Verify:** Run your controller and observe the log output. Notice how the time between reconciliation attempts increases after each failure.
+
+[NOTE]
+====
+Remember: The workqueue is **FIFO (First-In, First-Out)**. If you have multiple items in the queue, the controller will process them in the order they arrived, but it will apply the retry delay independently to each item based on its failure history.
+====
+
+== Troubleshooting Gotchas
+*   **Queue Saturation:** If you requeue too many items, your controller's memory usage may spike. Monitor the queue length.
+*   **Informer Desync:** If you catch an error, don't assume the local cache is stale. If the error is an `IsNotFound` error, treat it as a deletion event and clean up your local state.
+*   **Blocking:** Never perform long-running blocking operations inside `Reconcile` without considering the impact on the controller's ability to process other items in the queue. Use `go routines` only if absolutely necessary, but prefer the `RequeueAfter` pattern for time-based operations.

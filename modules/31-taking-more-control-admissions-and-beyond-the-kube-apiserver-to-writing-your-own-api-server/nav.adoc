@@ -1,0 +1,5 @@
+* xref:31-taking-more-control-admissions-and-beyond-the-kube-apiserver-to-writing-your-own-api-server.adoc[]
+** xref:admission-control-webhooks-validating-and-mutating.adoc[]
+** xref:differences-between-webhooks-and-policy-engines.adoc[]
+** xref:api-discovery-and-aggregation-layer.adoc[]
+** xref:implementing-custom-api-servers.adoc[]

@@ -18,3 +18,11 @@ It serves as an excellent companion to xref:week-32-the-other-stuff:week-32-the-
 
 This book explores common distributed systems patterns -- sidecar, ambassador, adapter -- and shows how they are implemented with Kubernetes.
 It provides a strong conceptual foundation for understanding the distributed challenges covered in xref:week-22-going-distributed-locks-leases-ownership-eventual-consistency:week-22-going-distributed-locks-leases-ownership-eventual-consistency.adoc[Week 2.2], including idempotency, leader election, and controller sharding.
+#  Suggested Reading
+
+= Suggested Reading
+
+The recommended literature for the Kubernetes Developer Learning Path focuses on securing, observing, and designing scalable distributed applications:
+
+* *Kubernetes Security and Observability* (Creane & Gupta): Provides essential strategies for hardening cluster security and implementing effective observability practices.
+* *Designing Distributed Systems* (Burns): Explores common, reusable software patterns designed to build scalable and reliable systems using Kubernetes primitives.

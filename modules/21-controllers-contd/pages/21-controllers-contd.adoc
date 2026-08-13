@@ -1,0 +1,11 @@
+#  2.1 — Controllers contd.
+
+[#controllers-contd]
+= 2.1 — Controllers contd.
+
+This module builds upon foundational controller knowledge by focusing on the `controller-runtime` abstraction to simplify the development of custom Kubernetes APIs.
+
+*   **Abstraction and Scaffolding:** Utilizing `controller-runtime` to streamline reconciliation logic and `kubebuilder` for project scaffolding.
+*   **State Management:** Implementing the distinction between `Spec` (desired state) and `Status` (actual state), including robust condition management.
+*   **API Integrity:** Enforcing API schemas through validation and linting.
+*   **Data Operations:** Mastering CRUD operations and the specific semantics of `apply`, `patch`, and `update` to ensure efficient state synchronization.

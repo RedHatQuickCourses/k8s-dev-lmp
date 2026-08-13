@@ -1,0 +1,6 @@
+* xref:32-the-other-stuff.adoc[]
+** xref:advanced-networking-ingress-and-gateway-api.adoc[]
+** xref:service-mesh-concepts.adoc[]
+** xref:authnauthz-in-openshift.adoc[]
+** xref:cluster-security-and-hardening-techniques.adoc[]
+** xref:hands-on-lab-writing-a-custom-validating-webhook-that-allows-using-container-images-from-only-approved-container-registries.adoc[]

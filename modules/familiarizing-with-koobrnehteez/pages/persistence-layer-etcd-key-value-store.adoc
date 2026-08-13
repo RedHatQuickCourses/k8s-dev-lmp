@@ -1,0 +1,42 @@
+#  Persistence layer: etcd key-value store
+
+= Persistence Layer: etcd
+
+The robustness of the Kubernetes control plane relies heavily on its ability to maintain a consistent "source of truth." In Kubernetes, that source of truth is `etcd`, a distributed, consistent, key-value store.
+
+== What is etcd?
+
+`etcd` is a strongly consistent, distributed key-value store used as Kubernetes' backing store for all cluster data. It is the only stateful component in the control plane; the `kube-apiserver` itself is stateless, relying on `etcd` to persist the desired state of the system.
+
+=== Core Characteristics
+*   **Consistency:** It uses the Raft consensus algorithm to ensure that all nodes in an `etcd` cluster agree on the sequence of state changes.
+*   **Key-Value Hierarchy:** While it is a flat key-value store, Kubernetes organizes data using a hierarchical path structure (typically under the `/registry/` prefix).
+*   **Watch Mechanism:** `etcd` provides a watch API that allows the `kube-apiserver` (and other components) to receive notifications when specific keys change, which is the foundation of the asynchronous reconciliation pattern used by controllers.
+*   **Atomic Transactions:** It supports transactional updates, ensuring that either all changes in a batch are applied or none are.
+
+== The Role of etcd in the API Request Lifecycle
+
+When you submit a resource (e.g., a `Pod` definition) to the `kube-apiserver`, the following flow occurs regarding persistence:
+
+1.  **Authentication/Authorization:** The `kube-apiserver` validates the request.
+2.  **Admission Control:** Validating/Mutating webhooks are executed.
+3.  **Persistence:** If validation passes, the `kube-apiserver` transforms the JSON object into a serialized format and commits it to `etcd`.
+4.  **Event Propagation:** Once persisted, `etcd` notifies the `kube-apiserver` via a watch, which in turn triggers informers/controllers to observe the change.
+
+== Architectural Considerations
+
+=== Reliability and Consensus
+Because `etcd` uses the Raft consensus algorithm, it requires a quorum to function. In a production cluster, `etcd` is typically deployed with an odd number of members (3, 5, or 7). If a majority of members are lost, the cluster loses the ability to write new state, effectively rendering the Kubernetes cluster read-only.
+
+=== Performance and Scaling
+*   **Vertical Scaling:** Unlike worker nodes that scale horizontally, the control plane persistence layer (`etcd`) requires vertical scaling. Increasing the IOPS (disk performance) and CPU/Memory allocation of the `etcd` nodes is the primary method for handling increased cluster load.
+*   **Compaction and Defragmentation:** Since `etcd` tracks history for the watch mechanism, it can grow indefinitely. The `kube-apiserver` triggers periodic compaction to remove old revisions, and manual defragmentation is often necessary to reclaim disk space.
+
+== Key Takeaways for Developers
+*   **Stateless Controllers:** Your custom controllers should treat `etcd` as the primary source of truth. Never store local state in a controller that isn't mirrored or derived from `etcd`.
+*   **Resource Versions:** Every object in `etcd` has a `metadata.resourceVersion`. Kubernetes uses this for optimistic concurrency control—if you attempt to update an object that has changed since you last read it, the API server will reject the request with a `409 Conflict` error.
+
+[IMPORTANT]
+====
+Direct interaction with `etcd` is strictly reserved for the `kube-apiserver`. Developers should never interact with the `etcd` database directly using `etcdctl` to modify cluster state, as this bypasses the API server's validation, admission webhooks, and the cache consistency logic essential for cluster health.
+====

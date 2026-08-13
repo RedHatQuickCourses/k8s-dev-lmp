@@ -1,0 +1,9 @@
+#  4.2 — Ubiquitous topics!
+
+= 4.2 — Ubiquitous topics!
+
+This module explores the diversity of Kubernetes control plane architectures and their deployment form factors, moving beyond standard cluster configurations. Key focus areas include:
+
+* **Alternate Control Planes:** Understanding specialized control plane architectures designed for non-standard use cases, such as `kcp` for Kubernetes-like APIs on unconventional infrastructure.
+* **HyperShift:** Exploring nested OpenShift deployments where control planes are decoupled from worker nodes to enable massive scalability and resource isolation.
+* **Edge and Lightweight Form Factors:** Examining resource-constrained distributions like `MicroShift`, `k3s`, and `k0s` optimized for edge computing and small-footprint environments.

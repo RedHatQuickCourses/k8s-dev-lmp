@@ -9,23 +9,23 @@ nav:
 
 - modules/who-is-this-for-pre-requisites/nav.adoc
 
-- modules/week-0-familiarizing-with-koobrnehteez/nav.adoc
+- modules/familiarizing-with-koobrnehteez/nav.adoc
 
-- modules/week-11-kubernetes-resource-model/nav.adoc
+- modules/11-kubernetes-resource-model/nav.adoc
 
-- modules/week-12-controllers-informers-client-go/nav.adoc
+- modules/12-controllers-informers-client-go/nav.adoc
 
-- modules/week-21-controllers-contd/nav.adoc
+- modules/21-controllers-contd/nav.adoc
 
-- modules/week-22-going-distributed-locks-leases-ownership-eventual-consistency/nav.adoc
+- modules/22-going-distributed-locks-leases-ownership-eventual-consistency/nav.adoc
 
-- modules/week-31-taking-more-control-admissions-and-beyond-the-kube-apiserver-to-writing-your-own-api-server/nav.adoc
+- modules/31-taking-more-control-admissions-and-beyond-the-kube-apiserver-to-writing-your-own-api-server/nav.adoc
 
-- modules/week-32-the-other-stuff/nav.adoc
+- modules/32-the-other-stuff/nav.adoc
 
-- modules/week-41-all-about-kube-scheduler/nav.adoc
+- modules/41-all-about-kube-scheduler/nav.adoc
 
-- modules/week-42-ubiquitous-topics/nav.adoc
+- modules/42-ubiquitous-topics/nav.adoc
 
 - modules/exercises/nav.adoc
 

@@ -1,0 +1,87 @@
+#  Managing resource Requests and Limits
+
+= Managing Resource Requests and Limits
+
+In the Kubernetes ecosystem, the `kube-scheduler` makes decisions based on the available capacity of nodes and the requirements defined within a Pod specification. Managing resource requests and limits is the foundational mechanism for ensuring cluster stability, predictable performance, and efficient bin-packing of workloads.
+
+== Understanding Resource Requests and Limits
+
+Every container within a Pod can define two primary attributes for CPU and memory: **Requests** and **Limits**.
+
+=== Requests: The "Guaranteed" Floor
+A **request** is the amount of resource that the `kube-scheduler` guarantees to a container. 
+*   **Scheduling:** The scheduler uses the sum of all requests in a Pod to determine if a node has enough remaining capacity to host that Pod.
+*   **Allocation:** If a node does not have enough capacity to satisfy the sum of requests, the Pod will remain in a `Pending` state.
+
+=== Limits: The "Hard" Ceiling
+A **limit** is the maximum amount of a resource a container is allowed to consume.
+*   **CPU:** CPU is a *compressible* resource. If a container hits its CPU limit, the kernel throttles the container's execution, but it will not be terminated.
+*   **Memory:** Memory is an *incompressible* resource. If a container attempts to exceed its memory limit, the OOM (Out-of-Memory) Killer will terminate the container process.
+
+== Quality of Service (QoS) Classes
+
+Kubernetes classifies Pods into three QoS classes based on their resource configuration. The QoS class determines the order in which Pods are evicted when a node runs out of resources (e.g., during memory pressure).
+
+. **Guaranteed:** All containers in the Pod have requests and limits set, and they are equal for each resource. These are the last to be evicted.
+. **Burstable:** The Pod has requests, but they do not match the limits, or some containers lack specific resource definitions.
+. **BestEffort:** No requests or limits are defined for any containers in the Pod. These are the first to be evicted.
+
+== Hands-on Lab: Configuring Resource Requirements
+
+In this lab, you will define a deployment with explicit resource constraints.
+
+=== Step 1: Create a Resource-Constrained Pod
+Create a file named `resource-demo.yaml` with the following content:
+
+[source,yaml]
+----
+apiVersion: v1
+kind: Pod
+metadata:
+  name: resource-demo
+spec:
+  containers:
+  - name: nginx-container
+    image: nginx
+    resources:
+      requests:
+        memory: "64Mi"
+        cpu: "250m"
+      limits:
+        memory: "128Mi"
+        cpu: "500m"
+----
+
+=== Step 2: Deploy and Inspect
+Apply the configuration to your cluster:
+
+[source,bash]
+----
+kubectl apply -f resource-demo.yaml
+----
+
+Verify the Pod's status and inspect the assigned QoS class:
+
+[source,bash]
+----
+kubectl get pod resource-demo -o jsonpath='{.status.qosClass}'
+# Output should be: Burstable
+----
+
+=== Step 3: Observe Scheduling Behavior
+If you attempt to request more resources than your cluster nodes have available, the scheduler will fail to place the Pod. You can verify this by checking the events:
+
+[source,bash]
+----
+kubectl describe pod resource-demo | grep -A 5 Events
+----
+
+== Best Practices for Production
+*   **Always set requests:** Failing to set requests leads to poor scheduling decisions and potential over-subscription of nodes.
+*   **Size for reality:** Use monitoring tools (like Prometheus or Vertical Pod Autoscaler) to observe actual usage and tune your requests/limits accordingly.
+*   **Avoid over-committing:** While Burstable Pods are useful, ensure your nodes have enough "headroom" to handle spikes to prevent node-level instability.
+
+[TIP]
+====
+When defining CPU resources, `1000m` is equivalent to `1` full vCPU. A request of `250m` ensures your application gets at least 1/4 of a core, while a limit of `500m` ensures it never consumes more than half a core.
+====

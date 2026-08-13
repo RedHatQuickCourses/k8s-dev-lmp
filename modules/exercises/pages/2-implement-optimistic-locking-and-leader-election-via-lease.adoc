@@ -1,0 +1,89 @@
+#  2: Implement optimistic locking and leader election via Lease
+
+= 2.2 Implementing Optimistic Locking and Leader Election via Lease
+
+When scaling controllers, running multiple replicas of the same controller is a common requirement for high availability. However, this creates a "split-brain" scenario where multiple controllers attempt to reconcile the same resources simultaneously, leading to race conditions and inconsistent states.
+
+In Kubernetes, we solve this by implementing **Leader Election** using the `Lease` API.
+
+== Understanding Distributed Locks in Kubernetes
+
+A **Lease** is a Kubernetes resource that provides a distributed lock mechanism. It allows a set of controller replicas to compete for the "leadership" role. 
+
+*   **Atomic Updates:** Using the `client-go/tools/leaderelection` package, controllers perform atomic updates to the Lease object.
+*   **Heartbeat Mechanism:** The leader periodically updates the `renewTime` of the Lease. If the leader crashes, the `renewTime` stops updating, and the Lease expires, allowing a follower to acquire leadership.
+*   **Optimistic Locking:** Kubernetes uses the `ResourceVersion` field in the Lease object to ensure that only one controller successfully updates the lease at any given time (Optimistic Concurrency Control).
+
+== Hands-on Lab: Implementing Leader Election
+
+In this lab, we will extend the `client-go` controller created in the previous module to support high-availability through leader election.
+
+### Prerequisites
+
+*   A working `client-go` controller loop.
+*   `k8s.io/client-go/tools/leaderelection` and `k8s.io/client-go/tools/leaderelection/resourcelock` packages.
+
+### Step 1: Define the Lock Resource
+
+First, we define the `Lease` object that will serve as the lock. This is typically done using the `LeaseLock` type within the `resourcelock` package.
+
+[source,go]
+----
+import (
+    "k8s.io/client-go/tools/leaderelection"
+    "k8s.io/client-go/tools/leaderelection/resourcelock"
+)
+
+// Define the lease lock
+lock := &resourcelock.LeaseLock{
+    LeaseMeta: metav1.ObjectMeta{
+        Name:      "my-controller-lock",
+        Namespace: "kube-system",
+    },
+    Client: clientSet.CoordinationV1(),
+    LockConfig: resourcelock.ResourceLockConfig{
+        Identity: podName, // Unique identifier for this instance
+    },
+}
+----
+
+### Step 2: Configure the Leader Election Loop
+
+Initialize the `leaderelection` configuration. This is where you define the `Callbacks` that trigger when your controller becomes the leader or loses its status.
+
+[source,go]
+----
+leaderelection.RunOrDie(ctx, leaderelection.LeaderElectionConfig{
+    Lock:            lock,
+    ReleaseOnCancel: true,
+    LeaseDuration:   15 * time.Second,
+    RenewDeadline:   10 * time.Second,
+    RetryPeriod:     2 * time.Second,
+    Callbacks: leaderelection.LeaderCallbacks{
+        OnStartedLeading: func(ctx context.Context) {
+            // Start your controller's Run() loop here
+            controller.Run(ctx)
+        },
+        OnStoppedLeading: func() {
+            log.Printf("Leader lost, shutting down.")
+            os.Exit(0)
+        },
+        OnNewLeader: func(identity string) {
+            log.Printf("New leader elected: %s", identity)
+        },
+    },
+})
+----
+
+### Step 3: Verifying the Setup
+
+1.  **Deploy Multiple Replicas:** Scale your controller deployment to 3 replicas.
+2.  **Monitor the Lease:** Observe the `Lease` object in the `kube-system` namespace:
+    `kubectl get lease my-controller-lock -o yaml`
+3.  **Simulate Failure:** Delete the pod currently holding the lease (identified in the `holderIdentity` field). Observe the logs of the remaining pods to see the re-election process occur.
+
+== Best Practices
+
+*   **Idempotency:** Ensure your `Reconcile` function is truly idempotent. Even with leader election, there may be brief windows during transition where an old leader is still finishing a task.
+*   **TTL Tuning:** The `LeaseDuration` should be long enough to handle transient network blips but short enough to allow for rapid failover. A common default is 15 seconds.
+*   **Sharding:** If you have a massive number of resources, rather than just leader election, consider **Controller Sharding**, where you split the workload (e.g., based on namespace labels) so each controller instance is responsible for a subset of the resources.

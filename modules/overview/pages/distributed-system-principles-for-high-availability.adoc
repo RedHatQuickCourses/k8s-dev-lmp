@@ -1,0 +1,84 @@
+#  Distributed system principles for high availability
+
+= Distributed System Principles for High Availability in Kubernetes
+
+In a distributed system like Kubernetes, high availability (HA) is not merely about keeping processes running; it is about ensuring the system maintains a consistent state despite network partitions, hardware failures, or concurrent updates. When extending Kubernetes through custom controllers, you are essentially building a distributed state machine.
+
+== The Challenge of Distributed State
+Kubernetes operates on the principle of **eventual consistency**. The control plane does not guarantee that a cluster will be in a specific state at a specific microsecond. Instead, it guarantees that, given enough time, the cluster will converge toward the "desired state" defined in your objects.
+
+When multiple controller instances manage the same resources, you face two primary challenges:
+1. **Race Conditions:** Multiple controllers attempting to modify the same resource simultaneously.
+2. **Split-Brain Scenarios:** Different controller instances making conflicting decisions, leading to state corruption or service instability.
+
+== Foundational Principles for HA Controllers
+
+To build robust, highly available automation, your controllers must adhere to these distributed systems principles:
+
+### 1. Idempotency
+An operation is idempotent if performing it multiple times yields the same result as performing it once. In Kubernetes, your `Reconcile` function must be designed to be idempotent. 
+* **Design Pattern:** Always read the current state (Status/Live state) before acting. If the resource is already in the desired state, do nothing.
+* **Why it matters:** Controllers can be triggered by spurious events or retries. Non-idempotent operations often lead to resource exhaustion or duplicate API calls.
+
+### 2. Optimistic Concurrency Control (OCC)
+Kubernetes uses `resourceVersion` in metadata to implement OCC. When you update an object, the API server checks if the `resourceVersion` you provided matches the current version in `etcd`.
+* **Mechanism:** If a conflict occurs (409 Conflict), your controller must handle the error by re-fetching the latest version of the object and re-running the reconciliation logic.
+
+### 3. Leader Election
+In high-availability deployments, you often run multiple replicas of a controller (e.g., via a `Deployment`). However, you usually only want **one** active controller to perform reconciliation at any given time to avoid conflicting actions.
+* **Lease Objects:** Kubernetes uses the `coordination.k8s.io/v1` `Lease` API. Controllers compete for a lock on a Lease resource. The winner becomes the leader, while others wait in a standby state.
+
+### 4. Controller Sharding
+When a single controller cannot handle the sheer volume of resources, you must employ **sharding**. This is the process of partitioning the workload across multiple controller instances based on a specific key (e.g., namespace or a custom label).
+* **Case Study (OpenShift Ingress):** The ingress controller shards the routing table. Each controller instance is responsible for a subset of the total routes, ensuring that the control plane remains responsive as the number of ingress objects grows.
+
+== Distributed Sync Workflow: Hands-On
+
+To implement high availability in your own controllers, you must move beyond a simple loop. 
+
+[#lab-leader-election]
+.Hands-on Lab: Implementing Leader Election with Leases
+====
+In this lab, you will configure your `client-go` controller to respect leader election using the `leaderelection` package.
+
+1. **Initialize the Leader Election Config:**
+   Define a `LeaderElectionConfig` that specifies the `Lease` name and the namespace where the lock will be held.
+
+   [source,go]
+   ----
+   import "k8s.io/client-go/tools/leaderelection"
+
+   // Define the lock
+   lock := &resourcelock.LeaseLock{
+       LeaseMeta: metav1.ObjectMeta{Name: "my-controller-lock", Namespace: "kube-system"},
+       Client:    client.CoordinationV1(),
+       LockConfig: resourcelock.ResourceLockConfig{Identity: podName},
+   }
+   ----
+
+2. **Run the Election Loop:**
+   Wrap your main reconciliation logic inside the `leaderelection.RunOrDie` function. This ensures your code only executes when the lease is acquired.
+
+   [source,go]
+   ----
+   leaderelection.RunOrDie(context.TODO(), leaderelection.LeaderElectionConfig{
+       Lock: lock,
+       Callbacks: leaderelection.LeaderCallbacks{
+           OnStartedLeading: func(ctx context.Context) {
+               // Start your Informers and Reconcile loop here
+           },
+           OnStoppedLeading: func() {
+               log.Fatalf("Lost leader lock")
+           },
+       },
+   })
+   ----
+
+3. **Verification:**
+   Deploy two replicas of your controller. Observe that only one log entry indicates "Leading", and if you delete that pod, the second replica automatically picks up the lease.
+====
+
+== Summary for Architectural Success
+* **Design for failure:** Always assume your controller might restart or encounter a network partition.
+* **Leverage the API Server:** Never store "state" inside your controller's memory. Always persist state in the Kubernetes API using Status fields or Custom Resources.
+* **Reconcile, don't trigger:** Your logic should be driven by the difference between current state and desired state, not by a sequence of events.

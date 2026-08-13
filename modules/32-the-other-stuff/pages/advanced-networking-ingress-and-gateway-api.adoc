@@ -1,0 +1,90 @@
+#  Advanced networking: Ingress and Gateway API
+
+= Advanced Networking: Ingress and Gateway API
+
+In the Kubernetes ecosystem, managing external access to services is a critical architectural requirement. While initial implementations relied on basic primitives, the community has evolved toward more expressive, role-oriented, and extensible standards.
+
+== The Evolution of Traffic Management
+
+Historically, the `Ingress` resource served as the standard for exposing HTTP and HTTPS routes. However, as Kubernetes deployments grew in complexity, the `Ingress` API faced limitations: it lacked standardization across providers (relying on implementation-specific annotations), had a rigid structure, and provided limited support for advanced traffic shifting or header-based routing.
+
+To address these shortcomings, the **Gateway API** was introduced as the modern, successor standard.
+
+== Ingress vs. Gateway API
+
+=== Ingress: The Classic Approach
+The `Ingress` resource describes a collection of rules that allow inbound connections to reach the cluster services.
+*   **Strengths:** Simple to deploy; broad support across almost all cloud providers and ingress controllers (e.g., Nginx, HAProxy).
+*   **Weaknesses:** Vendor lock-in via custom annotations; lack of separation between infrastructure management and application routing.
+
+=== Gateway API: The Modern Standard
+The Gateway API is a collection of resources (GatewayClass, Gateway, HTTPRoute) that model service networking as an infrastructure-managed asset.
+*   **Role-Oriented:** Separates concerns by allowing cluster operators to manage infrastructure (Gateway) while developers define traffic routing (HTTPRoute).
+*   **Extensible:** Built to support complex traffic patterns, including weighted traffic splitting, header-based routing, and cross-namespace sharing by default.
+*   **Expressive:** Standardizes features that previously required diverse, non-portable annotations.
+
+[IMPORTANT]
+====
+If you are designing a new system or migrating a complex architecture, prioritize the **Gateway API**. It is the community-accepted path forward for Kubernetes networking, offering better consistency across different implementations.
+====
+
+== Hands-on Lab: Routing Traffic with Gateway API
+
+This activity demonstrates how to define a `Gateway` and an `HTTPRoute` to expose a service.
+
+=== Prerequisites
+Ensure your cluster has a Gateway API-compatible implementation installed (e.g., Istio, Cilium, or Contour). Verify by checking for the presence of the Gateway API Custom Resource Definitions (CRDs).
+
+=== Step 1: Define a Gateway
+The `Gateway` resource defines the entry point into your cluster.
+
+[source,yaml]
+----
+apiVersion: gateway.networking.k8s.io/v1
+kind: Gateway
+metadata:
+  name: example-gateway
+  namespace: default
+spec:
+  gatewayClassName: istio # Replace with your provider's class name
+  listeners:
+  - name: http
+    protocol: HTTP
+    port: 80
+----
+
+=== Step 2: Define an HTTPRoute
+The `HTTPRoute` attaches to the `Gateway` and specifies how to route traffic to your application service.
+
+[source,yaml]
+----
+apiVersion: gateway.networking.k8s.io/v1
+kind: HTTPRoute
+metadata:
+  name: app-route
+spec:
+  parentRefs:
+  - name: example-gateway
+  rules:
+  - matches:
+    - path:
+        type: PathPrefix
+        value: /api
+    backendRefs:
+    - name: my-api-service
+      port: 8080
+----
+
+=== Step 3: Apply and Verify
+1. Apply the manifests using `oc apply -f <file.yaml>`.
+2. Check the status of your gateway to ensure it is programmed:
++
+[source,bash]
+----
+oc get gateway example-gateway -o yaml
+----
+3. Ensure the `status.conditions` indicate that the Gateway is "Accepted" and "Programmed".
+
+== Advanced Concepts
+*   **GAMMA (Gateway API for Mesh Management):** This initiative extends Gateway API semantics to Service Mesh, allowing you to use the same `HTTPRoute` resources to manage internal Pod-to-Pod traffic alongside external ingress traffic.
+*   **Service Mesh:** Unlike the Gateway API (which focuses on edge routing), a Service Mesh (e.g., Istio, Linkerd) provides observability, security (mTLS), and reliability (retries/circuit breaking) for service-to-service communication.

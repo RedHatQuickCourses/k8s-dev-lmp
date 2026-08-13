@@ -1,0 +1,48 @@
+#  Target audience: Engineers, sys admins, and developers with container experience
+
+= Target Audience and Prerequisites
+
+This learning path is designed for technical professionals who have moved beyond basic container usage and are ready to master the internal mechanics, extensibility, and architectural patterns of Kubernetes.
+
+== Who is this for?
+
+This content is curated for:
+
+*   **Software Engineers:** Developers who need to extend Kubernetes functionality by building custom controllers, operators, or specialized API servers.
+*   **Systems Administrators (SREs/Platform Engineers):** Professionals responsible for managing, scaling, and hardening complex Kubernetes environments.
+*   **Platform Architects:** Those tasked with designing automated workflows or deploying alternative control plane architectures (e.g., HyperShift, kcp).
+
+== Recommended Prerequisites
+
+To derive maximum value from this path, you should possess a solid foundation in container orchestration. We assume you are comfortable with:
+
+*   **Container Fundamentals:** You understand images, container lifecycles, and basic networking (e.g., `podman` or `docker` workflows).
+*   **Kubernetes Basics:** You are familiar with standard resources (Deployments, Services, ConfigMaps) and the `kubectl` CLI.
+*   **Distributed Systems Concepts:** You have a working knowledge of asynchronous communication, state consistency, and basic concurrency models.
+*   **Programming Literacy:** Because we will be interacting with `client-go` and implementing controllers, proficiency in **Go (Golang)** is highly recommended.
+
+== Ideal Baseline
+
+We recommend that participants meet one of the following benchmarks to ensure a successful learning experience:
+
+[cols="1,3"]
+|===
+| Benchmark | Description
+
+| *CKAD Certification* | Demonstrates hands-on proficiency in designing, building, and deploying cloud-native applications on Kubernetes.
+| *Red Hat DO-180* | Familiarity with Introduction to Containers, Kubernetes, and Red Hat OpenShift.
+| *Red Hat DO-280* | Proficiency in OpenShift Administration: Core concepts of managing enterprise-grade Kubernetes clusters.
+|===
+
+[NOTE]
+====
+If you are familiar with the declarative nature of Kubernetes but are new to the internal `kube-apiserver` request/response lifecycle, we will cover these foundational concepts in the upcoming modules. If your Go programming skills are rusty, we suggest reviewing the https://go.dev/doc/tutorial/[Go Tutorial] before starting the *client-go* lab exercises.
+====
+
+== Why this path matters
+Beyond managing static workloads, this curriculum moves you toward **Platform Engineering**. By the end of this path, you will transition from a consumer of Kubernetes resources to an architect capable of:
+
+1.  Automating infrastructure through **Custom Resources (CRDs)**.
+2.  Building resilient **Controllers** that handle complex state reconciliation.
+3.  Securing the cluster via **Admission Webhooks**.
+4.  Understanding the distributed systems "magic" that keeps the Control Plane stable under high load.

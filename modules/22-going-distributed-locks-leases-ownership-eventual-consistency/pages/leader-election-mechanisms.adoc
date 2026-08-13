@@ -1,0 +1,91 @@
+#  Leader election mechanisms
+
+= Leader Election Mechanisms in Kubernetes Controllers
+
+In a distributed system, running multiple instances of a controller is often necessary for high availability (HA). However, if multiple controllers attempt to modify the same set of resources simultaneously, it leads to race conditions, conflicting state transitions, and "split-brain" scenarios.
+
+Leader election is the architectural pattern that ensures only one instance of a controller (the "leader") is actively processing the workqueue, while other instances (the "followers") remain in a standby state, ready to take over if the leader fails.
+
+== The Role of Leases
+Kubernetes utilizes the `coordination.k8s.io/v1` API `Lease` resource to manage distributed locking. A `Lease` acts as a heartbeat-based lock:
+
+*   **Atomic Updates:** The `kube-apiserver` ensures that `Lease` updates are atomic, allowing only one client to successfully claim or renew the lock.
+*   **Time-to-Live (TTL):** Each lease has a defined duration. If the leader fails to renew its lease before the expiration, other instances perceive this as a failure and initiate a new election.
+*   **Liveness:** The `client-go` library provides the tooling to abstract this complexity, allowing developers to focus on the `OnStartedLeading` and `OnStoppedLeading` lifecycle hooks.
+
+== Leader Election Lifecycle
+The `client-go/tools/leaderelection` package manages the state machine for the leader:
+
+1.  **Candidate Phase:** All controller instances attempt to acquire the lease.
+2.  **Acquisition:** The first instance to successfully create or update the `Lease` object becomes the leader.
+3.  **Renewal:** The leader periodically updates the `Lease` resource (typically via a heartbeat interval) to signal it is still operational.
+4.  **Failover:** If the leader stops renewing the lease, the TTL expires. Followers detect the stale lease and attempt to acquire it, promoting one of themselves to the new leader.
+
+== Hands-on Lab: Implementing Leader Election
+
+In this lab, you will modify your existing `client-go` controller to support leader election using the `leaderelection` package.
+
+=== Prerequisites
+*   A functional `client-go` controller from the previous module.
+*   Access to a Kubernetes cluster (e.g., `kind` or `minikube`).
+
+=== Step 1: Initialize the Leader Election Configuration
+Import the necessary packages and define the `LeaderElectionConfig`.
+
+[source,go]
+----
+import (
+    "k8s.io/client-go/tools/leaderelection"
+    "k8s.io/client-go/tools/leaderelection/resourcelock"
+)
+
+// Configure the lock using a Lease object
+lock := &resourcelock.LeaseLock{
+    LeaseMeta: metav1.ObjectMeta{
+        Name:      "my-controller-lock",
+        Namespace: "kube-system",
+    },
+    Client: clientset.CoordinationV1(),
+    LockConfig: resourcelock.ResourceLockConfig{
+        Identity: podName, // Unique identifier for this instance
+    },
+}
+----
+
+=== Step 2: Running the Controller with Election
+Wrap your controller's start logic within the `RunOrDie` function. This ensures your controller logic only executes when the instance holds the lock.
+
+[source,go]
+----
+leaderelection.RunOrDie(context.TODO(), leaderelection.LeaderElectionConfig{
+    Lock:            lock,
+    ReleaseOnCancel: true,
+    LeaseDuration:   15 * time.Second,
+    RenewDeadline:   10 * time.Second,
+    RetryPeriod:     2 * time.Second,
+    Callbacks: leaderelection.LeaderCallbacks{
+        OnStartedLeading: func(ctx context.Context) {
+            // Start your controller's Run() loop here
+            controller.Run(ctx)
+        },
+        OnStoppedLeading: func() {
+            log.Info("Leader lost: shutting down")
+            os.Exit(0)
+        },
+    },
+})
+----
+
+=== Step 3: Verification
+1.  Deploy two pods running your controller image to the cluster.
+2.  Check the logs of both pods:
+    `kubectl logs -f <pod-name-1>`
+    `kubectl logs -f <pod-name-2>`
+3.  You will observe that only one pod reports "Started leading," while the other remains in a waiting state.
+4.  Delete the leader pod: `kubectl delete pod <leader-pod-name>`.
+5.  Observe the second pod automatically assuming the leadership role.
+
+== Troubleshooting Tips
+*   **Permissions:** Ensure the ServiceAccount used by your controller has `get`, `create`, and `update` permissions on the `leases` resource in the specified namespace.
+*   **Clock Skew:** Leader election relies on the `kube-apiserver` time; ensure your node clocks are synchronized via NTP.
+*   **Lease Contention:** If your TTL (`LeaseDuration`) is too short, transient network issues may cause frequent, unnecessary leader re-elections (flapping).

@@ -1,0 +1,71 @@
+#  Designing Distributed Systems (Burns)
+
+= Designing Distributed Systems: Foundations for Kubernetes Controllers
+
+In the context of Kubernetes development, transitioning from a single-instance controller to a resilient, distributed operator requires a fundamental shift in how we perceive state. Brendan Burns’ *Designing Distributed Systems* provides the theoretical bedrock for the patterns we implement in `client-go` and `controller-runtime`.
+
+To build robust Kubernetes controllers, you must move away from "transactional" thinking—where you expect a command to succeed immediately—and move toward "eventual consistency."
+
+== Core Distributed Principles for Kubernetes
+
+When scaling controllers or ensuring high availability, we rely on specific patterns to manage state across distributed nodes:
+
+*   **The Sidecar Pattern:** Extending the functionality of a primary container without modifying its source code. In controller design, this is mirrored in how we use `Admission Webhooks` to intercept and modify resource requests before they reach `etcd`.
+*   **The Ambassador Pattern:** Offloading communication logic (like retries or mTLS) to a sidecar, similar to how Service Mesh architectures (like Istio or Linkerd) handle traffic management outside the application logic.
+*   **The Work Queue Pattern:** Essential for `client-go` informers. By decoupling the observation of state (events) from the processing of state (the Reconcile loop), we ensure that a spike in API traffic does not crash our controller.
+*   **The Replicated Worker Pattern:** The foundation of controller sharding. When you run multiple instances of a controller, you must ensure they don't fight over the same resources.
+
+== Implementing Distributed State Machines
+
+The transition from a basic controller to a distributed system is defined by how you handle conflicts and state ownership.
+
+=== 1. Idempotency and Atomicity
+In a distributed system, you cannot assume a request will only arrive once. Your `Reconcile` function must be **idempotent**:
+*   *Definition:* An operation is idempotent if performing it multiple times yields the same result as performing it once.
+*   *Application:* Always verify current cluster state before applying changes. If the resource is already in the desired state, the `Reconcile` loop should exit gracefully without making unnecessary API calls.
+
+=== 2. Leader Election (Leases)
+Running multiple replicas of a controller for high availability (HA) introduces a "Split Brain" risk, where two controllers attempt to modify the same resource simultaneously. 
+*   **The Mechanism:** Kubernetes uses the `Lease` resource (within the `coordination.k8s.io` API group) to implement distributed locking.
+*   **The Workflow:** 
+    1. Controllers compete to acquire a `Lease` object.
+    2. The controller that holds the lock is the "Leader."
+    3. Other instances wait or remain in a "standby" mode.
+    4. If the leader fails to renew the lease, a new leader is elected.
+
+=== 3. Controller Sharding
+When a single controller becomes a bottleneck (e.g., managing thousands of Ingress resources), you implement **sharding**. By partitioning the work—where each replica is responsible for only a subset of resources (e.g., resources with a specific label or hash)—you increase throughput while maintaining individual controller simplicity.
+
+== Hands-on Concept: The Distributed Reconcile Logic
+
+When writing your own controller (as outlined in our 2.2 objectives), apply these design principles:
+
+[source,go]
+----
+// Simplified pseudo-code for a Reconcile loop demonstrating distributed principles
+func (r *Reconcile) Reconcile(req ctrl.Request) (ctrl.Result, error) {
+    // 1. Fetch the latest state (Do not rely on cached memory)
+    instance := &v1.MyResource{}
+    err := r.Get(ctx, req.NamespacedName, instance)
+    
+    // 2. Idempotent logic: Check if work is actually needed
+    if instance.Status.Processed == true {
+        return ctrl.Result{}, nil
+    }
+
+    // 3. Perform the work
+    // Ensure this call is atomic or repeatable
+    err = r.performAction(instance)
+    
+    // 4. Update Status (Optimistic Locking)
+    // Always use Patch/Update to ensure we don't overwrite changes made by other controllers
+    return ctrl.Result{}, err
+}
+----
+
+== Key Takeaways for the Developer
+*   **Design for Failure:** Assume the network is unreliable and the API server may reject your request. Always use exponential backoff in your workqueues.
+*   **Respect the State:** Kubernetes is the source of truth. Your controller is merely a tool to drive the cluster toward a desired configuration.
+*   **Leverage Existing Patterns:** Don't reinvent locks; use `client-go` leaderelection packages that utilize the `Lease` API to keep your implementation clean and idiomatic.
+
+For further exploration, *Designing Distributed Systems* by Brendan Burns is essential reading to understand the transition from standalone scripts to production-grade, distributed Kubernetes operators.

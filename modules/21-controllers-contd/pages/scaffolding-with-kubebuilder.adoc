@@ -1,0 +1,79 @@
+#  Scaffolding with kubebuilder
+
+= Scaffolding with Kubebuilder
+
+Kubebuilder is the industry-standard framework for building Kubernetes APIs using Custom Resource Definitions (CRDs) and controllers. While writing a controller from scratch using `client-go` (as explored in previous modules) is essential for understanding the underlying machinery, **Kubebuilder** provides a high-level abstraction that significantly reduces boilerplate and enforces Kubernetes API best practices.
+
+== Why Kubebuilder?
+
+Building a production-grade controller involves complex tasks: setting up informers, managing caches, handling event queues, and ensuring thread safety. Kubebuilder scaffolds this infrastructure for you, allowing you to focus on the business logic inside the **Reconciliation Loop**.
+
+It leverages `controller-runtime`—a set of libraries used by Kubernetes-native projects—to simplify:
+* **API Scaffolding:** Generating Go structs for your Custom Resources (CRs).
+* **Controller Boilerplate:** Setting up the manager, leader election, and health probes.
+* **Webhook Integration:** Simplified generation of conversion, mutating, and validating webhooks.
+* **Standardization:** Ensuring your API adheres to Kubernetes conventions (GVK, scope, and status subresources).
+
+== The Development Workflow
+
+Kubebuilder follows an iterative command-line workflow to transition from an idea to a deployed controller.
+
+[cols="1,3", options="header"]
+|===
+| Command | Purpose
+| `kubebuilder init` | Initializes a new project, setting up the Go module and `controller-runtime` scaffolding.
+| `kubebuilder create api` | Scaffolds a new CRD (Spec/Status) and its associated Controller logic.
+| `make manifests` | Generates the YAML manifests (CRDs, RBAC roles) based on Go struct tags.
+| `make install` | Installs the CRDs into the target Kubernetes cluster.
+| `make run` | Runs the controller locally against your current `~/.kube/config`.
+|===
+
+== Best Practices for API Design
+
+When scaffolding with Kubebuilder, your design must adhere to the https://github.com/kubernetes/community/blob/master/contributors/devel/sigarchitecture/api-conventions.md[Kubernetes API Conventions].
+
+=== 1. Spec vs. Status
+* **Spec (Desired State):** Fields that represent the state the user *wants*. This should be immutable where possible and represents the "contract" between the user and your controller.
+* **Status (Actual State):** Fields that represent the *current* state of the object as observed by the controller. Users should never manually modify the Status field.
+
+=== 2. API Validation and Linting
+To catch architectural issues early, integrate the **Kube API Linter (KAL)**. It checks your Go structs against standard Kubernetes patterns, such as verifying that your CRD fields follow naming conventions and utilize appropriate validation markers (e.g., `+kubebuilder:validation:Minimum=1`).
+
+[source,go]
+----
+// Example of validation markers in a CRD struct
+type CronJobSpec struct {
+    // +kubebuilder:validation:Minimum=0
+    ConcurrencyPolicy string `json:"concurrencyPolicy,omitempty"`
+}
+----
+
+== Hands-on: Scaffolding a Basic Operator
+
+Follow these steps to bootstrap your project.
+
+1. **Initialize the Project:**
++
+[source,bash]
+----
+mkdir my-controller && cd my-controller
+kubebuilder init --domain example.com --repo github.com/example/my-controller
+----
+
+2. **Create the API:**
++
+[source,bash]
+----
+kubebuilder create api --group batch --version v1 --kind CronJob
+----
++
+*Note: This command generates both the API definition (`api/v1/cronjob_types.go`) and the controller logic (`internal/controller/cronjob_controller.go`).*
+
+3. **Explore the Controller:**
+Open `internal/controller/cronjob_controller.go`. You will see a `Reconcile` function. This is where you inject your reconciliation logic to ensure the "Actual State" (Status) matches the "Desired State" (Spec).
+
+4. **Verify with Manifests:**
+Run `make manifests` to update your `config/crd/bases` directory. Inspect the generated YAML to see how Kubebuilder translated your Go structs into a valid Kubernetes CRD schema.
+
+== Summary: Kubebuilder vs. Operator SDK
+While `kubebuilder` is the underlying framework, the **Operator SDK** is a wrapper that adds additional features like Helm/Ansible operator support and advanced operator lifecycle management. For high-performance Go-based controllers, standard `kubebuilder` remains the preferred, lightweight choice for developers who want full control over their code.

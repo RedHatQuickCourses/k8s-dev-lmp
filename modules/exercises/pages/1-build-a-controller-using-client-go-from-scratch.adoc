@@ -1,0 +1,106 @@
+#  1: Build a controller using client-go from scratch
+
+= Exercise: Building a Kubernetes Controller from Scratch
+
+Building a controller from scratch using `client-go` is the best way to understand the "magic" that hides behind higher-level abstractions like `controller-runtime` or `kubebuilder`. 
+
+In this exercise, you will create a controller that watches for `ConfigMaps` and logs a message whenever one is added, updated, or deleted.
+
+== Prerequisites
+* A running Kubernetes cluster (e.g., `kind` or `minikube`).
+* `go` (version 1.21+).
+* `kubectl` configured to point to your cluster.
+* `client-go` dependency:
+[source,bash]
+----
+go mod init my-controller
+go get k8s.io/client-go@latest
+go get k8s.io/api@latest
+go get k8s.io/apimachinery@latest
+----
+
+== Conceptual Architecture
+To build a controller, you must implement the "Control Loop" pattern using these primitives:
+* **Informers:** The "Eyes." They list and watch resources, pushing events to a local cache.
+* **Listers:** The "Cache." They provide read-only access to the local cache, preventing excessive API server load.
+* **WorkQueue:** The "Buffer." It decouples the informer’s event notification from the processing logic, allowing for retries and rate-limiting.
+
+== Hands-on: Implementation
+
+### 1. Initialize the Controller
+Create a file named `main.go`. We will use `SharedInformerFactory` to keep track of the ConfigMap resources.
+
+[source,go]
+----
+package main
+
+import (
+	"fmt"
+	"time"
+
+	"k8s.io/client-go/informers"
+	"k8s.io/client-go/kubernetes"
+	"k8s.io/client-go/tools/cache"
+	"k8s.io/client-go/tools/clientcmd"
+	"k8s.io/client-go/util/workqueue"
+)
+
+func main() {
+	// 1. Build kubeconfig and clientset
+	kubeconfig := clientcmd.NewNonInteractiveDeferredLoadingClientConfig(clientcmd.NewDefaultClientConfigLoadingRules(), &clientcmd.ConfigOverrides{}).ClientConfig()
+	clientset := kubernetes.NewForConfigOrDie(kubeconfig)
+
+	// 2. Initialize Informer Factory and WorkQueue
+	factory := informers.NewSharedInformerFactory(clientset, time.Minute*10)
+	informer := factory.Core().V1().ConfigMaps().Informer()
+	queue := workqueue.NewNamedRateLimitingQueue(workqueue.DefaultControllerRateLimiter(), "ConfigMapQueue")
+
+	// 3. Register Event Handlers
+	informer.AddEventHandler(cache.ResourceEventHandlerFuncs{
+		AddFunc: func(obj interface{}) {
+			key, _ := cache.MetaNamespaceKeyFunc(obj)
+			queue.Add(key)
+		},
+		UpdateFunc: func(old, new interface{}) {
+			key, _ := cache.MetaNamespaceKeyFunc(new)
+			queue.Add(key)
+		},
+	})
+
+	// ... continue to process loop
+}
+----
+
+### 2. Implement the Reconcile Loop
+Now, define the loop that consumes items from the queue.
+
+[source,go]
+----
+func runWorker(queue workqueue.RateLimitingInterface, lister cache.GenericLister) {
+	for {
+		key, quit := queue.Get()
+		if quit { return }
+
+		namespace, name, _ := cache.SplitMetaNamespaceKey(key.(string))
+		fmt.Printf("Reconciling ConfigMap: %s/%s\n", namespace, name)
+		
+		// Logic: Perform your desired state enforcement here
+		
+		queue.Done(key)
+	}
+}
+----
+
+### 3. Execution
+To run this:
+1. Start the `Informer` by calling `informer.Run(stopCh)`.
+2. Wait for the local cache to synchronize (`cache.WaitForCacheSync`).
+3. Run the `runWorker` function in a goroutine.
+
+== Troubleshooting Tips
+* **Cache Sync:** Always ensure you call `cache.WaitForCacheSync` before starting the worker. If the cache isn't ready, your listers will return empty results.
+* **Namespace Scoping:** If your controller is behaving unexpectedly, verify if you are using `NewSharedInformerFactory` (cluster-wide) or `NewFilteredSharedInformerFactory` (namespace-scoped).
+* **Key Parsing:** Use `cache.MetaNamespaceKeyFunc` consistently to ensure that the keys in your workqueue can be correctly parsed back into namespace and name.
+
+== Why do this?
+By writing this manually, you observe how `client-go` handles the complex orchestration of API watches. In the next stage, you will see how `controller-runtime` wraps this exact logic into a clean `Reconcile` method, drastically reducing the boilerplate while maintaining the same underlying mechanics.

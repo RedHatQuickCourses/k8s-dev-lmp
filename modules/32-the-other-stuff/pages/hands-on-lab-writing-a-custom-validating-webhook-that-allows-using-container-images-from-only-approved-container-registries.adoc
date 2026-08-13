@@ -1,0 +1,104 @@
+#  Hands-on Lab: Writing a custom Validating Webhook that allows using container images from only approved container registries.
+
+= Hands-on Lab: Implementing a Custom Validating Webhook
+
+In this lab, you will implement a **Validating Admission Webhook**. Admission webhooks are HTTP callbacks that receive admission requests from the `kube-apiserver` and process them to decide whether to accept or reject an operation. 
+
+Our goal is to enforce a security policy: **only container images from approved registries are permitted** when creating or updating specific resources.
+
+== Prerequisites
+
+* A running Kubernetes cluster (e.g., `kind` or `minikube`).
+* `go` version 1.20+ installed.
+* `cfssl` or `openssl` for generating self-signed certificates.
+* `kubectl` configured with cluster-admin access.
+
+== Step 1: Define the Webhook Logic
+
+We will write a small Go server using the `net/http` package. The server must handle the `admission.k8s.io/v1` `AdmissionReview` object.
+
+1. Create a new directory and initialize a Go module:
++
+[source,bash]
+----
+mkdir image-validator && cd image-validator
+go mod init image-validator
+----
+
+2. Create `main.go`. The logic needs to parse the `AdmissionReview` request, inspect the `Deployment` or `Pod` spec, and check the image strings against a whitelist provided via command-line flags.
+
+[source,go]
+----
+// Simplified logic snippet for the validator
+func validateImage(image string, approvedRegistries []string) bool {
+    for _, reg := range approvedRegistries {
+        if strings.HasPrefix(image, reg) {
+            return true
+        }
+    }
+    return false
+}
+----
+
+== Step 2: Handling the AdmissionReview
+
+The `kube-apiserver` sends an `AdmissionReview` object. Your code must:
+1. Decode the JSON into an `AdmissionReview` struct.
+2. Inspect `request.Object` (the resource being created/updated).
+3. Validate the `image` fields against your approved list.
+4. Return an `AdmissionResponse` with `Allowed: true` or `Allowed: false`.
+
+== Step 3: Securing the Webhook with TLS
+
+The `kube-apiserver` requires HTTPS to communicate with webhooks. Since internal cluster traffic needs a trusted CA, you must:
+
+1. Generate a CA key and certificate.
+2. Generate a server key/cert for the webhook service.
+3. Create a `Secret` in your namespace containing these certificates.
+4. Update the `ValidatingWebhookConfiguration` to include the `caBundle` (the base64 encoded CA certificate).
+
+== Step 4: Configuration
+
+Create the `ValidatingWebhookConfiguration` YAML. This tells the API server when to call your service.
+
+[source,yaml]
+----
+apiVersion: admissionregistration.k8s.io/v1
+kind: ValidatingWebhookConfiguration
+metadata:
+  name: image-validator-webhook
+webhooks:
+  - name: image-validator.example.com
+    rules:
+      - apiGroups: ["apps"]
+        apiVersions: ["v1"]
+        operations: ["CREATE", "UPDATE"]
+        resources: ["deployments"]
+    clientConfig:
+      service:
+        name: image-validator-svc
+        namespace: default
+        path: "/validate"
+      caBundle: <BASE64_CA_CERT>
+    admissionReviewVersions: ["v1"]
+    sideEffects: None
+----
+
+== Step 5: Deployment and Testing
+
+1. **Deploy the Webhook**: Build your Go binary, containerize it, and deploy it to your cluster along with the associated `Service`.
+2. **Apply Configuration**: Apply the `ValidatingWebhookConfiguration` YAML.
+3. **Verify**: Attempt to create a Deployment using an image from `docker.io` (if not in your whitelist):
+
+[source,bash]
+----
+kubectl create deployment nginx --image=nginx:latest
+----
+
+*Expected Output*: The `apiserver` should reject the request with:
+`Error from server: admission webhook "image-validator.example.com" denied the request: image from unapproved registry.`
+
+== Troubleshooting
+* **Logs**: Check the logs of your webhook pod: `kubectl logs -l app=image-validator`.
+* **Connectivity**: Ensure the `kube-apiserver` can reach your pod IP or the Service endpoint.
+* **Certificates**: Ensure the `caBundle` in the configuration matches the certificate used by the server exactly.

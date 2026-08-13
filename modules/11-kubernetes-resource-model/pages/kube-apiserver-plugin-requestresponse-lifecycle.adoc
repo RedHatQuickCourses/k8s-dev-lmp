@@ -1,0 +1,81 @@
+#  kube-apiserver plugin request/response lifecycle
+
+= The kube-apiserver Plugin Request/Response Lifecycle
+
+The `kube-apiserver` acts as the brain of the Kubernetes cluster. It is not a monolithic service but a sophisticated aggregation of plugin layers that process every incoming request. Understanding this lifecycle is critical for developers who need to implement custom controllers, admission webhooks, or extended API servers.
+
+== The Request Lifecycle
+
+When a client (like `kubectl` or a custom controller) sends a request to the `kube-apiserver`, the request traverses a strict chain of plugin layers before it is persisted to `etcd` or returned to the user.
+
+[plantuml]
+....
+@startuml
+skinparam componentStyle uml2
+[Client] --> [Authentication]
+[Authentication] --> [Audit]
+[Audit] --> [Impersonation]
+[Impersonation] --> [Priority & Fairness]
+[Priority & Fairness] --> [Authorization]
+[Authorization] --> [Mutating Admission]
+[Mutating Admission] --> [Object Validation]
+[Object Validation] --> [Validating Admission]
+[Validating Admission] --> [Storage (etcd)]
+@enduml
+....
+
+=== 1. Authentication
+The server verifies who the caller is. Plugins include X509 client certs, static token files, OIDC, or Webhook token authentication. If authentication fails, the request is rejected with a `401 Unauthorized` response.
+
+=== 2. Audit
+Once authenticated, the request is recorded by the Audit Logging backend. This layer ensures that every action is traceable for compliance and debugging, capturing the `who, what, when, and where` of the request.
+
+=== 3. Impersonation
+This allows an authenticated user to perform actions on behalf of another user. This is frequently used by `kubectl auth can-i` or administrative tooling to verify permissions without switching user contexts.
+
+=== 4. Priority & Fairness (APF)
+This layer prevents a single client or controller from overwhelming the `kube-apiserver`. It classifies incoming requests into flows and applies rate limiting based on the configured `PriorityLevelConfiguration` and `FlowSchema` objects.
+
+=== 5. Authorization
+The server determines if the authenticated user has permission to perform the requested action (e.g., `GET`, `POST`, `PATCH`) on the specific resource. Common plugins include RBAC (Role-Based Access Control) and Node authorization.
+
+=== 6. Admission Control
+Admission controllers are the final gatekeepers. They are divided into two phases:
+*   **Mutating:** These webhooks can modify the object definition (e.g., injecting sidecars or default values).
+*   **Validating:** These webhooks ensure the object meets custom policies (e.g., "Only allow images from the private registry") before persisting to storage.
+
+=== 7. Storage
+If the request passes all validation phases, the `kube-apiserver` serializes the object and commits it to the `etcd` backend.
+
+== Hands-on Lab: Observing API Discovery
+
+To understand how the API server exposes its capabilities, we can inspect the API discovery endpoints.
+
+=== Prerequisites
+*   A running Kubernetes cluster (e.g., `minikube` or `oc cluster up`).
+*   Access to `curl` and a proxy to the cluster.
+
+=== Step-by-Step Activity
+
+1. **Start the local proxy:**
+   Open a terminal and establish a connection to your cluster.
+   [source,bash]
+   ----
+   kubectl proxy --port=8001
+   ----
+
+2. **Query the API Discovery endpoint:**
+   Use the specific header requested to retrieve the discovery information. This demonstrates how the `kube-apiserver` handles content negotiation.
+   [source,bash]
+   ----
+   curl -v http://127.0.0.1:8001/api \
+     -H "Accept: application/json;v=v2;g=apidiscovery.k8s.io;as=APIGroupDiscoveryList"
+   ----
+
+3. **Analyze the Response:**
+   Notice the `Content-Type` header and the structured JSON returned. This is the mechanism by which the `kube-apiserver` dynamically informs clients of the resources available within the cluster, enabling the `kubectl` client to function without needing hard-coded resource definitions for every CRD installed.
+
+== Troubleshooting Tips
+*   **401 Unauthorized:** Check your `kubeconfig` and ensure the identity provider (OIDC/Certs) is reachable.
+*   **403 Forbidden:** The request reached the API server, but the `RBAC` layer blocked it. Review your `ClusterRole` and `RoleBinding` definitions.
+*   **Latency Issues:** If your API server is sluggish, check the `Priority and Fairness` metrics to see if specific controllers are saturating your available request flows.

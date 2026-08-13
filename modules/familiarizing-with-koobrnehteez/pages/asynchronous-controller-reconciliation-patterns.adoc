@@ -1,0 +1,51 @@
+#  Asynchronous controller reconciliation patterns
+
+= Asynchronous Controller Reconciliation Patterns
+
+In Kubernetes, the control plane does not use a push-based model to command components. Instead, it relies on an **asynchronous reconciliation loop**. This design is fundamental to the platform's robustness, allowing it to recover from partial failures, network partitions, and unexpected state changes without manual intervention.
+
+== The Reconciliation Concept
+
+At its core, a Kubernetes controller acts as a control loop that constantly compares the **observed state** of the system with the **desired state** defined in the API object (the `Spec`).
+
+The reconciliation process follows these principles:
+*   **Declarative Intent:** Users define "what" they want (the Spec), not "how" to achieve it.
+*   **Idempotency:** The controller must be able to run the same logic repeatedly without causing side effects beyond the intended state change.
+*   **Level-Triggered, not Edge-Triggered:** Unlike an edge-triggered system (which triggers only on the exact moment a change happens), Kubernetes is level-triggered. It cares about the *current state* of the world, making it resilient to missed events.
+
+== Anatomy of the Reconciliation Loop
+
+The reconciliation loop is the "heartbeat" of any controller. Using `client-go`, this is typically structured as follows:
+
+1.  **Watch:** The controller watches the API server for changes to resources (e.g., Pods, Deployments, or Custom Resources).
+2.  **Enqueue:** When an event (Add, Update, Delete) occurs, the resource key (namespace/name) is added to a `workqueue`.
+3.  **Process:** The controller pulls the key from the `workqueue`.
+4.  **Sync:** The controller fetches the latest version of the resource from a local cache (via `Informer` and `Lister`).
+5.  **Reconcile:** The controller logic runs. It compares the current state (`Status`) against the desired state (`Spec`).
+6.  **Act:** If the states don't match, the controller performs actions (e.g., calling the API server to create a service) to move the system toward the desired state.
+
+== Asynchronous Nature and Eventual Consistency
+
+Because the system is asynchronous, several factors influence its behavior:
+
+=== Why Queues are FIFO
+The `workqueue` (and `DeltaFIFO` in informers) operates on a First-In-First-Out basis. This ensures that operations are processed in the order they were observed. Since the controller is asynchronous, multiple events for the same object might be coalesced in the queue—if the controller hasn't processed the first update yet, the second update will simply replace the entry in the queue, ensuring the controller always reconciles against the *latest* version.
+
+=== Caches and Informers
+Directly polling the `kube-apiserver` for every reconciliation cycle would overwhelm the API server and introduce unacceptable latency. 
+*   **Informers:** These maintain a local, high-performance cache of resources in memory.
+*   **Event Propagation:** When an event occurs, the `Reflector` (part of the Informer) watches the API server and populates the cache. The controller logic reads from this local cache, ensuring the system remains responsive even under high load.
+
+=== Error Handling and Requeuing
+If a reconciliation attempt fails (e.g., due to a temporary network error or a validation failure), the controller does not crash. Instead:
+1.  The error is captured.
+2.  The key is **requeued** with an exponential backoff.
+3.  The controller will retry the operation until it succeeds or reaches a threshold where it logs the error for human intervention.
+
+== Designing for Idempotency
+To build a reliable asynchronous controller, every operation must be idempotent. If a controller creates a resource and the network drops before the confirmation is received, the subsequent reconciliation loop will attempt to create it again. Your code must be able to handle "Already Exists" errors gracefully by checking the existing state before acting.
+
+[IMPORTANT]
+====
+In a distributed environment, the reconciliation loop is where you must consider **Optimistic Locking**. When updating a resource, always provide the `resourceVersion` found in the object. If another process modified the object while you were working, the API server will reject your update, prompting your controller to requeue and reconcile against the new, correct state.
+====

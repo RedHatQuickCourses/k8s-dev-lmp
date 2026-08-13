@@ -33,3 +33,12 @@ You should be comfortable with most of these items:
 * [ ] You understand the difference between a Pod, a ReplicaSet, and a Deployment
 * [ ] You have worked with namespaces and resource quotas
 * [ ] You are familiar with basic RBAC concepts (Roles, RoleBindings)
+#  Who is this for? pre-requisites.
+
+== Who is this for? Pre-requisites
+
+This learning path is designed for engineers, system administrators, and developers who possess practical experience with containerized environments. To ensure success, participants should have a foundational understanding of distributed systems.
+
+*   **Target Audience:** Professionals working with container technology and infrastructure automation.
+*   **Recommended Prerequisites:** Basic knowledge of distributed system principles.
+*   **Ideal Baseline:** Completion of CKAD certification, or Red Hat DO-180 and DO-280 tracks.

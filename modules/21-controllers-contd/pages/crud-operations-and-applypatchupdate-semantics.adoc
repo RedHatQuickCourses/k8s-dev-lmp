@@ -1,0 +1,98 @@
+#  CRUD operations and apply/patch/update semantics
+
+= CRUD Operations and Apply/Patch/Update Semantics
+
+In the Kubernetes control plane, understanding how data is modified is critical for writing robust controllers. Kubernetes does not simply "overwrite" files; it manages state through specific API interaction patterns. Choosing the wrong method can lead to race conditions, lost updates, or unexpected resource behavior.
+
+== Understanding API Semantics
+
+When interacting with the `kube-apiserver`, you generally perform four types of operations. While they map to traditional CRUD (Create, Read, Update, Delete), Kubernetes has specific implementations for the "Update" phase.
+
+=== 1. Create and Read
+*   **Create:** Posts a new manifest to the API.
+*   **Read (Get/List):** Retrieves the current state of a resource. This is often served from the controller's local cache (Informer) rather than hitting `etcd` directly.
+
+=== 2. Update (The "Full Replace")
+The `Update` operation (HTTP `PUT`) requires the client to send the **entire object** back to the server.
+*   **How it works:** The server compares the received object with the existing one.
+*   **Risk:** If another process modified the resource between your `Get` and your `Update`, your `Update` will fail with a `409 Conflict` (Optimistic Concurrency).
+*   **Use case:** When you need to change multiple fields simultaneously and ensure the entire object state is synchronized.
+
+=== 3. Patch (The Partial Update)
+The `Patch` operation (HTTP `PATCH`) allows you to modify specific fields without sending the whole object. This is the preferred method for controllers to avoid massive data transfer and reduce conflict frequency.
+
+There are three primary strategies:
+*   **JSON Patch:** A list of operations (add, remove, replace) defined in RFC 6902.
+*   **Merge Patch:** A partial JSON document representing the intended state of the object.
+*   **Strategic Merge Patch:** Kubernetes-specific. It understands the schema of resources. For example, it knows how to merge lists (like container definitions in a Pod) based on unique keys rather than simply overwriting the entire list.
+
+=== 4. Server-Side Apply (SSA)
+Server-Side Apply is the modern standard for managing resources. It shifts the logic of "who owns what" to the API server.
+
+*   **Field Ownership:** SSA tracks which field manager (e.g., your controller) owns which fields. 
+*   **Resolution:** If two controllers try to set the same field, the API server handles the conflict. 
+*   **Benefit:** It eliminates the need for the `Get -> Modify -> Update` cycle, which is prone to race conditions.
+
+---
+
+== Technical Comparison Summary
+
+[cols="1,1,2"]
+|===
+| Method | Data Sent | Concurrency Strategy
+
+| **Update (PUT)**
+| Entire Object
+| Optimistic Locking (ResourceVersion)
+
+| **Patch**
+| Partial JSON
+| Server-side atomic merge
+
+| **Server-Side Apply**
+| Partial / Intentional State
+| Field Management (Ownership)
+|===
+
+---
+
+== Hands-On: Experimenting with Patching
+
+In this activity, you will observe the difference between a standard `Update` and a `Patch`.
+
+=== Prerequisites
+*   A running Kubernetes cluster (e.g., `kind` or `minikube`).
+*   `kubectl` installed and configured.
+
+=== Step 1: Create a test resource
+Create a simple ConfigMap to experiment with.
+
+[source,bash]
+----
+kubectl create configmap demo-map --from-literal=key1=value1
+----
+
+=== Step 2: Simulate a Conflict (Update)
+1. Open two terminals.
+2. In Terminal A, get the object: `kubectl get cm demo-map -o yaml > map.yaml`
+3. In Terminal B, change the value in `map.yaml` and run `kubectl apply -f map.yaml`.
+4. In Terminal A, change the value to something else and run `kubectl apply -f map.yaml`.
+5. **Observation:** You will see an error indicating the `resourceVersion` has changed.
+
+=== Step 3: Using Patch (Strategic Merge)
+Use the `patch` command to update only the specific data field without touching the rest of the object.
+
+[source,bash]
+----
+kubectl patch configmap demo-map -p '{"data": {"key1": "new-value"}}'
+----
+
+*Note: Observe how the `metadata.resourceVersion` increments, but you never had to fetch the original object to perform the change.*
+
+---
+
+== Pro-Tips for Controllers
+
+*   **Avoid PUTs:** Inside your `Reconcile` loop, prefer `client.Patch` or `client.Status().Update`.
+*   **Use `$retainKeys`:** If you are performing a strategic merge and need to explicitly drop a field that was previously managed, use the `$retainKeys` directive in your patch payload.
+*   **Status vs. Spec:** Always use `status().update()` when changing the status subresource to avoid triggering extra reconciliation loops unnecessarily.

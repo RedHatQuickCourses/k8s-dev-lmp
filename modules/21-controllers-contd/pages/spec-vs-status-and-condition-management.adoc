@@ -1,0 +1,43 @@
+#  Spec vs Status and condition management
+
+= Spec vs. Status and Condition Management
+
+In the Kubernetes declarative resource model, separating the "what" from the "how" is fundamental. This separation is achieved through the architectural division of a resource into two primary sections: the `spec` and the `status`.
+
+== The Spec: The Desired State
+The `spec` (short for *specification*) defines the **intended** state of an object. It represents the user's "truth"—the configuration that the user wants to see realized in the cluster.
+
+*   **Immutable intent:** Once defined, the `spec` should remain static until the user or an automated process explicitly changes it.
+*   **Source of Truth:** It acts as the input for controllers. When a controller observes a change in the `spec`, it triggers a reconciliation process to align the current cluster state with this requested state.
+
+== The Status: The Observed State
+The `status` represents the **actual** state of the resource at any given moment. It is the output of the controller’s work.
+
+*   **Controller-managed:** The `status` is intended to be updated *only* by the controller. Users should not manually modify the `status` field of a resource.
+*   **Feedback loop:** It provides visibility into whether the `spec` has been successfully realized, if there are errors, or if the system is currently "in progress."
+
+== Condition Management: Expressing Progress
+While `status` provides the broad state, **Conditions** provide granular, machine-readable details about that state. Conditions follow a standardized pattern that allows external tools and humans to interpret the lifecycle of an object without needing to parse complex logic.
+
+A standard Condition structure includes:
+*   **Type:** The specific aspect of the resource being reported (e.g., `Ready`, `Available`, `Progressing`).
+*   **Status:** The state of the condition, which must be one of `True`, `False`, or `Unknown`.
+*   **Reason:** A CamelCase, programmatic identifier explaining why the condition is in its current state.
+*   **Message:** A human-readable explanation of the status.
+*   **LastTransitionTime:** The timestamp indicating when the status of this condition last changed.
+
+=== Why Conditions Matter
+Conditions are essential for "Eventual Consistency." Since Kubernetes controllers run asynchronously, an operation (like provisioning a cloud resource) might take time. Conditions allow the controller to communicate:
+1.  **Pending:** `Ready` = `False`, `Reason` = `Provisioning`
+2.  **Success:** `Ready` = `True`, `Reason` = `Ready`
+3.  **Failure:** `Ready` = `False`, `Reason` = `ConfigurationError`
+
+== Best Practices for Controllers
+*   **Don't rely on `resourceVersion` for business logic:** While `metadata.resourceVersion` is used for optimistic concurrency, always use `.status.conditions[].observedGeneration` to determine if your controller has processed the current `spec` version. 
+*   **The Reconciliation Loop:** Always check `status` before acting. If the `spec` matches the `status` (and all conditions indicate success), the controller should exit the loop without performing unnecessary actions. This ensures **idempotency**.
+*   **Avoid Deep Nesting:** Keep your `status` fields clean and well-defined. Over-populating the status can lead to large object sizes, which impacts performance during API server transmission.
+
+[NOTE]
+====
+**Erratum/Clarification:** Ensure you distinguish between `resourceVersion` and `generation`. While `resourceVersion` is an internal string used by etcd for concurrency control, `.metadata.generation` is an integer that increments whenever the `spec` changes. Comparing `generation` against `observedGeneration` is the standard way to check if the controller needs to reconcile a new request.
+====

@@ -61,3 +61,17 @@ xref:week-41-all-about-kube-scheduler:week-41-all-about-kube-scheduler.adoc[Go t
 Operator landscape and alternative control plane architectures -- HyperShift, kcp, MicroShift, k3s.
 
 xref:week-42-ubiquitous-topics:week-42-ubiquitous-topics.adoc[Go to Week 4.2]
+#  Overview
+
+= Overview
+
+The Kubernetes Developer Learning Path provides an architectural deep dive into the platform's extensibility and internal mechanics. It is designed for engineers and developers with existing container experience looking to master platform automation and distributed system design.
+
+Key focus areas include:
+
+*   **Architecture & Extensibility:** Understanding the Kubernetes control plane, the role of `kube-apiserver`, and the `etcd` persistence layer.
+*   **Platform Automation:** Building custom resources and operators using the reconcile loop pattern.
+*   **Core Mechanics:** Deep dives into `client-go` components, including informers, listers, and workqueues.
+*   **Distributed Systems:** Implementing idempotent state machines, leader election, and optimistic locking via Leases.
+*   **Advanced Control Plane:** Exploring API aggregation, admission control webhooks, and modern traffic management paradigms like the Gateway API and Service Mesh.
+*   **Security & Operations:** Examining AuthN/AuthZ models, cluster hardening techniques, and alternative control plane form factors.

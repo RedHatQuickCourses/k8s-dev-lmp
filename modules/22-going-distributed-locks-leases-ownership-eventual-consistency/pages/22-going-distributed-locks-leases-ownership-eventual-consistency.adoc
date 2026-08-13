@@ -1,0 +1,10 @@
+#  2.2 — Going distributed: locks, leases, ownership, eventual consistency
+
+= 2.2 — Going distributed: locks, leases, ownership, eventual consistency
+
+As controllers scale, managing state across distributed instances requires robust synchronization to maintain eventual consistency and system stability. This module focuses on the principles of designing idempotent state machines and handling concurrency in Kubernetes.
+
+*   **Idempotency:** Designing state machines that ensure atomicity and consistent outcomes, regardless of how many times a reconcile loop executes.
+*   **Locks and Leases:** Utilizing Kubernetes `Lease` objects to manage synchronization and ensure that specific tasks—such as leader election—are handled by a single, authoritative controller instance.
+*   **Leader Election:** Implementing mechanisms to prevent conflicts when multiple controller replicas attempt to perform the same operations.
+*   **Controller Sharding:** Distributing workload across multiple controller instances to improve scalability and availability, as demonstrated by the OpenShift ingress controller patterns.

@@ -1,0 +1,10 @@
+#  Familiarizing with koo·br·neh·teez
+
+= Familiarizing with Kubernetes
+
+Kubernetes is an API-centric, declarative system designed for container orchestration and configuration management. Rather than executing imperative commands, users define the desired state of their infrastructure as data, which the system then works to maintain.
+
+*   **API-Centric Architecture:** The `kube-apiserver` acts as the central coordination point for all cluster operations, processing requests and managing lifecycle states.
+*   **Declarative Model:** Users submit resource configurations representing their desired intent, moving away from manual, step-by-step administrative tasks.
+*   **Persistence Layer:** The cluster state is stored within *etcd*, a distributed key-value store that serves as the single source of truth for the control plane.
+*   **Reconciliation Patterns:** Kubernetes utilizes asynchronous controllers to continuously observe current cluster status and take automated actions to align it with the declared desired state.

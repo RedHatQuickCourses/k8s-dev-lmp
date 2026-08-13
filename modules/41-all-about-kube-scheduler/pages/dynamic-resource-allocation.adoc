@@ -1,0 +1,3 @@
+#  Dynamic Resource Allocation
+
+Error: Unable to get response from Gemini model after multiple attempts.

@@ -1,0 +1,53 @@
+#  Kubernetes control plane and API server role
+
+= Kubernetes Control Plane and API Server Role
+
+The Kubernetes control plane is the brain of the cluster. It orchestrates the state of the system, ensuring that the actual state of your infrastructure matches the desired state defined by users. At the center of this operation lies the `kube-apiserver`, the primary gateway for all administrative tasks and internal component communication.
+
+== The Role of the API Server
+
+The `kube-apiserver` acts as the frontend for the Kubernetes control plane. Every interaction with the cluster—whether from `kubectl`, internal controllers, or external automation—must pass through the API server.
+
+Its primary responsibilities include:
+* **Exposure of the API:** It exposes the Kubernetes API using JSON over HTTP.
+* **Request Lifecycle Management:** It manages the end-to-end flow of a request, from authentication to final persistence.
+* **State Management:** It is the only component that talks directly to the `etcd` key-value store, ensuring a single source of truth for the cluster configuration.
+
+== The API Request Lifecycle
+
+Understanding how the API server processes a request is critical for any Kubernetes developer. When a request hits the API server, it traverses several plugin layers before interacting with storage:
+
+1.  **Authentication:** Identifies who is making the request (e.g., X509 certificates, service account tokens, or OIDC).
+2.  **Audit:** Records the request for security and compliance monitoring.
+3.  **Impersonation:** Allows one user to act as another (useful for troubleshooting and administrative delegation).
+4.  **Priority & Fairness:** Manages request execution based on defined priorities to prevent API starvation.
+5.  **Authorization:** Determines if the authenticated user has permission to perform the specific action (RBAC).
+6.  **Admission Control:** Executes plugins (Validating and Mutating webhooks) to modify or reject requests based on cluster policies.
+7.  **Storage:** Persistence layer interaction with `etcd`.
+
+[NOTE]
+====
+Admission webhooks (both Mutating and Validating) are triggered during `CREATE` and `UPDATE` operations. They are not invoked during `GET` or `LIST` operations, as those are read-only and do not alter the cluster state.
+====
+
+== Persistence Layer: etcd
+
+While the `kube-apiserver` manages the logic, `etcd` provides the persistence. It is a distributed, consistent key-value store. 
+
+* **Single Source of Truth:** All Kubernetes objects (Pods, Deployments, CustomResources) are stored as serialized JSON/Protobuf in `etcd`.
+* **Consistency:** Because `etcd` uses the Raft consensus algorithm, it guarantees that once a write is acknowledged, the data is consistent across the control plane nodes.
+* **Scaling:** Note that the control plane, specifically `etcd` and the `kube-apiserver`, scales vertically. Adding more CPU and memory to existing nodes is generally preferred over horizontal scaling for these components to maintain the integrity of the consensus store.
+
+== Declarative Intent
+
+Kubernetes operates on a declarative model. Instead of issuing commands (e.g., "start a container"), users submit a desired state (e.g., "I want 3 replicas of this image"). 
+
+The API server accepts this intent and stores it. It is then the role of the asynchronous controllers (like the `DeploymentController`) to watch these resources, calculate the delta between the current state and the desired state, and execute the necessary actions to reconcile the difference.
+
+[TIP]
+====
+For a deep dive into the internal mechanics of how these components interact, refer to the session materials: *The Life (or Death) of a Kubernetes API Request (2025 Edition)* by Abu Kashem and Stefan Schimanski.
+====
+
+== Next Steps
+Now that you understand the role of the control plane and the API server, the next module will cover how we interact with this API programmatically using `client-go` and how controllers monitor these resources to maintain cluster health.

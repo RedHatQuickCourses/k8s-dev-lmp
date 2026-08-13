@@ -1,0 +1,100 @@
+#  Platform automation through custom resources and operators
+
+= Platform Automation: Custom Resources and Operators
+
+== Overview
+Kubernetes is more than a container orchestrator; it is a platform for building platforms. The primary mechanism for this extensibility is the **Kubernetes Resource Model (KRM)**, which allows developers to extend the API to manage domain-specific logic. By leveraging **Custom Resource Definitions (CRDs)** and **Controllers**, you can codify operational knowledge into software, creating what we commonly call an **Operator**.
+
+== Custom Resources: Extending the API
+A **Custom Resource (CR)** is an extension of the Kubernetes API that allows you to store and retrieve structured data. When you define a CRD, the `kube-apiserver` creates a new RESTful endpoint for your resource.
+
+*   **Spec**: Defines the *desired state*—what the user wants the system to look like.
+*   **Status**: Reflects the *observed state*—what the system currently looks like.
+
+[TIP]
+====
+Avoid putting transient data in the `Spec`. The `Spec` should contain configuration that persists even if the controller is restarted.
+====
+
+== The Operator Pattern: Automating Operations
+An Operator is a software extension that uses custom resources to manage applications and their components. It follows the **Asynchronous Controller Reconciliation Pattern**:
+
+1.  **Watch**: The controller registers informers to monitor events on specific resources.
+2.  **Diff**: When an event occurs, the controller compares the `Spec` (intent) against the actual state of the system.
+3.  **Act**: The controller executes a series of actions (CRUD operations) to move the system toward the desired state.
+4.  **Reconcile**: This loop runs continuously, ensuring the system remains in the desired state despite external changes.
+
+== Why Custom Controllers?
+While `kubectl` and manual manifests work for simple workloads, complex systems require:
+*   **Encapsulation**: Bundling complex installation and configuration logic.
+*   **Self-Healing**: Automatic recovery from failures without human intervention.
+*   **Consistency**: Ensuring every instance of an application is deployed with the same parameters.
+
+== Hands-on Lab: Scaffolding a Controller with Kubebuilder
+
+In this lab, we will use `kubebuilder` to generate the boilerplate for a custom operator.
+
+=== Prerequisites
+*   Go (latest version)
+*   `kubectl`
+*   `kubebuilder` CLI
+*   A running Kubernetes cluster (e.g., Minikube or Kind)
+
+=== Step 1: Initialize the Project
+Create a new directory and initialize your project:
+
+[source,bash]
+----
+mkdir my-operator
+cd my-operator
+kubebuilder init --domain example.com --repo github.com/example/my-operator
+----
+
+=== Step 2: Create the API (CRD)
+Generate a new API group for your resource (e.g., `AppService`):
+
+[source,bash]
+----
+kubebuilder create api --group webapp --version v1 --kind AppService
+----
+
+=== Step 3: Define the Spec
+Edit `api/v1/appservice_types.go` to define the schema:
+
+[source,go]
+----
+type AppServiceSpec struct {
+    // Size is the desired number of replicas
+    Size int32 `json:"size,omitempty"`
+}
+
+type AppServiceStatus struct {
+    // Nodes are the names of the pods in the deployment
+    Nodes []string `json:"nodes,omitempty"`
+}
+----
+
+=== Step 4: Implement the Reconcile Loop
+Locate `internal/controller/appservice_controller.go` and implement the `Reconcile` function. Your logic should check if the resource exists, create child resources if missing, and update the `Status`.
+
+[source,go]
+----
+func (r *AppServiceReconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctrl.Result, error) {
+    // 1. Fetch the AppService instance
+    // 2. Logic to ensure deployment size matches Spec.Size
+    // 3. Update Status
+    return ctrl.Result{}, nil
+}
+----
+
+=== Step 5: Run the Controller
+[source,bash]
+----
+make install  # Install CRDs into the cluster
+make run      # Run the controller locally
+----
+
+== Key Takeaways
+*   **Declarative Intent**: The `Spec` represents the user's intent, not a command sequence.
+*   **Idempotency**: The reconcile loop must be idempotent—running it twice must produce the same result as running it once.
+*   **Event-Driven**: Controllers rely on `client-go` informers to efficiently listen for changes rather than polling the API server.

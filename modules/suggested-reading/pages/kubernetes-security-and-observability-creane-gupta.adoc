@@ -1,0 +1,82 @@
+#  Kubernetes Security and Observability (Creane, Gupta)
+
+= Kubernetes Security and Observability
+
+[abstract]
+As Kubernetes clusters move from experimental projects to production-grade infrastructure, the complexity of securing and monitoring the environment grows exponentially. This module explores the core concepts of Kubernetes security and observability, drawing from the architectural insights provided by Brendan Creane and Amit Gupta in *Kubernetes Security and Observability*.
+
+== Security Foundations in Kubernetes
+
+Securing a Kubernetes environment requires a defense-in-depth approach. Unlike traditional virtualized environments, Kubernetes requires security controls to be applied at multiple layers: the container image, the node, the network, and the API server.
+
+=== The Security Architecture
+The `kube-apiserver` acts as the central gatekeeper. As noted in the resource model, every request undergoes a strict lifecycle:
+* **Authentication:** Verifying who is making the request (X.509, OIDC, Tokens).
+* **Authorization:** Determining if the identity has the permissions for the requested action (RBAC, Node Authorization, ABAC).
+* **Admission Control:** Validating or mutating the request before it is persisted in `etcd`.
+
+=== Policy Enforcement
+A critical aspect of securing the cluster is moving beyond native RBAC toward automated governance. This involves:
+* **Validating Webhooks:** Intercepting requests to ensure they comply with organizational standards.
+* **Policy Engines:** Utilizing tools like OPA Gatekeeper or Kyverno to decouple security policies from application code, allowing for centralized, declarative governance.
+
+== Observability: Understanding Cluster State
+
+Observability in Kubernetes is more than just logging; it is the ability to understand the internal state of the system by examining its external outputs (metrics, logs, and traces).
+
+=== The Three Pillars
+1. **Metrics:** Quantifiable data (e.g., CPU/Memory usage, request latency, error rates). These are typically gathered via the Metrics Server or Prometheus and provide the "what" is happening in the system.
+2. **Logs:** Immutable records of discrete events (e.g., application startup, connection failures). Logs provide the "why" something happened.
+3. **Traces:** Distributed tracing allows engineers to follow a request as it traverses microservices, which is essential for troubleshooting performance bottlenecks in complex, distributed systems.
+
+== Hands-on Activity: Analyzing Security Contexts
+
+In this exercise, we will apply security hardening principles by restricting a Pod's capabilities through the `SecurityContext`.
+
+.Create a restricted pod manifest (`restricted-pod.yaml`):
+[source,yaml]
+----
+apiVersion: v1
+kind: Pod
+metadata:
+  name: security-hardened-pod
+spec:
+  securityContext:
+    runAsNonRoot: true
+    runAsUser: 1000
+    fsGroup: 2000
+  containers:
+  - name: nginx
+    image: nginx:latest
+    securityContext:
+      allowPrivilegeEscalation: false
+      capabilities:
+        drop:
+          - ALL
+----
+
+.Steps to apply and verify:
+1. **Apply the configuration:**
++
+[source,bash]
+----
+kubectl apply -f restricted-pod.yaml
+----
+
+2. **Verify security constraints:**
+Attempt to enter the container and perform a privileged action (like changing system time) to confirm the `capabilities` block effectively dropped `ALL` privileges.
++
+[source,bash]
+----
+kubectl exec -it security-hardened-pod -- date -s "2025-01-01"
+# Expected output: Operation not permitted
+----
+
+== Troubleshooting and Best Practices
+* **Least Privilege:** Always grant only the permissions necessary for a controller or user to function. Use `RoleBindings` scoped to specific namespaces rather than `ClusterRoleBindings` whenever possible.
+* **Visibility:** Ensure your observability stack (Prometheus/Grafana) has access to API audit logs. Audit logs are the single most important tool for forensic analysis in a compromised cluster.
+* **Immutable Infrastructure:** Treat your nodes and containers as immutable. If a container is misbehaving, replace it rather than patching it in place.
+
+[bibliography]
+== Recommended Reading
+* Creane, Brendan, and Amit Gupta. *Kubernetes Security and Observability*. O'Reilly Media, Inc., 2021.

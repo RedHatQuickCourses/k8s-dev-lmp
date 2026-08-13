@@ -1,0 +1,107 @@
+#  3: Develop a custom Validating Webhook for container registry enforcement
+
+= Exercise 3: Developing a Custom Validating Webhook
+
+In this exercise, you will extend your Kubernetes knowledge by implementing a **Validating Admission Webhook**. This component acts as a gatekeeper, intercepting requests to the `kube-apiserver` to ensure that any container images specified in your custom resources originate only from pre-approved registries.
+
+== Technical Overview
+
+Kubernetes Admission Controllers are plugins that govern and enforce policies on objects during create, update, or delete operations. A **Validating Webhook** is an HTTP callback that the API server invokes to determine whether a request should be allowed or rejected based on custom logic.
+
+Unlike **Policy Engines** (such as OPA Gatekeeper or Kyverno) which provide a declarative DSL for policy management, a custom webhook allows you to implement complex, imperative business logic directly in Go, providing complete control over the validation lifecycle.
+
+== Prerequisites
+
+* A running Kubernetes cluster (e.g., Minikube, Kind, or OpenShift).
+* A working custom resource already reconciled by your controller.
+* `cert-manager` installed in your cluster (for managing webhook TLS certificates).
+
+== Hands-on Lab: Registry Enforcement Webhook
+
+In this lab, you will write a Go-based binary that validates the container image string against an allow-list provided via command-line flags.
+
+### Step 1: Define the Webhook Logic
+
+Your binary needs to implement an HTTP handler that accepts an `admission.k8s.io/v1, Kind=AdmissionReview` request and returns a response indicating success or failure.
+
+[source,go]
+----
+func validateRegistry(image string, approvedRegistries []string) bool {
+    for _, registry := range approvedRegistries {
+        if strings.HasPrefix(image, registry) {
+            return true
+        }
+    }
+    return false
+}
+----
+
+### Step 2: Configure Command-Line Flags
+
+The webhook binary must accept the registry list at startup. Use the standard `flag` package to parse these inputs.
+
+[source,go]
+----
+var approvedRegistries []string
+
+func init() {
+    flag.Func("approved-registries", "Comma-separated list of allowed registries", func(s string) error {
+        approvedRegistries = strings.Split(s, ",")
+        return nil
+    })
+}
+----
+
+### Step 3: Define the ValidatingWebhookConfiguration
+
+You must register your webhook with the API server so it knows which resources to monitor and how to reach your service.
+
+[source,yaml]
+----
+apiVersion: admissionregistration.k8s.io/v1
+kind: ValidatingWebhookConfiguration
+metadata:
+  name: registry-validator
+webhooks:
+  - name: validate.registry.example.com
+    rules:
+      - apiGroups: ["your-api-group"]
+        apiVersions: ["v1"]
+        operations: ["CREATE", "UPDATE"]
+        resources: ["your-custom-resources"]
+    clientConfig:
+      service:
+        name: registry-validator-service
+        namespace: default
+        path: "/validate"
+    admissionReviewVersions: ["v1"]
+    sideEffects: None
+----
+
+### Step 4: Deployment and Verification
+
+1. **Build and Push**: Compile your Go binary, containerize it (including the flag setup), and push it to your registry.
+2. **Deploy**: Create the `Deployment` and `Service` for the webhook. Ensure your `ValidatingWebhookConfiguration` points to this service.
+3. **Test**: Attempt to create a custom resource using an image from a non-approved registry:
+
+[source,bash]
+----
+# This should be rejected by the API server
+kubectl apply -f- <<EOF
+apiVersion: your-api-group/v1
+kind: YourCustomResource
+metadata:
+  name: test-resource
+spec:
+  image: "malicious-registry.com/my-app:latest"
+EOF
+
+# Expected output:
+# Error from server: admission webhook "validate.registry.example.com" denied the request
+----
+
+== Troubleshooting Guidance
+
+* **TLS Issues**: Webhooks require HTTPS. Ensure your `ValidatingWebhookConfiguration` includes the `caBundle` field, which should contain the CA certificate used to sign your webhook's serving certificate. `cert-manager` can automate this injection.
+* **Network Connectivity**: If the `kube-apiserver` cannot reach your webhook, check your Service selector and ensure the `ValidatingWebhookConfiguration` namespace matches the target service.
+* **Infinite Loops**: Avoid having your webhook trigger itself or perform operations that cause secondary resource changes that could trigger the webhook again (set `sideEffects: None`).

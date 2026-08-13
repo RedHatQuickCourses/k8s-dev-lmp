@@ -1,0 +1,32 @@
+#  Ideal baseline: CKAD certification, or Red Hat DO-180 and DO-280 tracks
+
+= Preparing for the Kubernetes Developer Learning Path
+
+To succeed in this curriculum, you must possess a solid foundation in container orchestration. This learning path is designed for engineers, system administrators, and developers who are ready to transition from *using* Kubernetes to *extending* it.
+
+== The Ideal Baseline
+
+We expect participants to have a working understanding of the Kubernetes ecosystem. Our curriculum assumes you are comfortable with declarative configuration and the standard resource lifecycle. You should be prepared to meet one of the following benchmarks:
+
+*   **CKAD (Certified Kubernetes Application Developer):** This certification confirms your ability to design, build, and deploy cloud-native applications. If you hold this certification, you already have the necessary skills in handling Pods, Deployments, Services, and ConfigMaps—the fundamental building blocks we will manipulate via custom controllers.
+*   **Red Hat DO-180 (Introduction to Containers, Kubernetes, and Red Hat OpenShift):** This track provides the essential vocabulary for containerized environments, image management, and basic orchestration.
+*   **Red Hat DO-280 (Red Hat OpenShift Administration II: Operating a Production Kubernetes Cluster):** This track dives deeper into the operational aspects of the platform, providing the necessary context regarding how clusters are secured, networked, and maintained—all of which are critical when writing controllers that interact with the cluster's control plane.
+
+[NOTE]
+====
+If you do not hold these specific credentials, ensure you have equivalent practical experience. You should be familiar with:
+*   The `kubectl` command-line interface and basic API interaction.
+*   YAML-based manifest management.
+*   The fundamental concepts of distributed systems (e.g., eventual consistency, API-centric communication).
+====
+
+== Why these prerequisites matter
+
+The content we will cover—ranging from `client-go` informers to Custom Resource Definitions (CRDs) and admission webhooks—builds directly upon the core Kubernetes resource model.
+
+If you are unfamiliar with how the `kube-apiserver` processes a request or how a deployment maintains its state through reconciliation, the jump into `client-go` architecture and controller reconciliation patterns will be significantly more difficult. By starting with the proficiency level defined by the **CKAD** or **DO-180/DO-280** tracks, you ensure that you can focus on the *extension* mechanisms of Kubernetes rather than struggling with basic application deployment patterns.
+
+[TIP]
+====
+If you feel your knowledge in these areas is rusty, revisit the official Kubernetes documentation on *Declarative Management* and the *Kubernetes API* before beginning the hands-on labs in this learning path.
+====

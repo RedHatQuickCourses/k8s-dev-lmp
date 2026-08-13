@@ -1,0 +1,49 @@
+#  client-go architecture fundamentals
+
+= client-go Architecture Fundamentals
+
+`client-go` is the official Go-based client library for communicating with the Kubernetes API server. It is the foundation upon which almost all Kubernetes controllers and operators are built. Understanding its architecture is essential for moving beyond simple `kubectl` commands and into the realm of custom automation.
+
+== The Core Purpose
+In Kubernetes, the control plane relies on a declarative model. Your controller’s job is to observe the current state of the cluster and drive it toward a desired state. `client-go` provides the mechanisms to perform this observation efficiently without overwhelming the API server with constant polling.
+
+== Architecture Components
+
+The strength of `client-go` lies in its ability to provide a local, synchronized view of the cluster state. This is achieved through three primary components:
+
+=== 1. Informers (The "Eyes")
+An **Informer** is a client that watches the Kubernetes API for changes to a specific resource (e.g., Pods or Deployments).
+*   **Event Handling:** Instead of manual polling, the Informer uses a `Watch` request to receive a stream of events (Add, Update, Delete) from the API server.
+*   **Efficiency:** By maintaining a persistent connection, it reduces the load on the API server significantly compared to periodic list requests.
+
+=== 2. Listers (The "Local Cache")
+Every Informer maintains a local, read-only cache of the objects it is watching.
+*   **The Role:** The **Lister** acts as an interface to this cache. When your code needs to know the current state of a resource, it queries the Lister rather than querying the API server directly.
+*   **Performance:** Reading from local memory is orders of magnitude faster than a network round-trip to the API server.
+
+=== 3. WorkQueues (The "Buffers")
+Because events can happen rapidly (e.g., a burst of Pod deletions), you do not want your controller to execute a complex logic loop for every single event immediately.
+*   **Decoupling:** Informers push the name/namespace of changed objects into a **WorkQueue**.
+*   **FIFO Ordering:** The workqueue is strictly First-In-First-Out.
+*   **Rate Limiting & Retries:** The `workqueue` package provides built-in mechanisms to handle errors (e.g., if your reconciliation fails, you can put the item back into the queue with an exponential backoff).
+
+== Data Flow: How it works together
+
+1.  **Event:** A change occurs in the cluster (e.g., a user creates a new resource).
+2.  **Informer:** The Informer detects the event via the watch stream and updates the **local store (cache)**.
+3.  **Handler:** The Informer triggers an event handler (a function you define), which adds the key (namespace/name) of the affected resource into the **WorkQueue**.
+4.  **Worker:** Your controller's worker loop pulls the key from the queue and calls the **Lister** to get the actual object data from the local cache.
+5.  **Reconciliation:** Your code processes the object and interacts with the API server only when a change is strictly necessary.
+
+[IMPORTANT]
+====
+**Key Gotcha:** Always remember that your cache is *eventually consistent*. There is a slight propagation delay between an event happening in the cluster and that event reflecting in your local cache. Your controller logic must be designed to be idempotent to account for this.
+====
+
+== Why this architecture matters
+If you were to write a controller without this pattern, you would be forced to call `List` on the API server in a loop. This would:
+*   Increase API server CPU and memory pressure.
+*   Lead to latency issues as the cluster grows.
+*   Result in an unscalable application.
+
+By using the `client-go` architecture, you move the heavy lifting of state synchronization to the client side, ensuring your controller is performant, responsive, and resilient.

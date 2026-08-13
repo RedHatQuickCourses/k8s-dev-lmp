@@ -1,0 +1,10 @@
+#  3.2 — The other stuff
+
+== 3.2 — The other stuff
+
+This module covers essential Kubernetes ecosystem components that extend beyond core controllers and the API server. It focuses on the architectural features required for production-grade environments:
+
+* **Advanced Networking:** Evolution of traffic management, covering Ingress and the Gateway API.
+* **Service Mesh:** Concepts and implementation for managing microservice communication.
+* **Authentication and Authorization:** Specialized AuthN/AuthZ mechanisms specific to the OpenShift platform.
+* **Cluster Security and Hardening:** Implementing fine-grained security controls, including RBAC, Security Context Constraints (SCC), and Seccomp profiles.

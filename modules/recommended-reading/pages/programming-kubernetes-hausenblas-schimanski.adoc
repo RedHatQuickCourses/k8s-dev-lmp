@@ -1,0 +1,42 @@
+#  Programming Kubernetes (Hausenblas, Schimanski)
+
+= Recommended Reading: Programming Kubernetes
+
+In the journey toward becoming a Kubernetes developer, understanding the "how" and "why" of the control plane is essential. Michael Hausenblas and Stefan Schimanski’s *Programming Kubernetes: Developing Cloud-Native Applications* serves as the definitive foundational text for mastering the Kubernetes API and extending the platform.
+
+== Why this book is essential
+While many resources focus on using `kubectl` to manage workloads, this text shifts the perspective to that of a **platform engineer**. It deconstructs the Kubernetes control plane, providing the technical depth required to transition from a consumer of Kubernetes resources to an architect of Kubernetes extensions.
+
+Key insights provided by the authors include:
+
+*   **API-Centric Architecture:** A deep dive into how the `kube-apiserver` acts as the single source of truth and the gateway for all declarative configuration.
+*   **The Controller Pattern:** A clear explanation of the asynchronous reconciliation loop, which is the mechanism that maintains the desired state of the cluster.
+*   **Deep Dive into `client-go`:** Essential guidance on using the official Go client library to interact with the Kubernetes API, manage informers, and handle event propagation.
+*   **Custom Resource Definitions (CRDs):** Practical strategies for extending the Kubernetes API to manage domain-specific resources.
+
+== Key Concepts Covered
+For developers following this learning path, the book aligns perfectly with our core objectives:
+
+[cols="1,3"]
+|===
+| Topic | Relevance to Learning Path
+
+| *The Control Plane* | Provides the theoretical backing for our study of `etcd`, API validation, and the reconciliation pattern.
+| *Custom Controllers* | Mirrors our focus on building operators that utilize `client-go`, workqueues, and cache mechanisms.
+| *Distributed Systems* | Offers guidance on implementing the eventual consistency model and handling concurrency—crucial for high-availability operators.
+|===
+
+== How to use this resource in this course
+We recommend using *Programming Kubernetes* as your primary reference manual during the hands-on labs. Specifically, as you begin building your first controller from scratch, refer to the chapters covering:
+
+1.  **Workqueues and Informers:** Use these sections to understand the flow of events from the API server to your custom controller logic.
+2.  **API Machinery:** Use this as a reference when defining your Custom Resource Definition (CRD) schemas and managing `Spec` vs. `Status` fields.
+3.  **Optimistic Concurrency:** When we tackle the lesson on "Going distributed: locks, leases, and ownership," the book’s coverage of resource versioning and conflict handling will be invaluable for implementing robust leader election.
+
+== Further Study
+This book is not a "read once" resource; it is an architectural handbook. As you progress from basic controllers to advanced admission webhooks and custom API servers, revisit the technical implementation details documented in the text to ensure your custom infrastructure components adhere to the standard Kubernetes "look and feel."
+
+[TIP]
+====
+For those currently navigating the transition from `kubectl` automation to binary-based controller development, focus heavily on the sections describing the `client-go` event-driven architecture. This is the cornerstone of the hands-on labs you will complete in this track.
+====
