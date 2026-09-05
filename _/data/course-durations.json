@@ -1,5 +1,5 @@
 {
-  "totalSeconds": 7553,
+  "totalSeconds": 7573,
   "pageCount": 64,
   "pages": [
     {
@@ -20,27 +20,27 @@
     {
       "module": "overview",
       "page": "kubernetes-architecture-overview-and-extensibility-mechanisms.adoc",
-      "seconds": 160
+      "seconds": 161
     },
     {
       "module": "overview",
       "page": "control-plane-authentication-authorization-and-validation.adoc",
-      "seconds": 157
+      "seconds": 159
     },
     {
       "module": "overview",
       "page": "platform-automation-through-custom-resources-and-operators.adoc",
-      "seconds": 125
+      "seconds": 127
     },
     {
       "module": "overview",
       "page": "distributed-system-principles-for-high-availability.adoc",
-      "seconds": 194
+      "seconds": 195
     },
     {
       "module": "overview",
       "page": "advanced-networking-traffic-management-and-control-plane-architectures.adoc",
-      "seconds": 134
+      "seconds": 136
     },
     {
       "module": "who-is-this-for-pre-requisites",
@@ -50,22 +50,22 @@
     {
       "module": "who-is-this-for-pre-requisites",
       "page": "target-audience-engineers-sys-admins-and-developers-with-container-experience.adoc",
-      "seconds": 92
+      "seconds": 95
     },
     {
       "module": "who-is-this-for-pre-requisites",
       "page": "recommended-prerequisites-basic-distributed-systems-knowledge.adoc",
-      "seconds": 116
+      "seconds": 118
     },
     {
       "module": "who-is-this-for-pre-requisites",
       "page": "ideal-baseline-ckad-certification-or-red-hat-do-180-and-do-280-tracks.adoc",
-      "seconds": 92
+      "seconds": 95
     },
     {
       "module": "familiarizing-with-koobrnehteez",
       "page": "familiarizing-with-koobrnehteez.adoc",
-      "seconds": 22
+      "seconds": 21
     },
     {
       "module": "familiarizing-with-koobrnehteez",
@@ -80,7 +80,7 @@
     {
       "module": "11-kubernetes-resource-model",
       "page": "11-kubernetes-resource-model.adoc",
-      "seconds": 44
+      "seconds": 43
     },
     {
       "module": "11-kubernetes-resource-model",
@@ -125,7 +125,7 @@
     {
       "module": "21-controllers-contd",
       "page": "21-controllers-contd.adoc",
-      "seconds": 37
+      "seconds": 36
     },
     {
       "module": "21-controllers-contd",
@@ -230,7 +230,7 @@
     {
       "module": "41-all-about-kube-scheduler",
       "page": "41-all-about-kube-scheduler.adoc",
-      "seconds": 27
+      "seconds": 26
     },
     {
       "module": "41-all-about-kube-scheduler",
@@ -290,17 +290,17 @@
     {
       "module": "recommended-reading",
       "page": "programming-kubernetes-hausenblas-schimanski.adoc",
-      "seconds": 124
+      "seconds": 125
     },
     {
       "module": "recommended-reading",
       "page": "kubernetes-operators-dobies-wood.adoc",
-      "seconds": 150
+      "seconds": 152
     },
     {
       "module": "recommended-reading",
       "page": "cncf-operator-whitepaper.adoc",
-      "seconds": 141
+      "seconds": 142
     },
     {
       "module": "suggested-reading",
@@ -310,12 +310,12 @@
     {
       "module": "suggested-reading",
       "page": "kubernetes-security-and-observability-creane-gupta.adoc",
-      "seconds": 141
+      "seconds": 143
     },
     {
       "module": "suggested-reading",
       "page": "designing-distributed-systems-burns.adoc",
-      "seconds": 188
+      "seconds": 190
     },
     {
       "module": "appendix",
