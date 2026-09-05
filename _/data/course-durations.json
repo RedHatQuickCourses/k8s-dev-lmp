@@ -1,5 +1,5 @@
 {
-  "totalSeconds": 7573,
+  "totalSeconds": 7575,
   "pageCount": 64,
   "pages": [
     {
@@ -80,7 +80,7 @@
     {
       "module": "11-kubernetes-resource-model",
       "page": "11-kubernetes-resource-model.adoc",
-      "seconds": 43
+      "seconds": 44
     },
     {
       "module": "11-kubernetes-resource-model",
@@ -100,7 +100,7 @@
     {
       "module": "12-controllers-informers-client-go",
       "page": "12-controllers-informers-client-go.adoc",
-      "seconds": 38
+      "seconds": 37
     },
     {
       "module": "12-controllers-informers-client-go",
@@ -125,7 +125,7 @@
     {
       "module": "21-controllers-contd",
       "page": "21-controllers-contd.adoc",
-      "seconds": 36
+      "seconds": 37
     },
     {
       "module": "21-controllers-contd",
@@ -230,7 +230,7 @@
     {
       "module": "41-all-about-kube-scheduler",
       "page": "41-all-about-kube-scheduler.adoc",
-      "seconds": 26
+      "seconds": 27
     },
     {
       "module": "41-all-about-kube-scheduler",
