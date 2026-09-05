@@ -1,6 +1,6 @@
 {
-  "totalSeconds": 7575,
-  "pageCount": 64,
+  "totalSeconds": 6797,
+  "pageCount": 59,
   "pages": [
     {
       "module": "ROOT",
@@ -16,31 +16,6 @@
       "module": "overview",
       "page": "overview.adoc",
       "seconds": 72
-    },
-    {
-      "module": "overview",
-      "page": "kubernetes-architecture-overview-and-extensibility-mechanisms.adoc",
-      "seconds": 161
-    },
-    {
-      "module": "overview",
-      "page": "control-plane-authentication-authorization-and-validation.adoc",
-      "seconds": 159
-    },
-    {
-      "module": "overview",
-      "page": "platform-automation-through-custom-resources-and-operators.adoc",
-      "seconds": 127
-    },
-    {
-      "module": "overview",
-      "page": "distributed-system-principles-for-high-availability.adoc",
-      "seconds": 195
-    },
-    {
-      "module": "overview",
-      "page": "advanced-networking-traffic-management-and-control-plane-architectures.adoc",
-      "seconds": 136
     },
     {
       "module": "who-is-this-for-pre-requisites",

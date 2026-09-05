@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width,initial-scale=1">
     <title>Course Overview :: Kubernetes Developer Learning Path</title>
     <link rel="prev" href="../LABENV/index.html">
-    <link rel="next" href="kubernetes-architecture-overview-and-extensibility-mechanisms.html">
+    <link rel="next" href="../who-is-this-for-pre-requisites/who-is-this-for-pre-requisites.html">
     <meta name="generator" content="Antora 3.2.0-alpha.12">
     <link rel="stylesheet" href="../../../_/css/site.css">
     <link rel="stylesheet" href="../../../_/css/vendor/tabs.css">
@@ -58,25 +58,7 @@
   <li class="nav-item" data-depth="0">
 <ul class="nav-list">
   <li class="nav-item is-current-page" data-depth="1">
-    <button class="nav-item-toggle"></button>
     <a class="nav-link" href="overview.html">Overview</a>
-<ul class="nav-list">
-  <li class="nav-item" data-depth="2">
-    <a class="nav-link" href="kubernetes-architecture-overview-and-extensibility-mechanisms.html">Kubernetes architecture overview and extensibility mechanisms</a>
-  </li>
-  <li class="nav-item" data-depth="2">
-    <a class="nav-link" href="control-plane-authentication-authorization-and-validation.html">Control plane authentication, authorization, and validation</a>
-  </li>
-  <li class="nav-item" data-depth="2">
-    <a class="nav-link" href="platform-automation-through-custom-resources-and-operators.html">Platform automation through custom resources and operators</a>
-  </li>
-  <li class="nav-item" data-depth="2">
-    <a class="nav-link" href="distributed-system-principles-for-high-availability.html">Distributed system principles for high availability</a>
-  </li>
-  <li class="nav-item" data-depth="2">
-    <a class="nav-link" href="advanced-networking-traffic-management-and-control-plane-architectures.html">Advanced networking, traffic management, and control plane architectures</a>
-  </li>
-</ul>
   </li>
 </ul>
   </li>
@@ -405,7 +387,7 @@ This module orients you with how the API server, etcd, and controllers work toge
 </div>
 </div>
 <div class="sect2">
-<h3 id="_kubernetes_resource_model"><a class="anchor" href="#_kubernetes_resource_model"></a>Kubernetes Resource Model</h3>
+<h3 id="_1_1_kubernetes_resource_model"><a class="anchor" href="#_1_1_kubernetes_resource_model"></a>1.1 — Kubernetes Resource Model</h3>
 <div class="paragraph">
 <p>A walkthrough on kube-apiserver essentials&#8201;&#8212;&#8201;the declarative intent of Kubernetes Resources and all the plugin layers (authentication, audit, impersonation, priority &amp; fairness, authorization, admission, storage).</p>
 </div>
@@ -414,7 +396,7 @@ This module orients you with how the API server, etcd, and controllers work toge
 </div>
 </div>
 <div class="sect2">
-<h3 id="_controllers_informers_and_client_go"><a class="anchor" href="#_controllers_informers_and_client_go"></a>Controllers, Informers, and client-go</h3>
+<h3 id="_1_2_controllers_informers_and_client_go"><a class="anchor" href="#_1_2_controllers_informers_and_client_go"></a>1.2 — Controllers, Informers, and client-go</h3>
 <div class="paragraph">
 <p>The basic building blocks behind operators&#8201;&#8212;&#8201;client-go architecture, Informers, listers, workqueues, caches, and error handling.</p>
 </div>
@@ -423,7 +405,7 @@ This module orients you with how the API server, etcd, and controllers work toge
 </div>
 </div>
 <div class="sect2">
-<h3 id="_controllers_with_controller_runtime"><a class="anchor" href="#_controllers_with_controller_runtime"></a>Controllers with controller-runtime</h3>
+<h3 id="_2_1_controllers_with_controller_runtime"><a class="anchor" href="#_2_1_controllers_with_controller_runtime"></a>2.1 — Controllers with controller-runtime</h3>
 <div class="paragraph">
 <p>Writing concrete Kube APIs with controller-runtime&#8201;&#8212;&#8201;Reconcile loop, kubebuilder, Spec vs Status, Conditions, API validation, CRUD operations, Apply vs Patch vs Update.</p>
 </div>
@@ -432,7 +414,7 @@ This module orients you with how the API server, etcd, and controllers work toge
 </div>
 </div>
 <div class="sect2">
-<h3 id="_going_distributed"><a class="anchor" href="#_going_distributed"></a>Going Distributed</h3>
+<h3 id="_2_2_going_distributed_locks_leases_ownership_eventual_consistency"><a class="anchor" href="#_2_2_going_distributed_locks_leases_ownership_eventual_consistency"></a>2.2 — Going Distributed: Locks, Leases, Ownership, Eventual Consistency</h3>
 <div class="paragraph">
 <p>Distributed systems challenges&#8201;&#8212;&#8201;Idempotency, locks, leases, leader election, controller sharding (with OpenShift Ingress Controller case study).</p>
 </div>
@@ -441,7 +423,7 @@ This module orients you with how the API server, etcd, and controllers work toge
 </div>
 </div>
 <div class="sect2">
-<h3 id="_admissions_and_beyond_the_kube_apiserver"><a class="anchor" href="#_admissions_and_beyond_the_kube_apiserver"></a>Admissions and Beyond the kube-apiserver</h3>
+<h3 id="_3_1_taking_more_control_admissions_and_beyond_the_kube_apiserver_to_writing_your_own_api_server"><a class="anchor" href="#_3_1_taking_more_control_admissions_and_beyond_the_kube_apiserver_to_writing_your_own_api_server"></a>3.1 — Taking More Control: Admissions and Beyond the kube-apiserver to Writing Your Own API Server</h3>
 <div class="paragraph">
 <p>From admission control webhooks into writing your own apiserver&#8201;&#8212;&#8201;ValidatingWebhooks, MutatingWebhooks, policy engines, API discovery, aggregated APIs, custom API servers.</p>
 </div>
@@ -450,7 +432,7 @@ This module orients you with how the API server, etcd, and controllers work toge
 </div>
 </div>
 <div class="sect2">
-<h3 id="_the_other_stuff"><a class="anchor" href="#_the_other_stuff"></a>The Other Stuff</h3>
+<h3 id="_3_2_the_other_stuff"><a class="anchor" href="#_3_2_the_other_stuff"></a>3.2 — The Other Stuff</h3>
 <div class="paragraph">
 <p>Networking (Ingress, Gateway API), Service Mesh, AuthN/AuthZ in OpenShift, Security, Cluster Hardening.</p>
 </div>
@@ -459,7 +441,7 @@ This module orients you with how the API server, etcd, and controllers work toge
 </div>
 </div>
 <div class="sect2">
-<h3 id="_all_about_kube_scheduler"><a class="anchor" href="#_all_about_kube_scheduler"></a>All About kube-scheduler</h3>
+<h3 id="_4_1_all_about_kube_scheduler"><a class="anchor" href="#_4_1_all_about_kube_scheduler"></a>4.1 — All About kube-scheduler</h3>
 <div class="paragraph">
 <p>kube-scheduler deep dive&#8201;&#8212;&#8201;scheduling, de-scheduling, resource requests and limits, Dynamic Resource Allocation.</p>
 </div>
@@ -468,7 +450,7 @@ This module orients you with how the API server, etcd, and controllers work toge
 </div>
 </div>
 <div class="sect2">
-<h3 id="_ubiquitous_topics"><a class="anchor" href="#_ubiquitous_topics"></a>Ubiquitous Topics</h3>
+<h3 id="_4_2_ubiquitous_topics"><a class="anchor" href="#_4_2_ubiquitous_topics"></a>4.2 — Ubiquitous Topics</h3>
 <div class="paragraph">
 <p>Operator landscape and alternative control plane architectures&#8201;&#8212;&#8201;HyperShift, kcp, MicroShift, k3s.</p>
 </div>
@@ -480,7 +462,7 @@ This module orients you with how the API server, etcd, and controllers work toge
 </div>
 <nav class="pagination">
   <span class="prev"><a href="../LABENV/index.html">Lab Environment</a></span>
-  <span class="next"><a href="kubernetes-architecture-overview-and-extensibility-mechanisms.html">Kubernetes architecture overview and extensibility mechanisms</a></span>
+  <span class="next"><a href="../who-is-this-for-pre-requisites/who-is-this-for-pre-requisites.html">Who Is This For? Prerequisites</a></span>
 </nav>
 </article>
   </div>
