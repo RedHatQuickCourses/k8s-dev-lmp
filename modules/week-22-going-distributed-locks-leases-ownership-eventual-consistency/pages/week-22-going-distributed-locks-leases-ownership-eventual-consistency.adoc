@@ -1,9 +1,0 @@
-= Week 2.2 -- Going Distributed: Locks, Leases, Ownership, Eventual Consistency
-:navtitle: Week 2.2 -- Going Distributed
-
-When multiple controller replicas manage shared resources, you step squarely into the territory of distributed systems.
-Race conditions, stale caches, and split-brain scenarios are no longer theoretical -- they are daily operational realities.
-This week examines four layers of defense against these challenges.
-First, you will learn to structure your Reconcile loop so that every invocation is idempotent and tolerant of stale data.
-Next, you will study the theory behind distributed locks and understand why naive locking is insufficient for correctness.
-From there, you will implement Kubernetes-native leader election using Lease objects, and finally explore controller sharding as a strategy for scaling reconciliation beyond a single active replica.

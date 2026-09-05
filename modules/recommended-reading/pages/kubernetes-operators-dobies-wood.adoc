@@ -22,11 +22,14 @@ The text provides a architectural framework for moving from a standard controlle
 == Comparison: Kubebuilder vs. Operator SDK
 When beginning your development journey, choosing the right toolset is vital. While *Kubernetes Operators* focuses on the conceptual underpinnings, practical implementation often leans on the **Operator SDK** or **Kubebuilder**.
 
-| Feature | Kubebuilder | Operator SDK |
-| :--- | :--- | :--- |
-| **Philosophy** | "Go-native," focuses on simplicity and standard `controller-runtime` patterns. | Built on top of Kubebuilder; provides additional "batteries-included" features. |
-| **Capability Levels** | Primarily Go-based. | Supports Go, Helm, and Ansible-based operators. |
-| **Tooling** | Minimalist; standard scaffold. | Includes features like `operator-scorecard` and enhanced lifecycle management. |
+[cols="1,2,2", options="header"]
+|===
+| Feature | Kubebuilder | Operator SDK
+
+| *Philosophy* | "Go-native," focuses on simplicity and standard `controller-runtime` patterns. | Built on top of Kubebuilder; provides additional "batteries-included" features.
+| *Capability Levels* | Primarily Go-based. | Supports Go, Helm, and Ansible-based operators.
+| *Tooling* | Minimalist; standard scaffold. | Includes features like `operator-scorecard` and enhanced lifecycle management.
+|===
 
 == Recommended Practical Workflow
 To successfully implement the concepts discussed by Dobies and Wood, align your development process with these industry standards:

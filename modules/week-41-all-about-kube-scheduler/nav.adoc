@@ -1,4 +1,0 @@
-* xref:week-41-all-about-kube-scheduler.adoc[]
-** xref:how-the-scheduler-works.adoc[]
-** xref:resource-management.adoc[]
-** xref:dynamic-resource-allocation.adoc[]

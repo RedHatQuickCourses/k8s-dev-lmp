@@ -1,6 +1,0 @@
-* xref:week-21-controllers-contd.adoc[]
-** xref:gvk-gvr-and-api-terminology.adoc[]
-** xref:controller-runtime-and-kubebuilder.adoc[]
-** xref:spec-status-and-conditions.adoc[]
-** xref:api-validation-and-linting.adoc[]
-** xref:update-patch-and-server-side-apply.adoc[]

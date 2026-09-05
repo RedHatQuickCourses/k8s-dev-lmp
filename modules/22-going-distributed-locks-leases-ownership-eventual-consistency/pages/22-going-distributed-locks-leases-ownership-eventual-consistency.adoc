@@ -1,10 +1,11 @@
-#  2.2 — Going distributed: locks, leases, ownership, eventual consistency
+#  Going Distributed: Locks, Leases, Ownership, Eventual Consistency
 
-= 2.2 — Going distributed: locks, leases, ownership, eventual consistency
+= Going Distributed: Locks, Leases, Ownership, Eventual Consistency
+Going Distributed
 
-As controllers scale, managing state across distributed instances requires robust synchronization to maintain eventual consistency and system stability. This module focuses on the principles of designing idempotent state machines and handling concurrency in Kubernetes.
-
-*   **Idempotency:** Designing state machines that ensure atomicity and consistent outcomes, regardless of how many times a reconcile loop executes.
-*   **Locks and Leases:** Utilizing Kubernetes `Lease` objects to manage synchronization and ensure that specific tasks—such as leader election—are handled by a single, authoritative controller instance.
-*   **Leader Election:** Implementing mechanisms to prevent conflicts when multiple controller replicas attempt to perform the same operations.
-*   **Controller Sharding:** Distributing workload across multiple controller instances to improve scalability and availability, as demonstrated by the OpenShift ingress controller patterns.
+When multiple controller replicas manage shared resources, you step squarely into the territory of distributed systems.
+Race conditions, stale caches, and split-brain scenarios are no longer theoretical -- they are daily operational realities.
+This module examines four layers of defense against these challenges.
+First, you will learn to structure your Reconcile loop so that every invocation is idempotent and tolerant of stale data.
+Next, you will study the theory behind distributed locks and understand why naive locking is insufficient for correctness.
+From there, you will implement Kubernetes-native leader election using Lease objects, and finally explore controller sharding as a strategy for scaling reconciliation beyond a single active replica.

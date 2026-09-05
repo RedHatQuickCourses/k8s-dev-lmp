@@ -1,34 +1,69 @@
-#  3: Develop a custom Validating Webhook for container registry enforcement
+= Exercise 3: Validating Webhook for Registry Enforcement
+:navtitle: Exercise 3: Validating Webhook
 
-= Exercise 3: Developing a Custom Validating Webhook
-
-In this exercise, you will extend your Kubernetes knowledge by implementing a **Validating Admission Webhook**. This component acts as a gatekeeper, intercepting requests to the `kube-apiserver` to ensure that any container images specified in your custom resources originate only from pre-approved registries.
-
-== Technical Overview
-
-Kubernetes Admission Controllers are plugins that govern and enforce policies on objects during create, update, or delete operations. A **Validating Webhook** is an HTTP callback that the API server invokes to determine whether a request should be allowed or rejected based on custom logic.
-
-Unlike **Policy Engines** (such as OPA Gatekeeper or Kyverno) which provide a declarative DSL for policy management, a custom webhook allows you to implement complex, imperative business logic directly in Go, providing complete control over the validation lifecycle.
+In this exercise you will build and deploy a validating admission webhook that rejects Pods referencing unauthorized container registries.
+This applies the concepts from xref:31-taking-more-control-admissions-and-beyond-the-kube-apiserver-to-writing-your-own-api-server:admission-control-webhooks.adoc[].
 
 == Prerequisites
 
-* A running Kubernetes cluster (e.g., Minikube, Kind, or OpenShift).
-* A working custom resource already reconciled by your controller.
-* `cert-manager` installed in your cluster (for managing webhook TLS certificates).
+* A running Kubernetes cluster (Kind or Minikube)
+* cert-manager installed (for webhook TLS certificates)
+* Go 1.22+ installed
 
-== Hands-on Lab: Registry Enforcement Webhook
+== Step 1: Implement the Webhook Handler
 
-In this lab, you will write a Go-based binary that validates the container image string against an allow-list provided via command-line flags.
-
-### Step 1: Define the Webhook Logic
-
-Your binary needs to implement an HTTP handler that accepts an `admission.k8s.io/v1, Kind=AdmissionReview` request and returns a response indicating success or failure.
+Create an HTTP server that receives an `AdmissionReview` request, inspects the Pod's container images, and returns an allow or deny response:
 
 [source,go]
 ----
-func validateRegistry(image string, approvedRegistries []string) bool {
-    for _, registry := range approvedRegistries {
-        if strings.HasPrefix(image, registry) {
+func handleValidation(w http.ResponseWriter, r *http.Request) {
+    var review admissionv1.AdmissionReview
+    if err := json.NewDecoder(r.Body).Decode(&review); err != nil {
+        http.Error(w, err.Error(), http.StatusBadRequest)
+        return
+    }
+
+    var pod corev1.Pod
+    json.Unmarshal(review.Request.Object.Raw, &pod)
+
+    allowed := true
+    var message string
+    for _, c := range pod.Spec.Containers {
+        if !isImageAllowed(c.Image) {
+            allowed = false
+            message = fmt.Sprintf("image %q is not from an approved registry", c.Image)
+            break
+        }
+    }
+
+    review.Response = &admissionv1.AdmissionResponse{
+        UID:     review.Request.UID,
+        Allowed: allowed,
+        Result:  &metav1.Status{Message: message},
+    }
+    json.NewEncoder(w).Encode(review)
+}
+----
+
+== Step 2: Registry Allow-List
+
+Accept a list of approved registry prefixes via a command-line flag:
+
+[source,go]
+----
+var allowedRegistries []string
+
+func init() {
+    flag.Func("allowed-registries",
+        "Comma-separated list of approved registries", func(s string) error {
+        allowedRegistries = strings.Split(s, ",")
+        return nil
+    })
+}
+
+func isImageAllowed(image string) bool {
+    for _, prefix := range allowedRegistries {
+        if strings.HasPrefix(image, prefix) {
             return true
         }
     }
@@ -36,25 +71,9 @@ func validateRegistry(image string, approvedRegistries []string) bool {
 }
 ----
 
-### Step 2: Configure Command-Line Flags
+== Step 3: Register the Webhook
 
-The webhook binary must accept the registry list at startup. Use the standard `flag` package to parse these inputs.
-
-[source,go]
-----
-var approvedRegistries []string
-
-func init() {
-    flag.Func("approved-registries", "Comma-separated list of allowed registries", func(s string) error {
-        approvedRegistries = strings.Split(s, ",")
-        return nil
-    })
-}
-----
-
-### Step 3: Define the ValidatingWebhookConfiguration
-
-You must register your webhook with the API server so it knows which resources to monitor and how to reach your service.
+Create a `ValidatingWebhookConfiguration` that tells the API server to send Pod CREATE and UPDATE requests to your webhook:
 
 [source,yaml]
 ----
@@ -63,45 +82,55 @@ kind: ValidatingWebhookConfiguration
 metadata:
   name: registry-validator
 webhooks:
-  - name: validate.registry.example.com
-    rules:
-      - apiGroups: ["your-api-group"]
-        apiVersions: ["v1"]
-        operations: ["CREATE", "UPDATE"]
-        resources: ["your-custom-resources"]
-    clientConfig:
-      service:
-        name: registry-validator-service
-        namespace: default
-        path: "/validate"
-    admissionReviewVersions: ["v1"]
-    sideEffects: None
+- name: validate.registry.example.com
+  rules:
+  - operations: ["CREATE", "UPDATE"]
+    apiGroups: [""]
+    apiVersions: ["v1"]
+    resources: ["pods"]
+  clientConfig:
+    service:
+      name: webhook-service
+      namespace: default
+      path: "/validate"
+  admissionReviewVersions: ["v1"]
+  sideEffects: None
+  failurePolicy: Fail
 ----
 
-### Step 4: Deployment and Verification
+[WARNING]
+====
+Set `failurePolicy: Fail` in production so that Pods are blocked when the webhook is unreachable.
+Using `Ignore` silently skips validation, which defeats the purpose of the policy.
+====
 
-1. **Build and Push**: Compile your Go binary, containerize it (including the flag setup), and push it to your registry.
-2. **Deploy**: Create the `Deployment` and `Service` for the webhook. Ensure your `ValidatingWebhookConfiguration` points to this service.
-3. **Test**: Attempt to create a custom resource using an image from a non-approved registry:
+== Step 4: Deploy and Test
+
+. Build a container image for your webhook and push it to your cluster's registry.
+. Create a `Deployment` and `Service` for the webhook in the `default` namespace.
+. Ensure cert-manager injects TLS certificates (the API server requires HTTPS to reach webhooks).
+. Apply the `ValidatingWebhookConfiguration`.
+
+Test with an unauthorized image:
 
 [source,bash]
 ----
-# This should be rejected by the API server
-kubectl apply -f- <<EOF
-apiVersion: your-api-group/v1
-kind: YourCustomResource
-metadata:
-  name: test-resource
-spec:
-  image: "malicious-registry.com/my-app:latest"
-EOF
-
-# Expected output:
-# Error from server: admission webhook "validate.registry.example.com" denied the request
+kubectl run test --image=docker.io/library/nginx:latest
+# Expected: Error from server: admission webhook
+#   "validate.registry.example.com" denied the request:
+#   image "docker.io/library/nginx:latest" is not from an approved registry
 ----
 
-== Troubleshooting Guidance
+Test with an authorized image (assuming `quay.io` is in your allow-list):
 
-* **TLS Issues**: Webhooks require HTTPS. Ensure your `ValidatingWebhookConfiguration` includes the `caBundle` field, which should contain the CA certificate used to sign your webhook's serving certificate. `cert-manager` can automate this injection.
-* **Network Connectivity**: If the `kube-apiserver` cannot reach your webhook, check your Service selector and ensure the `ValidatingWebhookConfiguration` namespace matches the target service.
-* **Infinite Loops**: Avoid having your webhook trigger itself or perform operations that cause secondary resource changes that could trigger the webhook again (set `sideEffects: None`).
+[source,bash]
+----
+kubectl run test --image=quay.io/myorg/myapp:latest
+# Expected: pod/test created
+----
+
+== Tips
+
+* Use `kubectl run --dry-run=server` during development to test webhook responses without creating actual Pods.
+* Check webhook logs if requests are being denied unexpectedly -- the `AdmissionReview` request object contains the full Pod spec.
+* For a declarative alternative to hand-coded webhooks, see xref:31-taking-more-control-admissions-and-beyond-the-kube-apiserver-to-writing-your-own-api-server:policy-engines-and-gatekeeper.adoc[Policy Engines and Gatekeeper].

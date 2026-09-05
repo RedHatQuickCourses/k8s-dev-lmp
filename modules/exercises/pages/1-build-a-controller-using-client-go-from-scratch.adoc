@@ -1,106 +1,155 @@
-#  1: Build a controller using client-go from scratch
+= Exercise 1: Build a Controller Using client-go
+:navtitle: Exercise 1: Build a Controller
 
-= Exercise: Building a Kubernetes Controller from Scratch
-
-Building a controller from scratch using `client-go` is the best way to understand the "magic" that hides behind higher-level abstractions like `controller-runtime` or `kubebuilder`. 
-
-In this exercise, you will create a controller that watches for `ConfigMaps` and logs a message whenever one is added, updated, or deleted.
+In this exercise you will build a Kubernetes controller from scratch using client-go.
+By the end you will have a working program that watches for Pod events, processes them through a workqueue, and logs their state -- implementing the full data flow pipeline described in xref:12-controllers-informers-client-go:client-go-architecture.adoc[].
 
 == Prerequisites
-* A running Kubernetes cluster (e.g., `kind` or `minikube`).
-* `go` (version 1.21+).
-* `kubectl` configured to point to your cluster.
-* `client-go` dependency:
+
+* Go 1.22+ installed
+* Access to a Kubernetes cluster (Kind, Minikube, or OpenShift Local)
+* `kubeconfig` configured to point to your cluster
+
+== Part 1: Project Setup
+
+Create your project directory and pull in the required dependencies:
+
 [source,bash]
 ----
-go mod init my-controller
+mkdir k8s-controller-lab && cd k8s-controller-lab
+go mod init k8s-controller-lab
 go get k8s.io/client-go@latest
-go get k8s.io/api@latest
 go get k8s.io/apimachinery@latest
 ----
 
-== Conceptual Architecture
-To build a controller, you must implement the "Control Loop" pattern using these primitives:
-* **Informers:** The "Eyes." They list and watch resources, pushing events to a local cache.
-* **Listers:** The "Cache." They provide read-only access to the local cache, preventing excessive API server load.
-* **WorkQueue:** The "Buffer." It decouples the informer’s event notification from the processing logic, allowing for retries and rate-limiting.
+== Part 2: Connect to the Cluster
 
-== Hands-on: Implementation
-
-### 1. Initialize the Controller
-Create a file named `main.go`. We will use `SharedInformerFactory` to keep track of the ConfigMap resources.
+Use the standard `kubeconfig` lookup to build a REST config and create a typed clientset:
 
 [source,go]
 ----
 package main
 
 import (
-	"fmt"
-	"time"
+    "flag"
+    "fmt"
+    "path/filepath"
+    "time"
 
-	"k8s.io/client-go/informers"
-	"k8s.io/client-go/kubernetes"
-	"k8s.io/client-go/tools/cache"
-	"k8s.io/client-go/tools/clientcmd"
-	"k8s.io/client-go/util/workqueue"
+    "k8s.io/client-go/kubernetes"
+    "k8s.io/client-go/tools/clientcmd"
+    "k8s.io/client-go/util/homedir"
 )
 
 func main() {
-	// 1. Build kubeconfig and clientset
-	kubeconfig := clientcmd.NewNonInteractiveDeferredLoadingClientConfig(clientcmd.NewDefaultClientConfigLoadingRules(), &clientcmd.ConfigOverrides{}).ClientConfig()
-	clientset := kubernetes.NewForConfigOrDie(kubeconfig)
+    var kubeconfig *string
+    if home := homedir.HomeDir(); home != "" {
+        kubeconfig = flag.String("kubeconfig",
+            filepath.Join(home, ".kube", "config"), "path to kubeconfig")
+    }
+    flag.Parse()
 
-	// 2. Initialize Informer Factory and WorkQueue
-	factory := informers.NewSharedInformerFactory(clientset, time.Minute*10)
-	informer := factory.Core().V1().ConfigMaps().Informer()
-	queue := workqueue.NewNamedRateLimitingQueue(workqueue.DefaultControllerRateLimiter(), "ConfigMapQueue")
-
-	// 3. Register Event Handlers
-	informer.AddEventHandler(cache.ResourceEventHandlerFuncs{
-		AddFunc: func(obj interface{}) {
-			key, _ := cache.MetaNamespaceKeyFunc(obj)
-			queue.Add(key)
-		},
-		UpdateFunc: func(old, new interface{}) {
-			key, _ := cache.MetaNamespaceKeyFunc(new)
-			queue.Add(key)
-		},
-	})
-
-	// ... continue to process loop
+    config, err := clientcmd.BuildConfigFromFlags("", *kubeconfig)
+    if err != nil {
+        panic(err)
+    }
+    clientset, err := kubernetes.NewForConfig(config)
+    if err != nil {
+        panic(err)
+    }
+    // ... controller setup continues below
 }
 ----
 
-### 2. Implement the Reconcile Loop
-Now, define the loop that consumes items from the queue.
+== Part 3: Set Up the Informer
+
+Create a `SharedInformerFactory` and register event handlers that enqueue object keys.
+Review xref:12-controllers-informers-client-go:informers-listers-workqueues.adoc[] for why we enqueue keys rather than processing directly in the handler.
 
 [source,go]
 ----
-func runWorker(queue workqueue.RateLimitingInterface, lister cache.GenericLister) {
-	for {
-		key, quit := queue.Get()
-		if quit { return }
+factory := informers.NewSharedInformerFactory(clientset, 10*time.Minute)
+podInformer := factory.Core().V1().Pods().Informer()
 
-		namespace, name, _ := cache.SplitMetaNamespaceKey(key.(string))
-		fmt.Printf("Reconciling ConfigMap: %s/%s\n", namespace, name)
-		
-		// Logic: Perform your desired state enforcement here
-		
-		queue.Done(key)
-	}
+queue := workqueue.NewNamedRateLimitingQueue(
+    workqueue.DefaultControllerRateLimiter(), "pods")
+
+podInformer.AddEventHandler(cache.ResourceEventHandlerFuncs{
+    AddFunc: func(obj interface{}) {
+        key, err := cache.MetaNamespaceKeyFunc(obj)
+        if err == nil {
+            queue.Add(key)
+        }
+    },
+    UpdateFunc: func(old, new interface{}) {
+        key, err := cache.MetaNamespaceKeyFunc(new)
+        if err == nil {
+            queue.Add(key)
+        }
+    },
+    DeleteFunc: func(obj interface{}) {
+        key, err := cache.DeletionHandlingMetaNamespaceKeyFunc(obj)
+        if err == nil {
+            queue.Add(key)
+        }
+    },
+})
+
+stopCh := make(chan struct{})
+defer close(stopCh)
+factory.Start(stopCh)
+cache.WaitForCacheSync(stopCh, podInformer.HasSynced)
+----
+
+[IMPORTANT]
+====
+Always call `cache.WaitForCacheSync` before processing items.
+Starting your reconcile loop before the cache is warm leads to missed resources.
+====
+
+== Part 4: The Worker Loop
+
+Implement a worker that dequeues keys and processes them.
+On failure, use `queue.AddRateLimited(key)` to requeue with exponential backoff.
+On success, call `queue.Forget(key)` to reset the backoff counter.
+
+[source,go]
+----
+func processNextItem(queue workqueue.RateLimitingInterface,
+    lister corelisters.PodLister) bool {
+    key, shutdown := queue.Get()
+    if shutdown {
+        return false
+    }
+    defer queue.Done(key)
+
+    namespace, name, err := cache.SplitMetaNamespaceKey(key.(string))
+    if err != nil {
+        queue.Forget(key)
+        return true
+    }
+
+    pod, err := lister.Pods(namespace).Get(name)
+    if err != nil {
+        queue.AddRateLimited(key)
+        return true
+    }
+
+    fmt.Printf("Reconciling Pod %s/%s (phase: %s)\n",
+        pod.Namespace, pod.Name, pod.Status.Phase)
+    queue.Forget(key)
+    return true
 }
 ----
 
-### 3. Execution
-To run this:
-1. Start the `Informer` by calling `informer.Run(stopCh)`.
-2. Wait for the local cache to synchronize (`cache.WaitForCacheSync`).
-3. Run the `runWorker` function in a goroutine.
+Run the worker in a goroutine and block until `stopCh` closes.
 
-== Troubleshooting Tips
-* **Cache Sync:** Always ensure you call `cache.WaitForCacheSync` before starting the worker. If the cache isn't ready, your listers will return empty results.
-* **Namespace Scoping:** If your controller is behaving unexpectedly, verify if you are using `NewSharedInformerFactory` (cluster-wide) or `NewFilteredSharedInformerFactory` (namespace-scoped).
-* **Key Parsing:** Use `cache.MetaNamespaceKeyFunc` consistently to ensure that the keys in your workqueue can be correctly parsed back into namespace and name.
+== Challenge
 
-== Why do this?
-By writing this manually, you observe how `client-go` handles the complex orchestration of API watches. In the next stage, you will see how `controller-runtime` wraps this exact logic into a clean `Reconcile` method, drastically reducing the boilerplate while maintaining the same underlying mechanics.
+Extend your reconcile logic: if the Pod has no labels, log a warning `"Pod \{namespace\}/\{name\} is missing required labels!"`.
+Then try running two instances of your controller simultaneously and observe what happens -- this motivates the leader election exercise in xref:2-implement-optimistic-locking-and-leader-election-via-lease.adoc[Exercise 2].
+
+== References
+
+* https://sdk.operatorframework.io/docs/building-operators/golang/tutorial/[Operator SDK Go Tutorial]
+* https://github.com/kubernetes/community/blob/master/contributors/devel/sig-api-machinery/controllers.md#rough-structure[Controller Rough Structure]

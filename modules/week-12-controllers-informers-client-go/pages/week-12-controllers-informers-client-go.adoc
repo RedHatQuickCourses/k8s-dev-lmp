@@ -1,8 +1,0 @@
-= Week 1.2 -- Controllers, Informers, and client-go
-:navtitle: Week 1.2 -- Controllers, Informers, client-go
-
-This module covers the fundamental building blocks that power every Kubernetes operator and controller.
-We begin with the architecture of *client-go*, the official Go client library, examining its core components -- Reflector, DeltaFIFO, Indexer, and SharedInformerFactory -- and how they form a pipeline from the API server to your controller logic.
-From there we explore the Informer/Lister/Workqueue pattern that decouples event delivery from reconciliation, walk through the official sample-controller line by line, and discuss production pitfalls that surface only at scale.
-These components form the foundation that controller-runtime (covered in xref:week-21-controllers-contd:week-21-controllers-contd.adoc[Week 2.1]) abstracts over.
-A solid understanding of this layer is essential for debugging operator issues and for knowing when the higher-level abstractions are helping versus hiding problems.

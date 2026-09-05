@@ -15,20 +15,20 @@ When multiple controller instances manage the same resources, you face two prima
 
 To build robust, highly available automation, your controllers must adhere to these distributed systems principles:
 
-### 1. Idempotency
+=== 1. Idempotency
 An operation is idempotent if performing it multiple times yields the same result as performing it once. In Kubernetes, your `Reconcile` function must be designed to be idempotent. 
 * **Design Pattern:** Always read the current state (Status/Live state) before acting. If the resource is already in the desired state, do nothing.
 * **Why it matters:** Controllers can be triggered by spurious events or retries. Non-idempotent operations often lead to resource exhaustion or duplicate API calls.
 
-### 2. Optimistic Concurrency Control (OCC)
+=== 2. Optimistic Concurrency Control (OCC)
 Kubernetes uses `resourceVersion` in metadata to implement OCC. When you update an object, the API server checks if the `resourceVersion` you provided matches the current version in `etcd`.
 * **Mechanism:** If a conflict occurs (409 Conflict), your controller must handle the error by re-fetching the latest version of the object and re-running the reconciliation logic.
 
-### 3. Leader Election
+=== 3. Leader Election
 In high-availability deployments, you often run multiple replicas of a controller (e.g., via a `Deployment`). However, you usually only want **one** active controller to perform reconciliation at any given time to avoid conflicting actions.
 * **Lease Objects:** Kubernetes uses the `coordination.k8s.io/v1` `Lease` API. Controllers compete for a lock on a Lease resource. The winner becomes the leader, while others wait in a standby state.
 
-### 4. Controller Sharding
+=== 4. Controller Sharding
 When a single controller cannot handle the sheer volume of resources, you must employ **sharding**. This is the process of partitioning the workload across multiple controller instances based on a specific key (e.g., namespace or a custom label).
 * **Case Study (OpenShift Ingress):** The ingress controller shards the routing table. Each controller instance is responsible for a subset of the total routes, ensuring that the control plane remains responsive as the number of ingress objects grows.
 

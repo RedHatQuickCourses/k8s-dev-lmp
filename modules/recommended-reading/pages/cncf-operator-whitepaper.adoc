@@ -33,7 +33,7 @@ When building your controllers using `client-go` or `controller-runtime`, refer 
 == Further Reading
 To deepen your understanding of these patterns, the CNCF documentation provides critical insights into how Operators interact with the Kubernetes API machinery:
 
-*   **CNCF Tag App Delivery:** Visit the [official CNCF Operator Whitepaper](https://tag-app-delivery.cncf.io/whitepapers/operator/) for the complete architectural specification.
+*   **CNCF Tag App Delivery:** Visit the https://tag-app-delivery.cncf.io/whitepapers/operator/[official CNCF Operator Whitepaper] for the complete architectural specification.
 *   **Designing Distributed Systems:** Complement your learning by reading *Designing Distributed Systems* by Brendan Burns, which covers the sidecar and controller patterns that underpin the Operator framework.
 
 [NOTE]

@@ -1,5 +1,0 @@
-* xref:week-22-going-distributed-locks-leases-ownership-eventual-consistency.adoc[]
-** xref:idempotent-reconciliation.adoc[]
-** xref:distributed-locking-theory.adoc[]
-** xref:leader-election-in-kubernetes.adoc[]
-** xref:controller-sharding.adoc[]

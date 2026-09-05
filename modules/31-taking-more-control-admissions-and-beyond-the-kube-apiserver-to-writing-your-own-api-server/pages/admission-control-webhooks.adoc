@@ -1,0 +1,85 @@
+= Admission Control Webhooks
+:navtitle: Admission Control Webhooks
+
+== Admission Control in the Request Pipeline
+
+Admission control runs after authentication and authorization but before the object is persisted to storage.
+It is the last line of defense for enforcing policy on write operations (create, update, delete).
+Reads such as `get`, `watch`, and `list` bypass admission control entirely.
+
+The process has two phases:
+
+. *Mutating admission* -- controllers in this phase may modify the incoming object (for example, injecting default values).
+. *Validating admission* -- controllers in this phase accept or reject the request but cannot modify it.
+
+If any controller in either phase rejects the request, the entire request fails immediately and an error is returned to the client.
+
+For a refresher on where admission fits in the full request flow, see xref:11-kubernetes-resource-model:api-request-lifecycle.adoc[API Request Lifecycle].
+
+== Key Built-in Admission Controllers
+
+Kubernetes compiles a set of admission controllers directly into the `kube-apiserver` binary.
+The most important ones to understand are:
+
+* *NamespaceLifecycle* -- prevents creation of objects in namespaces that are terminating or do not exist, and blocks deletion of the `default`, `kube-system`, and `kube-public` namespaces.
+* *LimitRanger* -- observes incoming requests and enforces the constraints defined in `LimitRange` objects within a namespace. It can also apply default resource requests to pods.
+* *ServiceAccount* -- automates service account setup for pods, including token injection and image pull secret references.
+* *MutatingAdmissionWebhook* -- calls external mutating webhooks that match the request. Matching webhooks run in serial and may modify the object.
+* *ValidatingAdmissionWebhook* -- calls external validating webhooks in parallel. If any webhook rejects, the request fails.
+* *ResourceQuota* -- enforces aggregate resource consumption limits defined in `ResourceQuota` objects per namespace.
+
+== Writing a Webhook
+
+A webhook is an HTTPS server that exposes an endpoint accepting an `AdmissionReview` request and returning an `AdmissionReview` response.
+The kube-apiserver sends a JSON payload describing the incoming object and operation, and the webhook replies with an `allowed: true` or `allowed: false` decision.
+
+You register a webhook with the API server by creating a `ValidatingWebhookConfiguration` or `MutatingWebhookConfiguration` resource.
+Key fields in the configuration include:
+
+* `rules` -- defines which API groups, versions, resources, and operations (CREATE, UPDATE, DELETE) trigger the webhook.
+* `clientConfig` -- specifies how to reach the webhook: either a `service` reference (in-cluster) or a `url` (external endpoint), plus the CA bundle for TLS verification.
+* `failurePolicy` -- controls behavior when the webhook is unreachable. `Fail` rejects the request; `Ignore` allows it through.
+
+The following example shows a `ValidatingWebhookConfiguration` that intercepts pod creation:
+
+[source,yaml]
+----
+apiVersion: admissionregistration.k8s.io/v1
+kind: ValidatingWebhookConfiguration
+metadata:
+  name: pod-validation-webhook
+webhooks:
+  - name: validate.pods.example.com
+    rules:
+      - apiGroups: [""]
+        apiVersions: ["v1"]
+        operations: ["CREATE"]
+        resources: ["pods"]
+    failurePolicy: Fail
+    clientConfig:
+      service:
+        name: pod-validator
+        namespace: webhooks
+        path: /validate
+      caBundle: <BASE64_ENCODED_CA>
+    admissionReviewVersions: ["v1"]
+    sideEffects: None
+----
+
+The OpenShift `generic-admission-server` library simplifies webhook development by reusing the `k8s.io/apiserver` infrastructure for TLS, authentication, and authorization.
+Rather than managing certificates manually, you deploy the webhook as an aggregated API server and configure the webhook to call back through the main API server endpoint.
+
+[NOTE]
+====
+Webhook chaining has important ordering implications.
+Mutating webhooks may run multiple times if a prior mutating webhook modifies the object, causing previously invoked webhooks to be re-invoked.
+The order between multiple webhooks of the same type is not guaranteed.
+Always set `failurePolicy: Fail` in production to avoid silently skipping validation when a webhook is unreachable.
+====
+
+Ready to build one yourself? See xref:exercises:3-develop-a-custom-validating-webhook-for-container-registry-enforcement.adoc[Exercise 3: Develop a Custom Validating Webhook].
+
+== References
+
+* https://kubernetes.io/docs/reference/access-authn-authz/admission-controllers[Admission Controllers Reference]
+* https://github.com/openshift/generic-admission-server[generic-admission-server]

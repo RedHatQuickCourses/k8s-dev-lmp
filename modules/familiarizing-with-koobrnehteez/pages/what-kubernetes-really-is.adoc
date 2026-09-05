@@ -1,0 +1,29 @@
+= What Kubernetes Really Is
+:navtitle: What Kubernetes Really Is
+
+At its core, Kubernetes is an API-centric, declarative configuration management and container orchestration system.
+Rather than issuing imperative commands to tell the server what to do, you interact with the system by declaring the desired state of your resources as pure data.
+
+The heart of the control plane is the API server, which acts as a central coordination point and persists this desired state into a key-value store called etcd.
+
+To make reality match those declarations, Kubernetes relies on an ecosystem of asynchronous controllers.
+These controllers continuously watch the API server for changes, compare the current observed state of the world to your desired state, and actively reconcile any differences.
+
+This separation of responsibilities -- where the API server maintains shared state and independent controllers actuate it -- is the same fundamental architecture you will use and extend when building your own custom operators.
+
+== A Three-Layer Mental Model
+
+It helps to think of any declarative configuration management system -- Kubernetes included -- as composed of three distinct layers:
+
+* *Layer 1 -- Resource Schema:* The definition of which types of resources exist and what shape they take.
+In Kubernetes, this is expressed through API group-version-kind (GVK) definitions, Protocol Buffer schemas for built-in types, and OpenAPI v3 validation schemas for custom resources.
+
+* *Layer 2 -- Concrete Resource Syntax:* The raw YAML or JSON data that users author and submit to the API server.
+Kubernetes deliberately accepts only fully-realized resource definitions, pushing abstraction (templating, parameterization) to external tools such as Helm, Kustomize, or general-purpose programming languages.
+
+* *Layer 3 -- Convergence Engine:* The controllers that take a concrete set of resource declarations and actuate the managed system to match.
+Kubernetes has perhaps the most explicit notion of this layer of any declarative system, embodied in its controller architecture.
+
+This layered model clarifies why Kubernetes separates concerns the way it does: the API server owns Layers 1 and 2 (schema and storage of declared state), while controllers independently implement Layer 3 (making reality converge).
+The full treatment of the resource model -- including how schemas, serialization, and storage work together -- is covered in xref:11-kubernetes-resource-model:the-kubernetes-resource-model.adoc[].
+Controller internals and the client-go machinery that powers reconciliation are explored in xref:12-controllers-informers-client-go:client-go-architecture.adoc[].

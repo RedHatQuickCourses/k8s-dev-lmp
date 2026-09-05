@@ -1,11 +1,10 @@
-#  2.1 — Controllers contd.
+#  Controllers with controller-runtime
 
-[#controllers-contd]
-= 2.1 — Controllers contd.
+= Controllers with controller-runtime
 
-This module builds upon foundational controller knowledge by focusing on the `controller-runtime` abstraction to simplify the development of custom Kubernetes APIs.
-
-*   **Abstraction and Scaffolding:** Utilizing `controller-runtime` to streamline reconciliation logic and `kubebuilder` for project scaffolding.
-*   **State Management:** Implementing the distinction between `Spec` (desired state) and `Status` (actual state), including robust condition management.
-*   **API Integrity:** Enforcing API schemas through validation and linting.
-*   **Data Operations:** Mastering CRUD operations and the specific semantics of `apply`, `patch`, and `update` to ensure efficient state synchronization.
+This module moves from the raw client-go informer and workqueue machinery covered in the previous module to the higher-level abstractions that most production controllers use.
+We begin with the foundational terminology -- Groups, Versions, Kinds, and Resources -- that underpins every Kubernetes API interaction.
+From there we explore controller-runtime and Kubebuilder, which replace boilerplate informer setup with a single `Reconcile` method.
+We then cover API design conventions: the spec/status split, condition reporting, and the `observedGeneration` pattern that prevents stale status.
+Validation and linting ensure your CRD schemas follow upstream Kubernetes conventions before they reach review.
+Finally, we compare Update, the three Patch types, and Server-Side Apply, explaining when each is appropriate for controllers and CI/CD systems alike.

@@ -1,11 +1,10 @@
-#  4.1 — All about kube-scheduler
+#  All About kube-scheduler
 
-= 4.1 — All about kube-scheduler
+= All About kube-scheduler
 
-The `kube-scheduler` is the central component responsible for workload distribution across the cluster. It ensures that pods are placed on appropriate nodes based on resource availability and constraints.
+The kube-scheduler is at the heart of workload placement.
+This module examines how the scheduler selects nodes for pods, how resource requests and limits affect scheduling and runtime behavior, and how Dynamic Resource Allocation extends scheduling to non-fungible resources like GPUs.
 
-Key responsibilities include:
-
-* **Workload Scheduling:** Orchestrating pod placement, managing de-scheduling, and facilitating auto-scaling operations.
-* **Resource Management:** Enforcing container hardware allocation through defined Requests and Limits to ensure cluster stability.
-* **Dynamic Resource Allocation:** Providing advanced control for specialized hardware, such as GPUs, through dynamic resource slicing and allocation mechanisms.
+* xref:how-the-scheduler-works.adoc[] -- the filtering, scoring, and binding pipeline that turns a pending pod into a running workload.
+* xref:resource-management.adoc[] -- requests, limits, QoS classes, and the kernel enforcement mechanisms behind them.
+* xref:dynamic-resource-allocation.adoc[] -- the claim-based model for scheduling specialized hardware that CPU and memory numbers alone cannot describe.

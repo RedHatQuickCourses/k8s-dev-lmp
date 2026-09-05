@@ -1,8 +1,0 @@
-= Week 4.2 -- Ubiquitous Topics
-:navtitle: Week 4.2 -- Ubiquitous Topics
-
-This final week zooms out to the broader operator ecosystem and alternative Kubernetes form factors.
-We examine the operator capability model and framework landscape, then survey control plane architectures that diverge from the standard self-hosted model.
-
-* *The Operator Landscape* -- the formal definition of operators, the five-level capability model, major frameworks, and proven design patterns.
-* *Alternative Control Planes and Form Factors* -- hosted control planes, Kubernetes-like API platforms, and minimal distributions built for edge and resource-constrained environments.

@@ -1,3 +1,0 @@
-* xref:week-0-familiarizing-with-koobrnehteez.adoc[]
-** xref:what-kubernetes-really-is.adoc[]
-** xref:control-plane-architecture-primer.adoc[]

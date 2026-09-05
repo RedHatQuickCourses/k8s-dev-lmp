@@ -1,9 +1,9 @@
-#  4.2 — Ubiquitous topics!
+#  Ubiquitous Topics
 
-= 4.2 — Ubiquitous topics!
+= Ubiquitous Topics
 
-This module explores the diversity of Kubernetes control plane architectures and their deployment form factors, moving beyond standard cluster configurations. Key focus areas include:
+This final module zooms out to the broader operator ecosystem and alternative Kubernetes form factors.
+We examine the operator capability model and framework landscape, then survey control plane architectures that diverge from the standard self-hosted model.
 
-* **Alternate Control Planes:** Understanding specialized control plane architectures designed for non-standard use cases, such as `kcp` for Kubernetes-like APIs on unconventional infrastructure.
-* **HyperShift:** Exploring nested OpenShift deployments where control planes are decoupled from worker nodes to enable massive scalability and resource isolation.
-* **Edge and Lightweight Form Factors:** Examining resource-constrained distributions like `MicroShift`, `k3s`, and `k0s` optimized for edge computing and small-footprint environments.
+* *The Operator Landscape* -- the formal definition of operators, the five-level capability model, major frameworks, and proven design patterns.
+* *Alternative Control Planes and Form Factors* -- hosted control planes, Kubernetes-like API platforms, and minimal distributions built for edge and resource-constrained environments.

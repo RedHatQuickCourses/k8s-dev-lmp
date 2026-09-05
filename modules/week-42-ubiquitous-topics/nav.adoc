@@ -1,3 +1,0 @@
-* xref:week-42-ubiquitous-topics.adoc[]
-** xref:operator-landscape.adoc[]
-** xref:alternative-control-planes-and-form-factors.adoc[]

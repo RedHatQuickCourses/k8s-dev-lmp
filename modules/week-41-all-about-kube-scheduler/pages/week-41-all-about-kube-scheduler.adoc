@@ -1,9 +1,0 @@
-= Week 4.1 -- All About kube-scheduler
-:navtitle: Week 4.1 -- All About kube-scheduler
-
-The kube-scheduler is at the heart of workload placement.
-This week examines how the scheduler selects nodes for pods, how resource requests and limits affect scheduling and runtime behavior, and how Dynamic Resource Allocation extends scheduling to non-fungible resources like GPUs.
-
-* xref:how-the-scheduler-works.adoc[] -- the filtering, scoring, and binding pipeline that turns a pending pod into a running workload.
-* xref:resource-management.adoc[] -- requests, limits, QoS classes, and the kernel enforcement mechanisms behind them.
-* xref:dynamic-resource-allocation.adoc[] -- the claim-based model for scheduling specialized hardware that CPU and memory numbers alone cannot describe.

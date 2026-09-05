@@ -1,12 +1,10 @@
-#  1.2 — Controllers, informers, client-go
+#  Controllers, Informers, and client-go
 
-= 1.2 — Controllers, informers, client-go
+= Controllers, Informers, and client-go
+Controllers, Informers, client-go
 
-This module covers the foundational building blocks for Kubernetes operators and resource synchronization. It focuses on the `client-go` library, which provides the necessary tooling for interaction with the Kubernetes API.
-
-Key components include:
-
-*   **Informers:** Act as the "eyes" of the controller, watching for cluster events and reflecting changes into a local state.
-*   **Listers:** Provide read-only access to the local cache, allowing controllers to retrieve objects without constant API server round-trips.
-*   **Workqueues:** Serve as buffers that decouple event detection from processing, ensuring tasks are handled efficiently via FIFO (First-In-First-Out) logic.
-*   **Reconciliation Patterns:** Strategies for error handling and requeueing, enabling controllers to react to state changes and drive resources toward their desired declarative intent.
+This module covers the fundamental building blocks that power every Kubernetes operator and controller.
+We begin with the architecture of *client-go*, the official Go client library, examining its core components -- Reflector, DeltaFIFO, Indexer, and SharedInformerFactory -- and how they form a pipeline from the API server to your controller logic.
+From there we explore the Informer/Lister/Workqueue pattern that decouples event delivery from reconciliation, walk through the official sample-controller line by line, and discuss production pitfalls that surface only at scale.
+These components form the foundation that controller-runtime (covered in xref:21-controllers-contd:21-controllers-contd.adoc[]) abstracts over.
+A solid understanding of this layer is essential for debugging operator issues and for knowing when the higher-level abstractions are helping versus hiding problems.

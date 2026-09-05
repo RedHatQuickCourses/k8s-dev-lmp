@@ -41,12 +41,15 @@ For constrained environments, standard Kubernetes is too heavy. Solutions like *
 
 == Summary of Architectural Trade-offs
 
-| Architecture | Primary Use Case | Scaling Approach |
-| :--- | :--- | :--- |
-| **Standard K8s** | General purpose, Cloud-native | Horizontal node scaling |
-| **HyperShift** | Multi-tenant, Managed Services | Control Plane consolidation |
-| **kcp** | Global-scale API management | Logical clustering |
-| **MicroShift/k3s** | Edge, IoT, Industrial | Resource minimization |
+[cols="1,2,2", options="header"]
+|===
+| Architecture | Primary Use Case | Scaling Approach
+
+| *Standard K8s* | General purpose, Cloud-native | Horizontal node scaling
+| *HyperShift* | Multi-tenant, Managed Services | Control Plane consolidation
+| *kcp* | Global-scale API management | Logical clustering
+| *MicroShift/k3s* | Edge, IoT, Industrial | Resource minimization
+|===
 
 == Further Exploration
 *   **Design Considerations:** When choosing a control plane architecture, consider the "blast radius"—how failures in the control plane propagate to the managed workloads.

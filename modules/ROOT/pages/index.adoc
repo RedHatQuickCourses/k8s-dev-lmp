@@ -1,52 +1,40 @@
-=  Kubernetes Developer Learning Path
+= Kubernetes Developer Learning Path
 :navtitle: Home
 
 == Introduction
 
-Course Title:  Kubernetes Developer Learning Path
+This course provides a comprehensive overview of the Kubernetes architecture and its powerful extensibility mechanisms.
+We start by learning how the Kubernetes API functions behind the scenes, exploring how cluster requests are authenticated, authorized, and validated by the control plane.
+The core of the course focuses on platform automation, teaching you how to extend Kubernetes by defining custom resources and writing custom controllers or operators to automatically manage different workloads.
+To ensure these extensions are robust, we also cover essential distributed system principles required to build highly available components and safely handle concurrent updates.
+Finally, the course explores advanced networking and traffic management concepts alongside an exploration of alternative control plane architectures like HyperShift and kcp.
 
-Description:
-Course description FIXME
+== Topics Covered
 
-Duration: FIXME hours
-
-== Topics covered in this course
-
-
-*  Overview
-
-*  Who is this for? pre-requisites.
-
-*  Familiarizing with koo·br·neh·teez
-
-*  1.1 — Kubernetes Resource Model
-
-*  1.2 — Controllers, informers, client-go
-
-*  2.1 — Controllers contd.
-
-*  2.2 — Going distributed: locks, leases, ownership, eventual consistency
-
-*  3.1 — Taking more control: Admissions and beyond the kube-apiserver to writing your own API Server
-
-*  3.2 — The other stuff
-
-*  4.1 — All about kube-scheduler
-
-*  4.2 — Ubiquitous topics!
-
-*  Exercises
-
-*  Recommended Reading
-
-*  Suggested Reading
-
-
+* xref:overview:overview.adoc[Overview] — Course roadmap 
+* xref:who-is-this-for-pre-requisites:who-is-this-for-pre-requisites.adoc[Who is this for?] — Target audience and prerequisites
+* xref:familiarizing-with-koobrnehteez:familiarizing-with-koobrnehteez.adoc[Familiarizing with Kubernetes] — What Kubernetes really is
+* xref:11-kubernetes-resource-model:11-kubernetes-resource-model.adoc[Kubernetes Resource Model] — The declarative intent and kube-apiserver essentials
+* xref:12-controllers-informers-client-go:12-controllers-informers-client-go.adoc[Controllers, Informers, client-go] — The building blocks behind operators
+* xref:21-controllers-contd:21-controllers-contd.adoc[Controllers with controller-runtime] — Writing Kube APIs and reconciling with controller-runtime
+* xref:22-going-distributed-locks-leases-ownership-eventual-consistency:22-going-distributed-locks-leases-ownership-eventual-consistency.adoc[Going Distributed] — Locks, leases, ownership, eventual consistency
+* xref:31-taking-more-control-admissions-and-beyond-the-kube-apiserver-to-writing-your-own-api-server:31-taking-more-control-admissions-and-beyond-the-kube-apiserver-to-writing-your-own-api-server.adoc[Taking More Control] — Admissions and custom API servers
+* xref:32-the-other-stuff:32-the-other-stuff.adoc[The Other Stuff] — Networking, security, and cluster hardening
+* xref:41-all-about-kube-scheduler:41-all-about-kube-scheduler.adoc[All About kube-scheduler] — Scheduling, resources, and DRA
+* xref:42-ubiquitous-topics:42-ubiquitous-topics.adoc[Ubiquitous Topics] — Operator landscape and alternative control planes
+* xref:exercises:exercises.adoc[Exercises] — Hands-on labs 
 
 == Prerequisites
 
-This course assumes that you have the following prior experience:
+This course assumes the following prior experience:
 
-* Course or experience...
-* Course or experience...
-* Course or experience...
+* Familiarity running and managing container workloads within Kubernetes environments
+* A basic primer on distributed systems (concurrency, leasing, synchronization)
+* A baseline equivalent to holding a CKAD certification or completing Red Hat's DO-180 and DO-280 tracks
+
+See xref:who-is-this-for-pre-requisites:who-is-this-for-pre-requisites.adoc[Who is this for?] for the full prerequisites and self-assessment checklist.
+
+== Reading Lists
+
+* xref:recommended-reading:recommended-reading.adoc[Recommended Reading] — Core texts for this course
+* xref:suggested-reading:suggested-reading.adoc[Suggested Reading] — Supplementary references

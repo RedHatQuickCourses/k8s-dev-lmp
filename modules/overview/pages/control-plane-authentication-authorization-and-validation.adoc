@@ -11,7 +11,7 @@ When a user or a service account interacts with the Kubernetes API, the `kube-ap
 2.  **Authorization (AuthZ):** Determining *what* the user is allowed to do.
 3.  **Admission Control:** Validating or mutating the request content before it is finalized.
 
----
+'''
 
 == 1. Authentication (AuthN)
 The API server relies on one or more authentication modules to verify the caller's identity. If a request cannot be authenticated, the API server rejects it with an HTTP 401 response.
@@ -41,7 +41,7 @@ These controllers can modify the object content before it is stored.
 These controllers check the request against defined policies. If the validation fails, the request is rejected.
 *   **Use case:** Ensuring that container images come from an approved registry, requiring specific labels on Namespaces, or enforcing resource limit ranges.
 
----
+'''
 
 == Practical Perspective: Admission Webhooks
 While built-in controllers cover standard scenarios, developers often need to implement custom logic. This is achieved through **Dynamic Admission Webhooks**:
@@ -59,7 +59,7 @@ To ensure a robust control plane:
 *   **Idempotency:** Admission logic must be idempotent; the same request processed twice should yield the same result without side effects.
 *   **Latency Impact:** Admission webhooks are in the critical path of the API request. Keep logic lightweight to avoid slowing down `kubectl apply` operations.
 
----
+'''
 
 == Summary Checklist for Developers
 *   [ ] **Identify:** Are you interacting as a user or a ServiceAccount?

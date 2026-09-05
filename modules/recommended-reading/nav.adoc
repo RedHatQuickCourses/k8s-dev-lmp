@@ -1,5 +1,4 @@
 * xref:recommended-reading.adoc[]
-* xref:recommended-reading.adoc[]
 ** xref:programming-kubernetes-hausenblas-schimanski.adoc[]
 ** xref:kubernetes-operators-dobies-wood.adoc[]
 ** xref:cncf-operator-whitepaper.adoc[]

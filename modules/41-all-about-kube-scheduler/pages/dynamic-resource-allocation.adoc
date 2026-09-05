@@ -1,3 +1,104 @@
-#  Dynamic Resource Allocation
+= Dynamic Resource Allocation
+:navtitle: Dynamic Resource Allocation
 
-Error: Unable to get response from Gemini model after multiple attempts.
+== The problem DRA solves
+
+Traditional Kubernetes scheduling treats resources as fungible quantities -- 500m of CPU on node A is the same as 500m on node B.
+That model breaks down for specialized hardware like GPUs, FPGAs, and high-performance network interfaces.
+A workload may need "one NVIDIA A100 with 80 GB VRAM", not just "some amount of GPU".
+These resources are non-fungible: they differ in type, capability, and availability across nodes.
+
+The older Device Plugin framework handled simple pass-through allocation, but it could not express device attributes, share devices across containers, or let the scheduler reason about which _specific_ device to assign.
+Dynamic Resource Allocation (DRA) replaces that model with a claim-based approach inspired by PersistentVolumeClaims.
+
+== Key API resources
+
+DRA is part of the `resource.k8s.io/v1` API group and introduces three core resources:
+
+*DeviceClass*::
+Defines a category of devices available in the cluster.
+A DeviceClass is created by device drivers or cluster administrators and tells the scheduler what kind of hardware exists and how to select it.
+For example, a driver might publish a `gpu-class` that covers all GPU models it manages.
+
+*ResourceClaim*::
+A request for access to one or more devices.
+A ResourceClaim references a DeviceClass and can use https://cel.dev[CEL] selectors to filter for specific device attributes -- model, VRAM size, driver version, and so on.
+The scheduler coordinates with the DRA driver to find a node that has a matching device and allocates it to the claim.
+
+*ResourceClaimTemplate*::
+A template that Kubernetes uses to generate a per-pod ResourceClaim automatically.
+This is analogous to how a VolumeClaimTemplate works in a StatefulSet: each pod gets its own claim, and the claim is deleted when the pod terminates.
+
+A fourth resource, *ResourceSlice*, is created by the device driver on each node.
+ResourceSlices advertise what devices are available and their attributes, giving the scheduler the information it needs to match claims to nodes.
+
+== How scheduling works with DRA
+
+When a pod references a ResourceClaim (directly or via a ResourceClaimTemplate), the scheduling cycle adds an extra coordination step:
+
+. The scheduler identifies nodes that might satisfy the claim based on published ResourceSlices.
+. For each candidate node, the scheduler asks the DRA driver whether the claim can be allocated on that node.
+. Nodes where allocation succeeds are considered feasible; others are filtered out.
+. The pod is scored and bound as usual, and the allocated device information is recorded in the ResourceClaim status.
+
+This means DRA extends the scheduler's Filter stage with device-aware logic without requiring changes to the scheduler core.
+
+== Prioritized alternatives
+
+A ResourceClaim can specify a *prioritized list* of sub-requests using `firstAvailable`.
+The scheduler evaluates each alternative in order and picks the first one that can be satisfied.
+This lets you express preferences -- for example, prefer a large GPU but fall back to two smaller ones:
+
+[source,yaml]
+----
+apiVersion: resource.k8s.io/v1
+kind: ResourceClaimTemplate
+metadata:
+  name: gpu-claim-template
+spec:
+  spec:
+    devices:
+      requests:
+      - name: gpu-req
+        firstAvailable:
+        - name: large-gpu
+          deviceClassName: gpu-class
+          selectors:
+          - cel:
+              expression: device.attributes["gpu-driver.example.com"].vram >= 80
+        - name: small-gpus
+          deviceClassName: gpu-class
+          selectors:
+          - cel:
+              expression: device.attributes["gpu-driver.example.com"].vram >= 24
+          count: 2
+----
+
+When scoring nodes, the scheduler prefers nodes that can satisfy a higher-ranked alternative, so the large GPU is chosen when available.
+
+== Device sharing
+
+Unlike the old Device Plugin model, DRA supports sharing a device across multiple containers or even multiple pods.
+If two containers in the same pod reference the same ResourceClaim, they both get access to the allocated device.
+Separate pods can also share a device by referencing the same named ResourceClaim, as long as the claim exists in the same namespace.
+
+== Relationship to traditional resources
+
+DRA does not replace CPU and memory requests.
+A pod that needs a GPU still needs CPU and memory to run the rest of its code.
+In practice, pods that use DRA set both traditional resource requests _and_ ResourceClaims:
+
+* The scheduler uses CPU and memory requests to ensure the node has enough compute.
+* The scheduler uses the ResourceClaim to ensure the node has the right device.
+* Only nodes that satisfy both constraints are feasible.
+
+[IMPORTANT]
+====
+DRA is a rapidly evolving area.
+Some features like workload-level claims and device taints are still in alpha or beta.
+Check the upstream https://kubernetes.io/docs/concepts/scheduling-eviction/dynamic-resource-allocation/[DRA documentation] for the latest API stability and feature gates.
+====
+
+== References
+
+* https://kubernetes.io/docs/concepts/scheduling-eviction/dynamic-resource-allocation/[Dynamic Resource Allocation]

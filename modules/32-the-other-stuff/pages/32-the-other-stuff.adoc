@@ -1,10 +1,10 @@
-#  3.2 — The other stuff
+#  The Other Stuff
 
-== 3.2 — The other stuff
+= The Other Stuff
 
-This module covers essential Kubernetes ecosystem components that extend beyond core controllers and the API server. It focuses on the architectural features required for production-grade environments:
+This module covers the other important topics that complement the operator and controller focus of the course -- networking (Ingress and Gateway API), service mesh, authentication and authorization, and cluster security hardening.
 
-* **Advanced Networking:** Evolution of traffic management, covering Ingress and the Gateway API.
-* **Service Mesh:** Concepts and implementation for managing microservice communication.
-* **Authentication and Authorization:** Specialized AuthN/AuthZ mechanisms specific to the OpenShift platform.
-* **Cluster Security and Hardening:** Implementing fine-grained security controls, including RBAC, Security Context Constraints (SCC), and Seccomp profiles.
+* *Ingress and Gateway API* -- how external traffic reaches your services, from the original Ingress resource to its role-oriented successor.
+* *Service Mesh Fundamentals* -- what a service mesh solves, its architecture, and how Istio implements traffic management, security, and observability.
+* *Authentication and Authorization* -- how Kubernetes identifies users and decides what they can do, including the Node authorizer and emerging ReBAC approaches.
+* *Security Context and Hardening* -- locking down pods with SecurityContext fields, the Security Profiles Operator, and OpenShift SecurityContextConstraints.

@@ -1,5 +1,0 @@
-* xref:week-32-the-other-stuff.adoc[]
-** xref:ingress-and-gateway-api.adoc[]
-** xref:service-mesh-fundamentals.adoc[]
-** xref:authentication-and-authorization.adoc[]
-** xref:security-context-and-hardening.adoc[]

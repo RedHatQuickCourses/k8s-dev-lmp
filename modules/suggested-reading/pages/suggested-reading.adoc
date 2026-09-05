@@ -2,7 +2,7 @@
 :navtitle: Suggested Reading
 
 The following resources provide additional depth on topics covered in this course.
-While not required, they are valuable references that complement specific weekly modules.
+While not required, they are valuable references that complement specific modules.
 
 == Kubernetes Security and Observability
 
@@ -10,19 +10,11 @@ While not required, they are valuable references that complement specific weekly
 
 This book is a practical guide to implementing robust security postures and effective monitoring strategies in Kubernetes clusters.
 It covers network policies, RBAC design, runtime security, and observability patterns in detail.
-It serves as an excellent companion to xref:week-32-the-other-stuff:week-32-the-other-stuff.adoc[Week 3.2], where you will study networking, authentication, authorization, and cluster hardening.
+It serves as an excellent companion to xref:32-the-other-stuff:32-the-other-stuff.adoc[], where you will study networking, authentication, authorization, and cluster hardening.
 
 == Designing Distributed Systems
 
 *Brendan Burns* (O'Reilly, 2024)
 
 This book explores common distributed systems patterns -- sidecar, ambassador, adapter -- and shows how they are implemented with Kubernetes.
-It provides a strong conceptual foundation for understanding the distributed challenges covered in xref:week-22-going-distributed-locks-leases-ownership-eventual-consistency:week-22-going-distributed-locks-leases-ownership-eventual-consistency.adoc[Week 2.2], including idempotency, leader election, and controller sharding.
-#  Suggested Reading
-
-= Suggested Reading
-
-The recommended literature for the Kubernetes Developer Learning Path focuses on securing, observing, and designing scalable distributed applications:
-
-* *Kubernetes Security and Observability* (Creane & Gupta): Provides essential strategies for hardening cluster security and implementing effective observability practices.
-* *Designing Distributed Systems* (Burns): Explores common, reusable software patterns designed to build scalable and reliable systems using Kubernetes primitives.
+It provides a strong conceptual foundation for understanding the distributed challenges covered in xref:22-going-distributed-locks-leases-ownership-eventual-consistency:22-going-distributed-locks-leases-ownership-eventual-consistency.adoc[], including idempotency, leader election, and controller sharding.

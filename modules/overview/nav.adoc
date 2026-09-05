@@ -1,5 +1,4 @@
 * xref:overview.adoc[]
-* xref:overview.adoc[]
 ** xref:kubernetes-architecture-overview-and-extensibility-mechanisms.adoc[]
 ** xref:control-plane-authentication-authorization-and-validation.adoc[]
 ** xref:platform-automation-through-custom-resources-and-operators.adoc[]

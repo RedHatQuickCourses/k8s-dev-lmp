@@ -1,7 +1,0 @@
-= Week 0 -- Familiarizing with Kubernetes
-:navtitle: Week 0 -- Familiarizing with Kubernetes
-
-Welcome to the orientation week of the Kubernetes Developer Learning Path.
-In this module we define what Kubernetes really is at its core -- an API-centric, declarative configuration management and container orchestration system.
-We also introduce the control plane architecture at a high level, covering the components that keep a cluster running.
-Detailed treatments of the Kubernetes resource model and controller internals follow in xref:week-11-kubernetes-resource-model:the-kubernetes-resource-model.adoc[Week 1.1] and xref:week-12-controllers-informers-client-go:client-go-architecture.adoc[Week 1.2], respectively.

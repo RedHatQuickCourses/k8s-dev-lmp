@@ -1,12 +1,11 @@
-#  3.1 — Taking more control: Admissions and beyond the kube-apiserver to writing your own API Server
+#  Taking More Control: Admissions and Beyond the kube-apiserver to Writing Your Own API Server
 
-= 3.1 — Taking more control: Admissions and beyond the kube-apiserver
+= Taking More Control: Admissions and Beyond the kube-apiserver to Writing Your Own API Server
+Overview
 
-This module covers advanced extension mechanisms for the Kubernetes control plane, focusing on intercepting and customizing API requests, as well as extending the API surface itself.
-
-Key concepts include:
-
-*   **Admission Control:** Implementing `Validating` and `Mutating` webhooks to enforce business logic and policy enforcement, and understanding how these differ from specialized Policy Engines.
-*   **API Aggregation:** Utilizing the API Aggregation Layer to register and serve custom APIs alongside standard Kubernetes resources.
-*   **Custom API Servers:** Designing and deploying standalone API servers that integrate seamlessly with the cluster, including considerations for API discovery.
-*   **Extensibility Patterns:** Analyzing real-world use cases, such as the Operator Lifecycle Manager (OLM) package manager, for implementing custom API servers.
+This module takes us deeper into the kube-apiserver's extension points.
+We start with admission control webhooks for intercepting and modifying API requests before they reach storage.
+From there, we explore policy engines as a declarative alternative to hand-coded webhook logic.
+We then move into API discovery and the aggregation layer, examining how clients enumerate available resources and how custom API servers integrate with the control plane.
+Finally, we look at when CRDs are not enough and how to build a custom API server backed by non-etcd storage.
+Together, these topics cover the full spectrum of Kubernetes API-level extensibility.

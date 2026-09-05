@@ -1,0 +1,214 @@
+= Sample Controller Walkthrough
+:navtitle: Sample Controller Walkthrough
+
+The https://github.com/kubernetes/sample-controller[sample-controller] is the official Kubernetes example operator.
+It shows you how to build a controller using client-go from scratch, managing a custom resource called *Foo* that creates and manages Deployments.
+
+== The Foo Custom Resource
+
+The sample-controller defines a custom resource called `Foo`.
+Each `Foo` object declares a Deployment name and a desired replica count.
+The controller ensures that a corresponding Deployment exists with the correct number of replicas.
+
+[source,go]
+----
+type Foo struct {
+    metav1.TypeMeta   `json:",inline"`
+    metav1.ObjectMeta `json:"metadata,omitempty"`
+
+    Spec   FooSpec   `json:"spec"`
+    Status FooStatus `json:"status"`
+}
+
+type FooSpec struct {
+    DeploymentName string `json:"deploymentName"`
+    Replicas       *int32 `json:"replicas"`
+}
+
+type FooStatus struct {
+    AvailableReplicas int32 `json:"availableReplicas"`
+}
+----
+
+After defining the types in `types.go`, the project uses `code-generator` (via `./hack/update-codegen.sh`) to produce typed clients, informers, listers, and `DeepCopy` methods automatically.
+
+== Program Entrypoint
+
+The `main.go` file sets up all the components the controller needs:
+
+[source,go]
+----
+kubeClient, err := kubernetes.NewForConfig(cfg)
+exampleClient, err := clientset.NewForConfig(cfg)
+
+kubeInformerFactory := kubeinformers.NewSharedInformerFactory(kubeClient, time.Second*30)
+exampleInformerFactory := informers.NewSharedInformerFactory(exampleClient, time.Second*30)
+
+controller := NewController(ctx, kubeClient, exampleClient,
+    kubeInformerFactory.Apps().V1().Deployments(),
+    exampleInformerFactory.Samplecontroller().V1alpha1().Foos())
+
+kubeInformerFactory.Start(ctx.Done())
+exampleInformerFactory.Start(ctx.Done())
+
+controller.Run(ctx, 2)
+----
+
+There are two clients because the controller works with two API groups: the built-in `apps/v1` (for Deployments) and the custom `samplecontroller/v1alpha1` (for Foos).
+Each client gets its own `SharedInformerFactory`.
+The factories are started to begin populating caches, and then the controller runs with two worker goroutines.
+
+== Event Handler Registration
+
+The `NewController` function registers event handlers on both the Foo and Deployment informers.
+
+*Foo informer handlers* -- every Foo event (add, update) enqueues the Foo itself:
+
+[source,go]
+----
+fooInformer.Informer().AddEventHandler(cache.ResourceEventHandlerFuncs{
+    AddFunc: controller.enqueueFoo,
+    UpdateFunc: func(old, new interface{}) {
+        controller.enqueueFoo(new)
+    },
+})
+----
+
+*Deployment informer handler* -- when a Deployment changes, the controller checks whether it is owned by a Foo and, if so, enqueues the owning Foo:
+
+[source,go]
+----
+deploymentInformer.Informer().AddEventHandler(cache.ResourceEventHandlerFuncs{
+    AddFunc: controller.handleObject,
+    UpdateFunc: func(old, new interface{}) {
+        newDepl := new.(*appsv1.Deployment)
+        oldDepl := old.(*appsv1.Deployment)
+        if newDepl.ResourceVersion == oldDepl.ResourceVersion {
+            return
+        }
+        controller.handleObject(new)
+    },
+    DeleteFunc: controller.handleObject,
+})
+----
+
+The `handleObject` function extracts the owner reference and, if the owner is a Foo, enqueues it:
+
+[source,go]
+----
+func (c *Controller) handleObject(obj interface{}) {
+    // ... tombstone handling omitted for brevity ...
+    if ownerRef := metav1.GetControllerOf(object); ownerRef != nil {
+        if ownerRef.Kind != "Foo" {
+            return
+        }
+        foo, err := c.foosLister.Foos(object.GetNamespace()).Get(ownerRef.Name)
+        if err != nil {
+            return  // orphaned object; ignore
+        }
+        c.enqueueFoo(foo)
+    }
+}
+----
+
+[NOTE]
+====
+There is no `DeleteFunc` on the Foo informer.
+When a Foo is deleted, Kubernetes garbage collection automatically deletes the owned Deployment (via OwnerReferences), which is sufficient to clean up.
+====
+
+== The Work Loop
+
+The controller's `Run` method waits for caches to sync and then launches worker goroutines.
+Each worker repeatedly calls `processNextWorkItem`:
+
+[source,go]
+----
+func (c *Controller) processNextWorkItem(ctx context.Context) bool {
+    objRef, shutdown := c.workqueue.Get()
+    if shutdown {
+        return false
+    }
+    defer c.workqueue.Done(objRef)
+
+    err := c.syncHandler(ctx, objRef)
+    if err == nil {
+        c.workqueue.Forget(objRef)
+        return true
+    }
+
+    utilruntime.HandleErrorWithContext(ctx, err,
+        "Error syncing; requeuing for later retry",
+        "objectReference", objRef)
+    c.workqueue.AddRateLimited(objRef)
+    return true
+}
+----
+
+The three workqueue calls serve distinct purposes:
+
+* `Get()` -- dequeues the next key and marks it as being processed (no other worker will pick up the same key).
+* `Done(key)` -- releases the processing lock so the key can be dequeued again if it was requeued.
+* `Forget(key)` -- resets the rate-limiting backoff counter for this key (used on success).
+* `AddRateLimited(key)` -- requeues with exponential backoff (used on failure).
+
+== The Sync Handler
+
+The `syncHandler` is where the actual reconciliation logic lives.
+It follows a clear sequence:
+
+. *Parse the key* into namespace and name.
+. *Get the Foo* from the lister (local cache, not an API call).
+. *Get or create the Deployment* -- look up the Deployment by the name specified in `foo.Spec.DeploymentName`. If it does not exist, create it.
+. *Check OwnerReference* -- verify the Deployment is controlled by this Foo. If another resource owns it, emit a warning event and return an error.
+. *Reconcile replicas* -- if the desired replica count differs from the actual count, update the Deployment.
+. *Update status* -- set `foo.Status.AvailableReplicas` to reflect the Deployment's actual state.
+
+[source,go]
+----
+func (c *Controller) syncHandler(ctx context.Context, objectRef cache.ObjectName) error {
+    foo, err := c.foosLister.Foos(objectRef.Namespace).Get(objectRef.Name)
+    if errors.IsNotFound(err) {
+        return nil  // Foo was deleted; nothing to do
+    }
+    if err != nil {
+        return err
+    }
+
+    deploymentName := foo.Spec.DeploymentName
+    deployment, err := c.deploymentsLister.Deployments(foo.Namespace).Get(deploymentName)
+    if errors.IsNotFound(err) {
+        deployment, err = c.kubeclientset.AppsV1().Deployments(foo.Namespace).Create(
+            ctx, newDeployment(foo), metav1.CreateOptions{FieldManager: FieldManager})
+    }
+    if err != nil {
+        return err
+    }
+
+    if !metav1.IsControlledBy(deployment, foo) {
+        msg := fmt.Sprintf(MessageResourceExists, deployment.Name)
+        c.recorder.Event(foo, corev1.EventTypeWarning, ErrResourceExists, msg)
+        return fmt.Errorf("%s", msg)
+    }
+
+    if foo.Spec.Replicas != nil && *foo.Spec.Replicas != *deployment.Spec.Replicas {
+        deployment, err = c.kubeclientset.AppsV1().Deployments(foo.Namespace).Update(
+            ctx, newDeployment(foo), metav1.UpdateOptions{FieldManager: FieldManager})
+    }
+    if err != nil {
+        return err
+    }
+
+    err = c.updateFooStatus(foo, deployment)
+    return err
+}
+----
+
+This pattern -- get from cache, compare desired vs. actual, create or update, then update status -- is the standard reconciliation loop that every client-go controller follows.
+
+For a hands-on exercise building a controller from scratch using this same pattern, see xref:exercises:1-build-a-controller-using-client-go-from-scratch.adoc[Exercise 1].
+
+== References
+
+* https://chishengliu.com/posts/kubernetes-operator-sample-controller/[How to Write a Kubernetes Operator Using client-go]
+* https://www.youtube.com/watch?v=AUNPLQVxvmw[Writing Kube Controllers for Everyone - Maciej Szulik]

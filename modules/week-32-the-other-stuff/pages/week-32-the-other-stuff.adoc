@@ -1,9 +1,0 @@
-= Week 3.2 -- The Other Stuff
-:navtitle: Week 3.2 -- The Other Stuff
-
-This week covers the other important topics that complement the operator and controller focus of the course -- networking (Ingress and Gateway API), service mesh, authentication and authorization, and cluster security hardening.
-
-* *Ingress and Gateway API* -- how external traffic reaches your services, from the original Ingress resource to its role-oriented successor.
-* *Service Mesh Fundamentals* -- what a service mesh solves, its architecture, and how Istio implements traffic management, security, and observability.
-* *Authentication and Authorization* -- how Kubernetes identifies users and decides what they can do, including the Node authorizer and emerging ReBAC approaches.
-* *Security Context and Hardening* -- locking down pods with SecurityContext fields, the Security Profiles Operator, and OpenShift SecurityContextConstraints.

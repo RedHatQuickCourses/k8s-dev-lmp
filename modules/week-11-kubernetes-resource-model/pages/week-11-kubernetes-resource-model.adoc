@@ -1,8 +1,0 @@
-= Week 1.1 -- Kubernetes Resource Model
-:navtitle: Week 1.1 -- Kubernetes Resource Model
-
-This week you will explore how the Kubernetes API works behind the scenes -- not just what you can do with it, but why it is designed the way it is.
-We begin with the Kubernetes Resource Model document, which lays out the assumptions, principles, and conventions that make the API composable and extensible.
-From there, you will walk through the kube-apiserver request pipeline to understand the stages every API call passes through before state is persisted to etcd.
-Finally, we examine a three-layer model of declarative configuration management that frames Kubernetes as a system with unusually strict separation between resource schemas, concrete syntax, and convergence engines.
-Together, these readings establish the mental model you will rely on throughout the rest of this learning path -- from writing controllers in Week 1.2, to building admission webhooks in Week 3.1.

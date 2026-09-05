@@ -1,5 +1,3 @@
 * xref:familiarizing-with-koobrnehteez.adoc[]
-** xref:api-centric-declarative-configuration-management.adoc[]
-** xref:kubernetes-control-plane-and-api-server-role.adoc[]
-** xref:persistence-layer-etcd-key-value-store.adoc[]
-** xref:asynchronous-controller-reconciliation-patterns.adoc[]
+** xref:what-kubernetes-really-is.adoc[]
+** xref:control-plane-architecture-primer.adoc[]

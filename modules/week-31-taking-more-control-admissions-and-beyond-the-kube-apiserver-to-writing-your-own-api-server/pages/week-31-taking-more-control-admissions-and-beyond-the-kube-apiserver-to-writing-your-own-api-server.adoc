@@ -1,9 +1,0 @@
-= Week 3.1 -- Taking More Control: Admissions and Beyond the kube-apiserver to Writing Your Own API Server
-:navtitle: Week 3.1 Overview
-
-This week takes us deeper into the kube-apiserver's extension points.
-We start with admission control webhooks for intercepting and modifying API requests before they reach storage.
-From there, we explore policy engines as a declarative alternative to hand-coded webhook logic.
-We then move into API discovery and the aggregation layer, examining how clients enumerate available resources and how custom API servers integrate with the control plane.
-Finally, we look at when CRDs are not enough and how to build a custom API server backed by non-etcd storage.
-Together, these topics cover the full spectrum of Kubernetes API-level extensibility.

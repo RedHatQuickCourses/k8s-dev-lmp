@@ -31,4 +31,4 @@ In this course, we move away from "using" the cluster to "orchestrating" it. Whe
 
 If you feel your knowledge in these areas is limited, we suggest reviewing:
 * *Designing Distributed Systems* by Brendan Burns (O'Reilly).
-* The official Kubernetes documentation on the [Reference Architecture](https://kubernetes.io/docs/concepts/architecture/).
+* The official Kubernetes documentation on the https://kubernetes.io/docs/concepts/architecture/[Reference Architecture].
