@@ -1,0 +1,564 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width,initial-scale=1">
+    <title>Distributed Locking Theory :: Kubernetes Developer Learning Path</title>
+    <link rel="prev" href="idempotent-reconciliation.html">
+    <link rel="next" href="leader-election-in-kubernetes.html">
+    <meta name="generator" content="Antora 3.2.0-alpha.12">
+    <link rel="stylesheet" href="../../../_/css/site.css">
+    <link rel="stylesheet" href="../../../_/css/vendor/tabs.css">
+    <link rel="stylesheet" href="../../../_/css/vendor/collapsible.css">
+    <link rel="stylesheet" href="../../../_/css/vendor/reading-time.css">
+    <link rel="stylesheet" href="../../../_/css/vendor/audio-transcript.css">
+    <script>var uiRootPath = '../../../_'</script>
+  </head>
+  <body class="article">
+<header class="header">
+  <nav class="navbar">
+    <div class="navbar-brand">
+      <a class="navbar-item" href="https://www.redhat.com" target="_blank"><img src="../../../_/img/redhat-logo.png" height="40px" alt="Red Hat"></a>
+      <a class="navbar-item" style="font-size: 24px; color: white" href="../../..">Kubernetes Developer Learning Path</a>
+      <button class="navbar-burger" data-target="topbar-nav">
+        <span></span>
+        <span></span>
+        <span></span>
+      </button>
+    </div>
+    <div id="topbar-nav" class="navbar-menu">
+      <div class="navbar-end">
+        <a class="navbar-item" href="https://github.com/RedHatQuickCourses/REPLACEREPONAME/issues" target="_blank">Report Issues</a>
+      </div>
+    </div>
+  </nav>
+</header>
+<div class="body">
+<div class="nav-container" data-component="k8s-dev-lmp" data-version="1.0.0">
+  <aside class="nav">
+    <div class="panels">
+<div class="nav-panel-menu is-active" data-panel="menu">
+  <nav class="nav-menu">
+    <h3 class="title"><a href="../index.html">Kubernetes Developer Learning Path</a></h3>
+<ul class="nav-list">
+  <li class="nav-item" data-depth="0">
+<ul class="nav-list">
+  <li class="nav-item" data-depth="1">
+    <a class="nav-link" href="../index.html">Home</a>
+  </li>
+</ul>
+  </li>
+  <li class="nav-item" data-depth="0">
+<ul class="nav-list">
+  <li class="nav-item" data-depth="1">
+    <a class="nav-link" href="../LABENV/index.html">Lab Environment</a>
+  </li>
+</ul>
+  </li>
+  <li class="nav-item" data-depth="0">
+<ul class="nav-list">
+  <li class="nav-item" data-depth="1">
+    <a class="nav-link" href="../overview/overview.html">Overview</a>
+  </li>
+  <li class="nav-item" data-depth="1">
+    <button class="nav-item-toggle"></button>
+    <a class="nav-link" href="../overview/overview.html">Overview</a>
+<ul class="nav-list">
+  <li class="nav-item" data-depth="2">
+    <a class="nav-link" href="../overview/kubernetes-architecture-overview-and-extensibility-mechanisms.html">Kubernetes architecture overview and extensibility mechanisms</a>
+  </li>
+  <li class="nav-item" data-depth="2">
+    <a class="nav-link" href="../overview/control-plane-authentication-authorization-and-validation.html">Control plane authentication, authorization, and validation</a>
+  </li>
+  <li class="nav-item" data-depth="2">
+    <a class="nav-link" href="../overview/platform-automation-through-custom-resources-and-operators.html">Platform automation through custom resources and operators</a>
+  </li>
+  <li class="nav-item" data-depth="2">
+    <a class="nav-link" href="../overview/distributed-system-principles-for-high-availability.html">Distributed system principles for high availability</a>
+  </li>
+  <li class="nav-item" data-depth="2">
+    <a class="nav-link" href="../overview/advanced-networking-traffic-management-and-control-plane-architectures.html">Advanced networking, traffic management, and control plane architectures</a>
+  </li>
+</ul>
+  </li>
+</ul>
+  </li>
+  <li class="nav-item" data-depth="0">
+<ul class="nav-list">
+  <li class="nav-item" data-depth="1">
+    <a class="nav-link" href="../who-is-this-for-pre-requisites/who-is-this-for-pre-requisites.html">Who Is This For? Prerequisites</a>
+  </li>
+  <li class="nav-item" data-depth="1">
+    <button class="nav-item-toggle"></button>
+    <a class="nav-link" href="../who-is-this-for-pre-requisites/who-is-this-for-pre-requisites.html">Who Is This For? Prerequisites</a>
+<ul class="nav-list">
+  <li class="nav-item" data-depth="2">
+    <a class="nav-link" href="../who-is-this-for-pre-requisites/target-audience-engineers-sys-admins-and-developers-with-container-experience.html">Target audience: Engineers, sys admins, and developers with container experience</a>
+  </li>
+  <li class="nav-item" data-depth="2">
+    <a class="nav-link" href="../who-is-this-for-pre-requisites/recommended-prerequisites-basic-distributed-systems-knowledge.html">Recommended prerequisites: Basic distributed systems knowledge</a>
+  </li>
+  <li class="nav-item" data-depth="2">
+    <a class="nav-link" href="../who-is-this-for-pre-requisites/ideal-baseline-ckad-certification-or-red-hat-do-180-and-do-280-tracks.html">Ideal baseline: CKAD certification, or Red Hat DO-180 and DO-280 tracks</a>
+  </li>
+</ul>
+  </li>
+</ul>
+  </li>
+  <li class="nav-item" data-depth="0">
+<ul class="nav-list">
+  <li class="nav-item" data-depth="1">
+    <button class="nav-item-toggle"></button>
+    <a class="nav-link" href="../familiarizing-with-koobrnehteez/familiarizing-with-koobrnehteez.html">Week 0&#8201;&#8212;&#8201;Familiarizing with Kubernetes</a>
+<ul class="nav-list">
+  <li class="nav-item" data-depth="2">
+    <a class="nav-link" href="../familiarizing-with-koobrnehteez/what-kubernetes-really-is.html">What Kubernetes Really Is</a>
+  </li>
+  <li class="nav-item" data-depth="2">
+    <a class="nav-link" href="../familiarizing-with-koobrnehteez/control-plane-architecture-primer.html">Control Plane Architecture Primer</a>
+  </li>
+</ul>
+  </li>
+</ul>
+  </li>
+  <li class="nav-item" data-depth="0">
+<ul class="nav-list">
+  <li class="nav-item" data-depth="1">
+    <button class="nav-item-toggle"></button>
+    <a class="nav-link" href="../11-kubernetes-resource-model/11-kubernetes-resource-model.html">Week 1.1&#8201;&#8212;&#8201;Kubernetes Resource Model</a>
+<ul class="nav-list">
+  <li class="nav-item" data-depth="2">
+    <a class="nav-link" href="../11-kubernetes-resource-model/the-kubernetes-resource-model.html">The Kubernetes Resource Model</a>
+  </li>
+  <li class="nav-item" data-depth="2">
+    <a class="nav-link" href="../11-kubernetes-resource-model/api-request-lifecycle.html">API Request Lifecycle</a>
+  </li>
+  <li class="nav-item" data-depth="2">
+    <a class="nav-link" href="../11-kubernetes-resource-model/declarative-configuration-layers.html">Declarative Configuration Layers</a>
+  </li>
+</ul>
+  </li>
+</ul>
+  </li>
+  <li class="nav-item" data-depth="0">
+<ul class="nav-list">
+  <li class="nav-item" data-depth="1">
+    <button class="nav-item-toggle"></button>
+    <a class="nav-link" href="../12-controllers-informers-client-go/12-controllers-informers-client-go.html">Week 1.2&#8201;&#8212;&#8201;Controllers, Informers, client-go</a>
+<ul class="nav-list">
+  <li class="nav-item" data-depth="2">
+    <a class="nav-link" href="../12-controllers-informers-client-go/client-go-architecture.html">client-go Architecture</a>
+  </li>
+  <li class="nav-item" data-depth="2">
+    <a class="nav-link" href="../12-controllers-informers-client-go/informers-listers-workqueues.html">Informers, Listers, and Workqueues</a>
+  </li>
+  <li class="nav-item" data-depth="2">
+    <a class="nav-link" href="../12-controllers-informers-client-go/sample-controller-walkthrough.html">Sample Controller Walkthrough</a>
+  </li>
+  <li class="nav-item" data-depth="2">
+    <a class="nav-link" href="../12-controllers-informers-client-go/informer-pitfalls-and-error-handling.html">Informer Pitfalls and Error Handling</a>
+  </li>
+</ul>
+  </li>
+</ul>
+  </li>
+  <li class="nav-item" data-depth="0">
+<ul class="nav-list">
+  <li class="nav-item" data-depth="1">
+    <button class="nav-item-toggle"></button>
+    <a class="nav-link" href="../21-controllers-contd/21-controllers-contd.html">Week 2.1&#8201;&#8212;&#8201;Controllers with controller-runtime</a>
+<ul class="nav-list">
+  <li class="nav-item" data-depth="2">
+    <a class="nav-link" href="../21-controllers-contd/gvk-gvr-and-api-terminology.html">GVK, GVR, and API Terminology</a>
+  </li>
+  <li class="nav-item" data-depth="2">
+    <a class="nav-link" href="../21-controllers-contd/controller-runtime-and-kubebuilder.html">Controller-runtime and Kubebuilder</a>
+  </li>
+  <li class="nav-item" data-depth="2">
+    <a class="nav-link" href="../21-controllers-contd/spec-status-and-conditions.html">Spec, Status, and Conditions</a>
+  </li>
+  <li class="nav-item" data-depth="2">
+    <a class="nav-link" href="../21-controllers-contd/api-validation-and-linting.html">API Validation and Linting</a>
+  </li>
+  <li class="nav-item" data-depth="2">
+    <a class="nav-link" href="../21-controllers-contd/update-patch-and-server-side-apply.html">Update, Patch, and Server-Side Apply</a>
+  </li>
+</ul>
+  </li>
+</ul>
+  </li>
+  <li class="nav-item" data-depth="0">
+<ul class="nav-list">
+  <li class="nav-item" data-depth="1">
+    <button class="nav-item-toggle"></button>
+    <a class="nav-link" href="22-going-distributed-locks-leases-ownership-eventual-consistency.html">Week 2.2&#8201;&#8212;&#8201;Going Distributed</a>
+<ul class="nav-list">
+  <li class="nav-item" data-depth="2">
+    <a class="nav-link" href="idempotent-reconciliation.html">Idempotent Reconciliation</a>
+  </li>
+  <li class="nav-item is-current-page" data-depth="2">
+    <a class="nav-link" href="distributed-locking-theory.html">Distributed Locking Theory</a>
+  </li>
+  <li class="nav-item" data-depth="2">
+    <a class="nav-link" href="leader-election-in-kubernetes.html">Leader Election in Kubernetes</a>
+  </li>
+  <li class="nav-item" data-depth="2">
+    <a class="nav-link" href="controller-sharding.html">Controller Sharding</a>
+  </li>
+</ul>
+  </li>
+</ul>
+  </li>
+  <li class="nav-item" data-depth="0">
+<ul class="nav-list">
+  <li class="nav-item" data-depth="1">
+    <button class="nav-item-toggle"></button>
+    <a class="nav-link" href="../31-taking-more-control-admissions-and-beyond-the-kube-apiserver-to-writing-your-own-api-server/31-taking-more-control-admissions-and-beyond-the-kube-apiserver-to-writing-your-own-api-server.html">Week 3.1 Overview</a>
+<ul class="nav-list">
+  <li class="nav-item" data-depth="2">
+    <a class="nav-link" href="../31-taking-more-control-admissions-and-beyond-the-kube-apiserver-to-writing-your-own-api-server/admission-control-webhooks.html">Admission Control Webhooks</a>
+  </li>
+  <li class="nav-item" data-depth="2">
+    <a class="nav-link" href="../31-taking-more-control-admissions-and-beyond-the-kube-apiserver-to-writing-your-own-api-server/policy-engines-and-gatekeeper.html">Policy Engines and Gatekeeper</a>
+  </li>
+  <li class="nav-item" data-depth="2">
+    <a class="nav-link" href="../31-taking-more-control-admissions-and-beyond-the-kube-apiserver-to-writing-your-own-api-server/api-discovery-and-aggregation.html">API Discovery and Aggregation</a>
+  </li>
+  <li class="nav-item" data-depth="2">
+    <a class="nav-link" href="../31-taking-more-control-admissions-and-beyond-the-kube-apiserver-to-writing-your-own-api-server/custom-api-servers.html">Custom API Servers</a>
+  </li>
+</ul>
+  </li>
+</ul>
+  </li>
+  <li class="nav-item" data-depth="0">
+<ul class="nav-list">
+  <li class="nav-item" data-depth="1">
+    <button class="nav-item-toggle"></button>
+    <a class="nav-link" href="../32-the-other-stuff/32-the-other-stuff.html">Week 3.2&#8201;&#8212;&#8201;The Other Stuff</a>
+<ul class="nav-list">
+  <li class="nav-item" data-depth="2">
+    <a class="nav-link" href="../32-the-other-stuff/ingress-and-gateway-api.html">Ingress and Gateway API</a>
+  </li>
+  <li class="nav-item" data-depth="2">
+    <a class="nav-link" href="../32-the-other-stuff/service-mesh-fundamentals.html">Service Mesh Fundamentals</a>
+  </li>
+  <li class="nav-item" data-depth="2">
+    <a class="nav-link" href="../32-the-other-stuff/authentication-and-authorization.html">Authentication and Authorization</a>
+  </li>
+  <li class="nav-item" data-depth="2">
+    <a class="nav-link" href="../32-the-other-stuff/security-context-and-hardening.html">Security Context and Hardening</a>
+  </li>
+</ul>
+  </li>
+</ul>
+  </li>
+  <li class="nav-item" data-depth="0">
+<ul class="nav-list">
+  <li class="nav-item" data-depth="1">
+    <button class="nav-item-toggle"></button>
+    <a class="nav-link" href="../41-all-about-kube-scheduler/41-all-about-kube-scheduler.html">Week 4.1&#8201;&#8212;&#8201;All About kube-scheduler</a>
+<ul class="nav-list">
+  <li class="nav-item" data-depth="2">
+    <a class="nav-link" href="../41-all-about-kube-scheduler/how-the-scheduler-works.html">How the Scheduler Works</a>
+  </li>
+  <li class="nav-item" data-depth="2">
+    <a class="nav-link" href="../41-all-about-kube-scheduler/resource-management.html">Resource Management</a>
+  </li>
+  <li class="nav-item" data-depth="2">
+    <a class="nav-link" href="../41-all-about-kube-scheduler/dynamic-resource-allocation.html">Dynamic Resource Allocation</a>
+  </li>
+</ul>
+  </li>
+</ul>
+  </li>
+  <li class="nav-item" data-depth="0">
+<ul class="nav-list">
+  <li class="nav-item" data-depth="1">
+    <button class="nav-item-toggle"></button>
+    <a class="nav-link" href="../42-ubiquitous-topics/42-ubiquitous-topics.html">Week 4.2&#8201;&#8212;&#8201;Ubiquitous Topics</a>
+<ul class="nav-list">
+  <li class="nav-item" data-depth="2">
+    <a class="nav-link" href="../42-ubiquitous-topics/operator-landscape.html">The Operator Landscape</a>
+  </li>
+  <li class="nav-item" data-depth="2">
+    <a class="nav-link" href="../42-ubiquitous-topics/alternative-control-planes-and-form-factors.html">Alternative Control Planes and Form Factors</a>
+  </li>
+</ul>
+  </li>
+</ul>
+  </li>
+  <li class="nav-item" data-depth="0">
+<ul class="nav-list">
+  <li class="nav-item" data-depth="1">
+    <button class="nav-item-toggle"></button>
+    <a class="nav-link" href="../exercises/exercises.html">Exercises</a>
+<ul class="nav-list">
+  <li class="nav-item" data-depth="2">
+    <a class="nav-link" href="../exercises/1-build-a-controller-using-client-go-from-scratch.html">Exercise 1: Build a Controller</a>
+  </li>
+  <li class="nav-item" data-depth="2">
+    <a class="nav-link" href="../exercises/2-implement-optimistic-locking-and-leader-election-via-lease.html">Exercise 2: Leader Election</a>
+  </li>
+  <li class="nav-item" data-depth="2">
+    <a class="nav-link" href="../exercises/3-develop-a-custom-validating-webhook-for-container-registry-enforcement.html">Exercise 3: Validating Webhook</a>
+  </li>
+</ul>
+  </li>
+</ul>
+  </li>
+  <li class="nav-item" data-depth="0">
+<ul class="nav-list">
+  <li class="nav-item" data-depth="1">
+    <a class="nav-link" href="../recommended-reading/recommended-reading.html">Recommended Reading</a>
+  </li>
+  <li class="nav-item" data-depth="1">
+    <button class="nav-item-toggle"></button>
+    <a class="nav-link" href="../recommended-reading/recommended-reading.html">Recommended Reading</a>
+<ul class="nav-list">
+  <li class="nav-item" data-depth="2">
+    <a class="nav-link" href="../recommended-reading/programming-kubernetes-hausenblas-schimanski.html">Programming Kubernetes (Hausenblas, Schimanski)</a>
+  </li>
+  <li class="nav-item" data-depth="2">
+    <a class="nav-link" href="../recommended-reading/kubernetes-operators-dobies-wood.html">Kubernetes Operators (Dobies, Wood)</a>
+  </li>
+  <li class="nav-item" data-depth="2">
+    <a class="nav-link" href="../recommended-reading/cncf-operator-whitepaper.html">CNCF Operator Whitepaper</a>
+  </li>
+</ul>
+  </li>
+</ul>
+  </li>
+  <li class="nav-item" data-depth="0">
+<ul class="nav-list">
+  <li class="nav-item" data-depth="1">
+    <a class="nav-link" href="../suggested-reading/suggested-reading.html">Suggested Reading</a>
+  </li>
+  <li class="nav-item" data-depth="1">
+    <button class="nav-item-toggle"></button>
+    <a class="nav-link" href="../suggested-reading/suggested-reading.html">Suggested Reading</a>
+<ul class="nav-list">
+  <li class="nav-item" data-depth="2">
+    <a class="nav-link" href="../suggested-reading/kubernetes-security-and-observability-creane-gupta.html">Kubernetes Security and Observability (Creane, Gupta)</a>
+  </li>
+  <li class="nav-item" data-depth="2">
+    <a class="nav-link" href="../suggested-reading/designing-distributed-systems-burns.html">Designing Distributed Systems (Burns)</a>
+  </li>
+</ul>
+  </li>
+</ul>
+  </li>
+  <li class="nav-item" data-depth="0">
+<ul class="nav-list">
+  <li class="nav-item" data-depth="1">
+    <a class="nav-link" href="../appendix/appendix.html">Appendix</a>
+  </li>
+</ul>
+  </li>
+</ul>
+  </nav>
+</div>
+<div class="nav-panel-explore" data-panel="explore">
+  <div class="context">
+    <span class="title">Kubernetes Developer Learning Path</span>
+    <span class="version">1.0.0</span>
+  </div>
+  <ul class="components">
+    <li class="component is-current">
+      <a class="title" href="../index.html">Kubernetes Developer Learning Path</a>
+      <ul class="versions">
+        <li class="version is-current is-latest">
+          <a href="../index.html">1.0.0</a>
+        </li>
+      </ul>
+    </li>
+  </ul>
+</div>
+    </div>
+  </aside>
+</div>
+<main class="article">
+<div class="toolbar" role="navigation">
+<button class="nav-toggle"></button>
+  <a href="../index.html" class="home-link"></a>
+<nav class="breadcrumbs" aria-label="breadcrumbs">
+  <ul>
+    <li><a href="../index.html">Kubernetes Developer Learning Path</a></li>
+    <li><a href="22-going-distributed-locks-leases-ownership-eventual-consistency.html">Week 2.2&#8201;&#8212;&#8201;Going Distributed</a></li>
+    <li><a href="distributed-locking-theory.html">Distributed Locking Theory</a></li>
+  </ul>
+</nav>
+</div>
+  <div class="content">
+<aside class="toc sidebar" data-title="Contents" data-levels="2">
+  <div class="toc-menu"></div>
+</aside>
+<article class="doc">
+<h1 class="page">Distributed Locking Theory</h1>
+<div id="preamble">
+<div class="sectionbody">
+<div class="paragraph">
+<p>Distributed locks appear simple but conceal subtle failure modes.
+This section explains why locks are harder than they look and what guarantees are actually achievable.</p>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_why_distributed_locks"><a class="anchor" href="#_why_distributed_locks"></a>Why Distributed Locks?</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>There are two distinct reasons to use a distributed lock, and they demand very different levels of rigor:</p>
+</div>
+<div class="ulist">
+<ul>
+<li>
+<p><strong>Efficiency:</strong> Prevent duplicate expensive work. For example, two cron jobs should not both run the same batch computation simultaneously. If the lock mechanism fails, the worst case is wasted compute&#8201;&#8212;&#8201;the same work is done twice.</p>
+</li>
+<li>
+<p><strong>Correctness:</strong> Prevent concurrent operations from corrupting shared state. For example, two processes must not simultaneously modify a file in object storage. If the lock mechanism fails, the worst case is data loss or inconsistency.</p>
+</li>
+</ul>
+</div>
+<div class="paragraph">
+<p>For efficiency-only use cases, a simple single-node lock (such as a Redis <code>SET &#8230;&#8203; NX</code>) is sufficient. Correctness requires much stronger guarantees.</p>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_why_locks_are_harder_than_they_look"><a class="anchor" href="#_why_locks_are_harder_than_they_look"></a>Why Locks Are Harder Than They Look</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>Three categories of failure undermine naive distributed locking:</p>
+</div>
+<div class="ulist">
+<ul>
+<li>
+<p><strong>Process pauses:</strong> A lock holder may be paused by garbage collection, an OS context switch, or a page fault. During the pause, the lock expires and another process acquires it&#8201;&#8212;&#8201;but the original process does not know it has lost the lock when it resumes.</p>
+</li>
+<li>
+<p><strong>Network delays:</strong> Messages between a client and the lock service can be delayed arbitrarily. A "lock acquired" response may arrive after the lock has already expired.</p>
+</li>
+<li>
+<p><strong>Clock skew:</strong> Nodes in a distributed system do not share a perfectly synchronized clock. Time-based lock expiration (TTLs) becomes unreliable when clocks drift or experience NTP jumps.</p>
+</li>
+</ul>
+</div>
+<div class="paragraph">
+<p>These failures are not edge cases. In production environments with garbage-collected runtimes (Java, Go), they occur regularly.</p>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_fencing_tokens"><a class="anchor" href="#_fencing_tokens"></a>Fencing Tokens</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>The recommended solution for correctness-critical locking is the <strong>fencing token</strong> pattern:</p>
+</div>
+<div class="olist arabic">
+<ol class="arabic">
+<li>
+<p>The lock service issues a monotonically increasing <em>fencing token</em> each time a lock is acquired.</p>
+</li>
+<li>
+<p>The client includes this token with every write to the shared resource.</p>
+</li>
+<li>
+<p>The storage service rejects any write carrying a token lower than the highest token it has already seen.</p>
+</li>
+</ol>
+</div>
+<div class="paragraph">
+<p>This ensures that even if a stale lock holder wakes up after a pause, its writes are rejected because its token is outdated. The storage service acts as the final arbiter of ordering.</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-text hljs" data-lang="text">Client 1 acquires lock -&gt; token 34
+Client 1 pauses (GC)
+Client 2 acquires lock -&gt; token 35
+Client 2 writes with token 35 -&gt; accepted
+Client 1 resumes, writes with token 34 -&gt; rejected (34 &lt; 35)</code></pre>
+</div>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_kubernetes_leases"><a class="anchor" href="#_kubernetes_leases"></a>Kubernetes Leases</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>The <code>Lease</code> resource in the <code>coordination.k8s.io</code> API group provides a lightweight coordination primitive built into Kubernetes. It serves three built-in use cases:</p>
+</div>
+<div class="olist arabic">
+<ol class="arabic">
+<li>
+<p><strong>Node heartbeats:</strong> Each node renews a Lease in the <code>kube-node-lease</code> namespace to signal liveness. The control plane uses <code>spec.renewTime</code> to detect unresponsive nodes.</p>
+</li>
+<li>
+<p><strong>Leader election:</strong> Controllers use Leases to elect a single active instance among multiple replicas. The holder sets <code>holderIdentity</code> and periodically renews the lease.</p>
+</li>
+<li>
+<p><strong>API server identity:</strong> Each kube-apiserver instance maintains a Lease in <code>kube-system</code>, enabling distributed features to discover and track active API servers.</p>
+</li>
+</ol>
+</div>
+<div class="paragraph">
+<p>Custom workloads can also create their own Lease objects for coordination. The best practice is to name Leases in a way that is clearly linked to the product or component (for example, <code>my-controller-leader</code>).</p>
+</div>
+<div class="paragraph">
+<p>You can inspect the Leases in a cluster to observe these mechanisms in action:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-bash hljs" data-lang="bash"># View node heartbeat leases
+kubectl get leases -n kube-node-lease
+
+# View control-plane leader election leases
+kubectl get leases -n kube-system</code></pre>
+</div>
+</div>
+<div class="admonitionblock note">
+<table>
+<tr>
+<td class="icon">
+<i class="fa icon-note" title="Note"></i>
+</td>
+<td class="content">
+<div class="paragraph">
+<p>Kubernetes leader election via Leases does <strong>not</strong> provide fencing token guarantees. Brief periods of dual leadership are possible&#8201;&#8212;&#8201;a paused leader can resume alongside a newly elected one. For most controllers, this is acceptable because reconciliation is designed to be idempotent (see <a href="idempotent-reconciliation.html" class="xref page">Idempotent Reconciliation</a>). The Kubernetes API server&#8217;s conflict detection on stale <code>resourceVersion</code> values provides an additional layer of safety against state regression.</p>
+</div>
+</td>
+</tr>
+</table>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_references"><a class="anchor" href="#_references"></a>References</h2>
+<div class="sectionbody">
+<div class="ulist">
+<ul>
+<li>
+<p><a href="https://martin.kleppmann.com/2016/02/08/how-to-do-distributed-locking.html">How to Do Distributed Locking</a></p>
+</li>
+<li>
+<p><a href="https://kubernetes.io/docs/concepts/architecture/leases">Leases</a></p>
+</li>
+</ul>
+</div>
+</div>
+</div>
+<nav class="pagination">
+  <span class="prev"><a href="idempotent-reconciliation.html">Idempotent Reconciliation</a></span>
+  <span class="next"><a href="leader-election-in-kubernetes.html">Leader Election in Kubernetes</a></span>
+</nav>
+</article>
+  </div>
+</main>
+</div>
+<footer class="footer">
+  <img src="../../../_/img/rhl-logo-red.png" height="40px" alt="Red Hat"  href="https://redhat.com" >
+</footer><script id="site-script" src="../../../_/js/site.js" data-ui-root-path="../../../_"></script>
+<script async src="../../../_/js/vendor/highlight.js"></script>
+<script defer src="../../../_/js/vendor/tabs.js"></script>
+<script defer src="../../../_/js/vendor/reading-time.js"></script>
+  </body>
+</html>

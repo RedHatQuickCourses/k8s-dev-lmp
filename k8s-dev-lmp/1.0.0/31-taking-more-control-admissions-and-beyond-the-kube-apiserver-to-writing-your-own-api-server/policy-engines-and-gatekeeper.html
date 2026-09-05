@@ -1,0 +1,549 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width,initial-scale=1">
+    <title>Policy Engines and Gatekeeper :: Kubernetes Developer Learning Path</title>
+    <link rel="prev" href="admission-control-webhooks.html">
+    <link rel="next" href="api-discovery-and-aggregation.html">
+    <meta name="generator" content="Antora 3.2.0-alpha.12">
+    <link rel="stylesheet" href="../../../_/css/site.css">
+    <link rel="stylesheet" href="../../../_/css/vendor/tabs.css">
+    <link rel="stylesheet" href="../../../_/css/vendor/collapsible.css">
+    <link rel="stylesheet" href="../../../_/css/vendor/reading-time.css">
+    <link rel="stylesheet" href="../../../_/css/vendor/audio-transcript.css">
+    <script>var uiRootPath = '../../../_'</script>
+  </head>
+  <body class="article">
+<header class="header">
+  <nav class="navbar">
+    <div class="navbar-brand">
+      <a class="navbar-item" href="https://www.redhat.com" target="_blank"><img src="../../../_/img/redhat-logo.png" height="40px" alt="Red Hat"></a>
+      <a class="navbar-item" style="font-size: 24px; color: white" href="../../..">Kubernetes Developer Learning Path</a>
+      <button class="navbar-burger" data-target="topbar-nav">
+        <span></span>
+        <span></span>
+        <span></span>
+      </button>
+    </div>
+    <div id="topbar-nav" class="navbar-menu">
+      <div class="navbar-end">
+        <a class="navbar-item" href="https://github.com/RedHatQuickCourses/REPLACEREPONAME/issues" target="_blank">Report Issues</a>
+      </div>
+    </div>
+  </nav>
+</header>
+<div class="body">
+<div class="nav-container" data-component="k8s-dev-lmp" data-version="1.0.0">
+  <aside class="nav">
+    <div class="panels">
+<div class="nav-panel-menu is-active" data-panel="menu">
+  <nav class="nav-menu">
+    <h3 class="title"><a href="../index.html">Kubernetes Developer Learning Path</a></h3>
+<ul class="nav-list">
+  <li class="nav-item" data-depth="0">
+<ul class="nav-list">
+  <li class="nav-item" data-depth="1">
+    <a class="nav-link" href="../index.html">Home</a>
+  </li>
+</ul>
+  </li>
+  <li class="nav-item" data-depth="0">
+<ul class="nav-list">
+  <li class="nav-item" data-depth="1">
+    <a class="nav-link" href="../LABENV/index.html">Lab Environment</a>
+  </li>
+</ul>
+  </li>
+  <li class="nav-item" data-depth="0">
+<ul class="nav-list">
+  <li class="nav-item" data-depth="1">
+    <a class="nav-link" href="../overview/overview.html">Overview</a>
+  </li>
+  <li class="nav-item" data-depth="1">
+    <button class="nav-item-toggle"></button>
+    <a class="nav-link" href="../overview/overview.html">Overview</a>
+<ul class="nav-list">
+  <li class="nav-item" data-depth="2">
+    <a class="nav-link" href="../overview/kubernetes-architecture-overview-and-extensibility-mechanisms.html">Kubernetes architecture overview and extensibility mechanisms</a>
+  </li>
+  <li class="nav-item" data-depth="2">
+    <a class="nav-link" href="../overview/control-plane-authentication-authorization-and-validation.html">Control plane authentication, authorization, and validation</a>
+  </li>
+  <li class="nav-item" data-depth="2">
+    <a class="nav-link" href="../overview/platform-automation-through-custom-resources-and-operators.html">Platform automation through custom resources and operators</a>
+  </li>
+  <li class="nav-item" data-depth="2">
+    <a class="nav-link" href="../overview/distributed-system-principles-for-high-availability.html">Distributed system principles for high availability</a>
+  </li>
+  <li class="nav-item" data-depth="2">
+    <a class="nav-link" href="../overview/advanced-networking-traffic-management-and-control-plane-architectures.html">Advanced networking, traffic management, and control plane architectures</a>
+  </li>
+</ul>
+  </li>
+</ul>
+  </li>
+  <li class="nav-item" data-depth="0">
+<ul class="nav-list">
+  <li class="nav-item" data-depth="1">
+    <a class="nav-link" href="../who-is-this-for-pre-requisites/who-is-this-for-pre-requisites.html">Who Is This For? Prerequisites</a>
+  </li>
+  <li class="nav-item" data-depth="1">
+    <button class="nav-item-toggle"></button>
+    <a class="nav-link" href="../who-is-this-for-pre-requisites/who-is-this-for-pre-requisites.html">Who Is This For? Prerequisites</a>
+<ul class="nav-list">
+  <li class="nav-item" data-depth="2">
+    <a class="nav-link" href="../who-is-this-for-pre-requisites/target-audience-engineers-sys-admins-and-developers-with-container-experience.html">Target audience: Engineers, sys admins, and developers with container experience</a>
+  </li>
+  <li class="nav-item" data-depth="2">
+    <a class="nav-link" href="../who-is-this-for-pre-requisites/recommended-prerequisites-basic-distributed-systems-knowledge.html">Recommended prerequisites: Basic distributed systems knowledge</a>
+  </li>
+  <li class="nav-item" data-depth="2">
+    <a class="nav-link" href="../who-is-this-for-pre-requisites/ideal-baseline-ckad-certification-or-red-hat-do-180-and-do-280-tracks.html">Ideal baseline: CKAD certification, or Red Hat DO-180 and DO-280 tracks</a>
+  </li>
+</ul>
+  </li>
+</ul>
+  </li>
+  <li class="nav-item" data-depth="0">
+<ul class="nav-list">
+  <li class="nav-item" data-depth="1">
+    <button class="nav-item-toggle"></button>
+    <a class="nav-link" href="../familiarizing-with-koobrnehteez/familiarizing-with-koobrnehteez.html">Week 0&#8201;&#8212;&#8201;Familiarizing with Kubernetes</a>
+<ul class="nav-list">
+  <li class="nav-item" data-depth="2">
+    <a class="nav-link" href="../familiarizing-with-koobrnehteez/what-kubernetes-really-is.html">What Kubernetes Really Is</a>
+  </li>
+  <li class="nav-item" data-depth="2">
+    <a class="nav-link" href="../familiarizing-with-koobrnehteez/control-plane-architecture-primer.html">Control Plane Architecture Primer</a>
+  </li>
+</ul>
+  </li>
+</ul>
+  </li>
+  <li class="nav-item" data-depth="0">
+<ul class="nav-list">
+  <li class="nav-item" data-depth="1">
+    <button class="nav-item-toggle"></button>
+    <a class="nav-link" href="../11-kubernetes-resource-model/11-kubernetes-resource-model.html">Week 1.1&#8201;&#8212;&#8201;Kubernetes Resource Model</a>
+<ul class="nav-list">
+  <li class="nav-item" data-depth="2">
+    <a class="nav-link" href="../11-kubernetes-resource-model/the-kubernetes-resource-model.html">The Kubernetes Resource Model</a>
+  </li>
+  <li class="nav-item" data-depth="2">
+    <a class="nav-link" href="../11-kubernetes-resource-model/api-request-lifecycle.html">API Request Lifecycle</a>
+  </li>
+  <li class="nav-item" data-depth="2">
+    <a class="nav-link" href="../11-kubernetes-resource-model/declarative-configuration-layers.html">Declarative Configuration Layers</a>
+  </li>
+</ul>
+  </li>
+</ul>
+  </li>
+  <li class="nav-item" data-depth="0">
+<ul class="nav-list">
+  <li class="nav-item" data-depth="1">
+    <button class="nav-item-toggle"></button>
+    <a class="nav-link" href="../12-controllers-informers-client-go/12-controllers-informers-client-go.html">Week 1.2&#8201;&#8212;&#8201;Controllers, Informers, client-go</a>
+<ul class="nav-list">
+  <li class="nav-item" data-depth="2">
+    <a class="nav-link" href="../12-controllers-informers-client-go/client-go-architecture.html">client-go Architecture</a>
+  </li>
+  <li class="nav-item" data-depth="2">
+    <a class="nav-link" href="../12-controllers-informers-client-go/informers-listers-workqueues.html">Informers, Listers, and Workqueues</a>
+  </li>
+  <li class="nav-item" data-depth="2">
+    <a class="nav-link" href="../12-controllers-informers-client-go/sample-controller-walkthrough.html">Sample Controller Walkthrough</a>
+  </li>
+  <li class="nav-item" data-depth="2">
+    <a class="nav-link" href="../12-controllers-informers-client-go/informer-pitfalls-and-error-handling.html">Informer Pitfalls and Error Handling</a>
+  </li>
+</ul>
+  </li>
+</ul>
+  </li>
+  <li class="nav-item" data-depth="0">
+<ul class="nav-list">
+  <li class="nav-item" data-depth="1">
+    <button class="nav-item-toggle"></button>
+    <a class="nav-link" href="../21-controllers-contd/21-controllers-contd.html">Week 2.1&#8201;&#8212;&#8201;Controllers with controller-runtime</a>
+<ul class="nav-list">
+  <li class="nav-item" data-depth="2">
+    <a class="nav-link" href="../21-controllers-contd/gvk-gvr-and-api-terminology.html">GVK, GVR, and API Terminology</a>
+  </li>
+  <li class="nav-item" data-depth="2">
+    <a class="nav-link" href="../21-controllers-contd/controller-runtime-and-kubebuilder.html">Controller-runtime and Kubebuilder</a>
+  </li>
+  <li class="nav-item" data-depth="2">
+    <a class="nav-link" href="../21-controllers-contd/spec-status-and-conditions.html">Spec, Status, and Conditions</a>
+  </li>
+  <li class="nav-item" data-depth="2">
+    <a class="nav-link" href="../21-controllers-contd/api-validation-and-linting.html">API Validation and Linting</a>
+  </li>
+  <li class="nav-item" data-depth="2">
+    <a class="nav-link" href="../21-controllers-contd/update-patch-and-server-side-apply.html">Update, Patch, and Server-Side Apply</a>
+  </li>
+</ul>
+  </li>
+</ul>
+  </li>
+  <li class="nav-item" data-depth="0">
+<ul class="nav-list">
+  <li class="nav-item" data-depth="1">
+    <button class="nav-item-toggle"></button>
+    <a class="nav-link" href="../22-going-distributed-locks-leases-ownership-eventual-consistency/22-going-distributed-locks-leases-ownership-eventual-consistency.html">Week 2.2&#8201;&#8212;&#8201;Going Distributed</a>
+<ul class="nav-list">
+  <li class="nav-item" data-depth="2">
+    <a class="nav-link" href="../22-going-distributed-locks-leases-ownership-eventual-consistency/idempotent-reconciliation.html">Idempotent Reconciliation</a>
+  </li>
+  <li class="nav-item" data-depth="2">
+    <a class="nav-link" href="../22-going-distributed-locks-leases-ownership-eventual-consistency/distributed-locking-theory.html">Distributed Locking Theory</a>
+  </li>
+  <li class="nav-item" data-depth="2">
+    <a class="nav-link" href="../22-going-distributed-locks-leases-ownership-eventual-consistency/leader-election-in-kubernetes.html">Leader Election in Kubernetes</a>
+  </li>
+  <li class="nav-item" data-depth="2">
+    <a class="nav-link" href="../22-going-distributed-locks-leases-ownership-eventual-consistency/controller-sharding.html">Controller Sharding</a>
+  </li>
+</ul>
+  </li>
+</ul>
+  </li>
+  <li class="nav-item" data-depth="0">
+<ul class="nav-list">
+  <li class="nav-item" data-depth="1">
+    <button class="nav-item-toggle"></button>
+    <a class="nav-link" href="31-taking-more-control-admissions-and-beyond-the-kube-apiserver-to-writing-your-own-api-server.html">Week 3.1 Overview</a>
+<ul class="nav-list">
+  <li class="nav-item" data-depth="2">
+    <a class="nav-link" href="admission-control-webhooks.html">Admission Control Webhooks</a>
+  </li>
+  <li class="nav-item is-current-page" data-depth="2">
+    <a class="nav-link" href="policy-engines-and-gatekeeper.html">Policy Engines and Gatekeeper</a>
+  </li>
+  <li class="nav-item" data-depth="2">
+    <a class="nav-link" href="api-discovery-and-aggregation.html">API Discovery and Aggregation</a>
+  </li>
+  <li class="nav-item" data-depth="2">
+    <a class="nav-link" href="custom-api-servers.html">Custom API Servers</a>
+  </li>
+</ul>
+  </li>
+</ul>
+  </li>
+  <li class="nav-item" data-depth="0">
+<ul class="nav-list">
+  <li class="nav-item" data-depth="1">
+    <button class="nav-item-toggle"></button>
+    <a class="nav-link" href="../32-the-other-stuff/32-the-other-stuff.html">Week 3.2&#8201;&#8212;&#8201;The Other Stuff</a>
+<ul class="nav-list">
+  <li class="nav-item" data-depth="2">
+    <a class="nav-link" href="../32-the-other-stuff/ingress-and-gateway-api.html">Ingress and Gateway API</a>
+  </li>
+  <li class="nav-item" data-depth="2">
+    <a class="nav-link" href="../32-the-other-stuff/service-mesh-fundamentals.html">Service Mesh Fundamentals</a>
+  </li>
+  <li class="nav-item" data-depth="2">
+    <a class="nav-link" href="../32-the-other-stuff/authentication-and-authorization.html">Authentication and Authorization</a>
+  </li>
+  <li class="nav-item" data-depth="2">
+    <a class="nav-link" href="../32-the-other-stuff/security-context-and-hardening.html">Security Context and Hardening</a>
+  </li>
+</ul>
+  </li>
+</ul>
+  </li>
+  <li class="nav-item" data-depth="0">
+<ul class="nav-list">
+  <li class="nav-item" data-depth="1">
+    <button class="nav-item-toggle"></button>
+    <a class="nav-link" href="../41-all-about-kube-scheduler/41-all-about-kube-scheduler.html">Week 4.1&#8201;&#8212;&#8201;All About kube-scheduler</a>
+<ul class="nav-list">
+  <li class="nav-item" data-depth="2">
+    <a class="nav-link" href="../41-all-about-kube-scheduler/how-the-scheduler-works.html">How the Scheduler Works</a>
+  </li>
+  <li class="nav-item" data-depth="2">
+    <a class="nav-link" href="../41-all-about-kube-scheduler/resource-management.html">Resource Management</a>
+  </li>
+  <li class="nav-item" data-depth="2">
+    <a class="nav-link" href="../41-all-about-kube-scheduler/dynamic-resource-allocation.html">Dynamic Resource Allocation</a>
+  </li>
+</ul>
+  </li>
+</ul>
+  </li>
+  <li class="nav-item" data-depth="0">
+<ul class="nav-list">
+  <li class="nav-item" data-depth="1">
+    <button class="nav-item-toggle"></button>
+    <a class="nav-link" href="../42-ubiquitous-topics/42-ubiquitous-topics.html">Week 4.2&#8201;&#8212;&#8201;Ubiquitous Topics</a>
+<ul class="nav-list">
+  <li class="nav-item" data-depth="2">
+    <a class="nav-link" href="../42-ubiquitous-topics/operator-landscape.html">The Operator Landscape</a>
+  </li>
+  <li class="nav-item" data-depth="2">
+    <a class="nav-link" href="../42-ubiquitous-topics/alternative-control-planes-and-form-factors.html">Alternative Control Planes and Form Factors</a>
+  </li>
+</ul>
+  </li>
+</ul>
+  </li>
+  <li class="nav-item" data-depth="0">
+<ul class="nav-list">
+  <li class="nav-item" data-depth="1">
+    <button class="nav-item-toggle"></button>
+    <a class="nav-link" href="../exercises/exercises.html">Exercises</a>
+<ul class="nav-list">
+  <li class="nav-item" data-depth="2">
+    <a class="nav-link" href="../exercises/1-build-a-controller-using-client-go-from-scratch.html">Exercise 1: Build a Controller</a>
+  </li>
+  <li class="nav-item" data-depth="2">
+    <a class="nav-link" href="../exercises/2-implement-optimistic-locking-and-leader-election-via-lease.html">Exercise 2: Leader Election</a>
+  </li>
+  <li class="nav-item" data-depth="2">
+    <a class="nav-link" href="../exercises/3-develop-a-custom-validating-webhook-for-container-registry-enforcement.html">Exercise 3: Validating Webhook</a>
+  </li>
+</ul>
+  </li>
+</ul>
+  </li>
+  <li class="nav-item" data-depth="0">
+<ul class="nav-list">
+  <li class="nav-item" data-depth="1">
+    <a class="nav-link" href="../recommended-reading/recommended-reading.html">Recommended Reading</a>
+  </li>
+  <li class="nav-item" data-depth="1">
+    <button class="nav-item-toggle"></button>
+    <a class="nav-link" href="../recommended-reading/recommended-reading.html">Recommended Reading</a>
+<ul class="nav-list">
+  <li class="nav-item" data-depth="2">
+    <a class="nav-link" href="../recommended-reading/programming-kubernetes-hausenblas-schimanski.html">Programming Kubernetes (Hausenblas, Schimanski)</a>
+  </li>
+  <li class="nav-item" data-depth="2">
+    <a class="nav-link" href="../recommended-reading/kubernetes-operators-dobies-wood.html">Kubernetes Operators (Dobies, Wood)</a>
+  </li>
+  <li class="nav-item" data-depth="2">
+    <a class="nav-link" href="../recommended-reading/cncf-operator-whitepaper.html">CNCF Operator Whitepaper</a>
+  </li>
+</ul>
+  </li>
+</ul>
+  </li>
+  <li class="nav-item" data-depth="0">
+<ul class="nav-list">
+  <li class="nav-item" data-depth="1">
+    <a class="nav-link" href="../suggested-reading/suggested-reading.html">Suggested Reading</a>
+  </li>
+  <li class="nav-item" data-depth="1">
+    <button class="nav-item-toggle"></button>
+    <a class="nav-link" href="../suggested-reading/suggested-reading.html">Suggested Reading</a>
+<ul class="nav-list">
+  <li class="nav-item" data-depth="2">
+    <a class="nav-link" href="../suggested-reading/kubernetes-security-and-observability-creane-gupta.html">Kubernetes Security and Observability (Creane, Gupta)</a>
+  </li>
+  <li class="nav-item" data-depth="2">
+    <a class="nav-link" href="../suggested-reading/designing-distributed-systems-burns.html">Designing Distributed Systems (Burns)</a>
+  </li>
+</ul>
+  </li>
+</ul>
+  </li>
+  <li class="nav-item" data-depth="0">
+<ul class="nav-list">
+  <li class="nav-item" data-depth="1">
+    <a class="nav-link" href="../appendix/appendix.html">Appendix</a>
+  </li>
+</ul>
+  </li>
+</ul>
+  </nav>
+</div>
+<div class="nav-panel-explore" data-panel="explore">
+  <div class="context">
+    <span class="title">Kubernetes Developer Learning Path</span>
+    <span class="version">1.0.0</span>
+  </div>
+  <ul class="components">
+    <li class="component is-current">
+      <a class="title" href="../index.html">Kubernetes Developer Learning Path</a>
+      <ul class="versions">
+        <li class="version is-current is-latest">
+          <a href="../index.html">1.0.0</a>
+        </li>
+      </ul>
+    </li>
+  </ul>
+</div>
+    </div>
+  </aside>
+</div>
+<main class="article">
+<div class="toolbar" role="navigation">
+<button class="nav-toggle"></button>
+  <a href="../index.html" class="home-link"></a>
+<nav class="breadcrumbs" aria-label="breadcrumbs">
+  <ul>
+    <li><a href="../index.html">Kubernetes Developer Learning Path</a></li>
+    <li><a href="31-taking-more-control-admissions-and-beyond-the-kube-apiserver-to-writing-your-own-api-server.html">Week 3.1 Overview</a></li>
+    <li><a href="policy-engines-and-gatekeeper.html">Policy Engines and Gatekeeper</a></li>
+  </ul>
+</nav>
+</div>
+  <div class="content">
+<aside class="toc sidebar" data-title="Contents" data-levels="2">
+  <div class="toc-menu"></div>
+</aside>
+<article class="doc">
+<h1 class="page">Policy Engines and Gatekeeper</h1>
+<div class="sect1">
+<h2 id="_webhooks_vs_policy_engines"><a class="anchor" href="#_webhooks_vs_policy_engines"></a>Webhooks vs Policy Engines</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>Raw admission webhooks are powerful but operationally expensive.
+Each webhook requires writing Go code (or another language), building a container image, deploying and maintaining a service, and managing TLS certificates.
+When you need dozens of policies&#8201;&#8212;&#8201;all images from approved registries, all pods with resource limits, all namespaces with a contact label&#8201;&#8212;&#8201;the overhead multiplies quickly.</p>
+</div>
+<div class="paragraph">
+<p>Policy engines solve this by providing a declarative way to define admission policies using CRDs.
+Instead of deploying a new webhook for each rule, you deploy the engine once and express individual policies as Kubernetes objects.</p>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_opa_gatekeeper"><a class="anchor" href="#_opa_gatekeeper"></a>OPA Gatekeeper</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p><a href="https://github.com/open-policy-agent/gatekeeper">OPA Gatekeeper</a> v3 integrates the <a href="https://www.openpolicyagent.org/">Open Policy Agent</a> with Kubernetes using the OPA Constraint Framework.
+The architecture centers on two CRD types:</p>
+</div>
+<div class="paragraph">
+<p><strong>ConstraintTemplates</strong> define the policy logic written in Rego (OPA&#8217;s query language) along with a parameter schema.
+A template is reusable&#8201;&#8212;&#8201;it describes <em>what</em> to check and <em>what parameters</em> can be customized.</p>
+</div>
+<div class="paragraph">
+<p><strong>Constraints</strong> instantiate a template with specific parameters and a <code>match</code> block that scopes enforcement to particular resource kinds.</p>
+</div>
+<div class="paragraph">
+<p>The following example defines a template that requires specific labels, then creates a constraint enforcing it on namespaces:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-yaml hljs" data-lang="yaml">apiVersion: templates.gatekeeper.sh/v1beta1
+kind: ConstraintTemplate
+metadata:
+  name: k8srequiredlabels
+spec:
+  crd:
+    spec:
+      names:
+        kind: K8sRequiredLabels
+      validation:
+        openAPIV3Schema:
+          properties:
+            labels:
+              type: array
+              items:
+                type: string
+  targets:
+    - target: admission.k8s.gatekeeper.sh
+      rego: |
+        package k8srequiredlabels
+
+        deny[{"msg": msg, "details": {"missing_labels": missing}}] {
+          provided := {label | input.review.object.metadata.labels[label]}
+          required := {label | label := input.parameters.labels[_]}
+          missing := required - provided
+          count(missing) &gt; 0
+          msg := sprintf("you must provide labels: %v", [missing])
+        }</code></pre>
+</div>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-yaml hljs" data-lang="yaml">apiVersion: constraints.gatekeeper.sh/v1beta1
+kind: K8sRequiredLabels
+metadata:
+  name: ns-must-have-owner
+spec:
+  match:
+    kinds:
+      - apiGroups: [""]
+        kinds: ["Namespace"]
+  parameters:
+    labels: ["owner"]</code></pre>
+</div>
+</div>
+<div class="sect2">
+<h3 id="_audit"><a class="anchor" href="#_audit"></a>Audit</h3>
+<div class="paragraph">
+<p>Gatekeeper does not only evaluate new requests.
+Its audit functionality periodically scans existing resources in the cluster and checks them against enforced constraints.
+Violations are recorded in the <code>status</code> field of the corresponding Constraint object, making it easy to detect pre-existing misconfigurations that were created before a policy was applied.</p>
+</div>
+</div>
+<div class="sect2">
+<h3 id="_data_replication"><a class="anchor" href="#_data_replication"></a>Data Replication</h3>
+<div class="paragraph">
+<p>Some policies require cross-resource visibility.
+For example, enforcing globally unique ingress hostnames means the policy engine needs access to all Ingress objects, not just the one being admitted.
+Gatekeeper supports data replication via a <code>Config</code> CRD that specifies which resource types should be cached into OPA for use in Rego rules.</p>
+</div>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_validatingadmissionpolicy_cel_based"><a class="anchor" href="#_validatingadmissionpolicy_cel_based"></a>ValidatingAdmissionPolicy (CEL-based)</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>Starting in Kubernetes v1.30, <code>ValidatingAdmissionPolicy</code> reached stable status as a built-in alternative to external webhook infrastructure.
+Instead of calling out to an HTTP server, policies are expressed as <a href="https://kubernetes.io/docs/reference/using-api/cel/">CEL (Common Expression Language)</a> expressions evaluated directly inside the API server.</p>
+</div>
+<div class="paragraph">
+<p>This eliminates the need for a separate webhook deployment, TLS certificates, and network round-trips.
+CEL-based policies are best suited for straightforward validation rules&#8201;&#8212;&#8201;such as checking label presence or resource limits&#8201;&#8212;&#8201;where the full power of Rego or Go code is not needed.</p>
+</div>
+<div class="admonitionblock tip">
+<table>
+<tr>
+<td class="icon">
+<i class="fa icon-tip" title="Tip"></i>
+</td>
+<td class="content">
+<div class="paragraph">
+<p>Use <strong>Gatekeeper</strong> when you need complex cross-resource policies, audit of existing resources, or Rego&#8217;s full expressiveness.
+Use <strong>ValidatingAdmissionPolicy</strong> for simpler, latency-sensitive validations that benefit from running in-process within the API server.</p>
+</div>
+</td>
+</tr>
+</table>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_references"><a class="anchor" href="#_references"></a>References</h2>
+<div class="sectionbody">
+<div class="ulist">
+<ul>
+<li>
+<p><a href="https://kubernetes.io/blog/2019/08/06/opa-gatekeeper-policy-and-governance-for-kubernetes/">OPA Gatekeeper: Policy and Governance for Kubernetes</a></p>
+</li>
+</ul>
+</div>
+</div>
+</div>
+<nav class="pagination">
+  <span class="prev"><a href="admission-control-webhooks.html">Admission Control Webhooks</a></span>
+  <span class="next"><a href="api-discovery-and-aggregation.html">API Discovery and Aggregation</a></span>
+</nav>
+</article>
+  </div>
+</main>
+</div>
+<footer class="footer">
+  <img src="../../../_/img/rhl-logo-red.png" height="40px" alt="Red Hat"  href="https://redhat.com" >
+</footer><script id="site-script" src="../../../_/js/site.js" data-ui-root-path="../../../_"></script>
+<script async src="../../../_/js/vendor/highlight.js"></script>
+<script defer src="../../../_/js/vendor/tabs.js"></script>
+<script defer src="../../../_/js/vendor/reading-time.js"></script>
+  </body>
+</html>

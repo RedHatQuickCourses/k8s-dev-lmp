@@ -1,0 +1,618 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width,initial-scale=1">
+    <title>Security Context and Hardening :: Kubernetes Developer Learning Path</title>
+    <link rel="prev" href="authentication-and-authorization.html">
+    <link rel="next" href="../41-all-about-kube-scheduler/41-all-about-kube-scheduler.html">
+    <meta name="generator" content="Antora 3.2.0-alpha.12">
+    <link rel="stylesheet" href="../../../_/css/site.css">
+    <link rel="stylesheet" href="../../../_/css/vendor/tabs.css">
+    <link rel="stylesheet" href="../../../_/css/vendor/collapsible.css">
+    <link rel="stylesheet" href="../../../_/css/vendor/reading-time.css">
+    <link rel="stylesheet" href="../../../_/css/vendor/audio-transcript.css">
+    <script>var uiRootPath = '../../../_'</script>
+  </head>
+  <body class="article">
+<header class="header">
+  <nav class="navbar">
+    <div class="navbar-brand">
+      <a class="navbar-item" href="https://www.redhat.com" target="_blank"><img src="../../../_/img/redhat-logo.png" height="40px" alt="Red Hat"></a>
+      <a class="navbar-item" style="font-size: 24px; color: white" href="../../..">Kubernetes Developer Learning Path</a>
+      <button class="navbar-burger" data-target="topbar-nav">
+        <span></span>
+        <span></span>
+        <span></span>
+      </button>
+    </div>
+    <div id="topbar-nav" class="navbar-menu">
+      <div class="navbar-end">
+        <a class="navbar-item" href="https://github.com/RedHatQuickCourses/REPLACEREPONAME/issues" target="_blank">Report Issues</a>
+      </div>
+    </div>
+  </nav>
+</header>
+<div class="body">
+<div class="nav-container" data-component="k8s-dev-lmp" data-version="1.0.0">
+  <aside class="nav">
+    <div class="panels">
+<div class="nav-panel-menu is-active" data-panel="menu">
+  <nav class="nav-menu">
+    <h3 class="title"><a href="../index.html">Kubernetes Developer Learning Path</a></h3>
+<ul class="nav-list">
+  <li class="nav-item" data-depth="0">
+<ul class="nav-list">
+  <li class="nav-item" data-depth="1">
+    <a class="nav-link" href="../index.html">Home</a>
+  </li>
+</ul>
+  </li>
+  <li class="nav-item" data-depth="0">
+<ul class="nav-list">
+  <li class="nav-item" data-depth="1">
+    <a class="nav-link" href="../LABENV/index.html">Lab Environment</a>
+  </li>
+</ul>
+  </li>
+  <li class="nav-item" data-depth="0">
+<ul class="nav-list">
+  <li class="nav-item" data-depth="1">
+    <a class="nav-link" href="../overview/overview.html">Overview</a>
+  </li>
+  <li class="nav-item" data-depth="1">
+    <button class="nav-item-toggle"></button>
+    <a class="nav-link" href="../overview/overview.html">Overview</a>
+<ul class="nav-list">
+  <li class="nav-item" data-depth="2">
+    <a class="nav-link" href="../overview/kubernetes-architecture-overview-and-extensibility-mechanisms.html">Kubernetes architecture overview and extensibility mechanisms</a>
+  </li>
+  <li class="nav-item" data-depth="2">
+    <a class="nav-link" href="../overview/control-plane-authentication-authorization-and-validation.html">Control plane authentication, authorization, and validation</a>
+  </li>
+  <li class="nav-item" data-depth="2">
+    <a class="nav-link" href="../overview/platform-automation-through-custom-resources-and-operators.html">Platform automation through custom resources and operators</a>
+  </li>
+  <li class="nav-item" data-depth="2">
+    <a class="nav-link" href="../overview/distributed-system-principles-for-high-availability.html">Distributed system principles for high availability</a>
+  </li>
+  <li class="nav-item" data-depth="2">
+    <a class="nav-link" href="../overview/advanced-networking-traffic-management-and-control-plane-architectures.html">Advanced networking, traffic management, and control plane architectures</a>
+  </li>
+</ul>
+  </li>
+</ul>
+  </li>
+  <li class="nav-item" data-depth="0">
+<ul class="nav-list">
+  <li class="nav-item" data-depth="1">
+    <a class="nav-link" href="../who-is-this-for-pre-requisites/who-is-this-for-pre-requisites.html">Who Is This For? Prerequisites</a>
+  </li>
+  <li class="nav-item" data-depth="1">
+    <button class="nav-item-toggle"></button>
+    <a class="nav-link" href="../who-is-this-for-pre-requisites/who-is-this-for-pre-requisites.html">Who Is This For? Prerequisites</a>
+<ul class="nav-list">
+  <li class="nav-item" data-depth="2">
+    <a class="nav-link" href="../who-is-this-for-pre-requisites/target-audience-engineers-sys-admins-and-developers-with-container-experience.html">Target audience: Engineers, sys admins, and developers with container experience</a>
+  </li>
+  <li class="nav-item" data-depth="2">
+    <a class="nav-link" href="../who-is-this-for-pre-requisites/recommended-prerequisites-basic-distributed-systems-knowledge.html">Recommended prerequisites: Basic distributed systems knowledge</a>
+  </li>
+  <li class="nav-item" data-depth="2">
+    <a class="nav-link" href="../who-is-this-for-pre-requisites/ideal-baseline-ckad-certification-or-red-hat-do-180-and-do-280-tracks.html">Ideal baseline: CKAD certification, or Red Hat DO-180 and DO-280 tracks</a>
+  </li>
+</ul>
+  </li>
+</ul>
+  </li>
+  <li class="nav-item" data-depth="0">
+<ul class="nav-list">
+  <li class="nav-item" data-depth="1">
+    <button class="nav-item-toggle"></button>
+    <a class="nav-link" href="../familiarizing-with-koobrnehteez/familiarizing-with-koobrnehteez.html">Week 0&#8201;&#8212;&#8201;Familiarizing with Kubernetes</a>
+<ul class="nav-list">
+  <li class="nav-item" data-depth="2">
+    <a class="nav-link" href="../familiarizing-with-koobrnehteez/what-kubernetes-really-is.html">What Kubernetes Really Is</a>
+  </li>
+  <li class="nav-item" data-depth="2">
+    <a class="nav-link" href="../familiarizing-with-koobrnehteez/control-plane-architecture-primer.html">Control Plane Architecture Primer</a>
+  </li>
+</ul>
+  </li>
+</ul>
+  </li>
+  <li class="nav-item" data-depth="0">
+<ul class="nav-list">
+  <li class="nav-item" data-depth="1">
+    <button class="nav-item-toggle"></button>
+    <a class="nav-link" href="../11-kubernetes-resource-model/11-kubernetes-resource-model.html">Week 1.1&#8201;&#8212;&#8201;Kubernetes Resource Model</a>
+<ul class="nav-list">
+  <li class="nav-item" data-depth="2">
+    <a class="nav-link" href="../11-kubernetes-resource-model/the-kubernetes-resource-model.html">The Kubernetes Resource Model</a>
+  </li>
+  <li class="nav-item" data-depth="2">
+    <a class="nav-link" href="../11-kubernetes-resource-model/api-request-lifecycle.html">API Request Lifecycle</a>
+  </li>
+  <li class="nav-item" data-depth="2">
+    <a class="nav-link" href="../11-kubernetes-resource-model/declarative-configuration-layers.html">Declarative Configuration Layers</a>
+  </li>
+</ul>
+  </li>
+</ul>
+  </li>
+  <li class="nav-item" data-depth="0">
+<ul class="nav-list">
+  <li class="nav-item" data-depth="1">
+    <button class="nav-item-toggle"></button>
+    <a class="nav-link" href="../12-controllers-informers-client-go/12-controllers-informers-client-go.html">Week 1.2&#8201;&#8212;&#8201;Controllers, Informers, client-go</a>
+<ul class="nav-list">
+  <li class="nav-item" data-depth="2">
+    <a class="nav-link" href="../12-controllers-informers-client-go/client-go-architecture.html">client-go Architecture</a>
+  </li>
+  <li class="nav-item" data-depth="2">
+    <a class="nav-link" href="../12-controllers-informers-client-go/informers-listers-workqueues.html">Informers, Listers, and Workqueues</a>
+  </li>
+  <li class="nav-item" data-depth="2">
+    <a class="nav-link" href="../12-controllers-informers-client-go/sample-controller-walkthrough.html">Sample Controller Walkthrough</a>
+  </li>
+  <li class="nav-item" data-depth="2">
+    <a class="nav-link" href="../12-controllers-informers-client-go/informer-pitfalls-and-error-handling.html">Informer Pitfalls and Error Handling</a>
+  </li>
+</ul>
+  </li>
+</ul>
+  </li>
+  <li class="nav-item" data-depth="0">
+<ul class="nav-list">
+  <li class="nav-item" data-depth="1">
+    <button class="nav-item-toggle"></button>
+    <a class="nav-link" href="../21-controllers-contd/21-controllers-contd.html">Week 2.1&#8201;&#8212;&#8201;Controllers with controller-runtime</a>
+<ul class="nav-list">
+  <li class="nav-item" data-depth="2">
+    <a class="nav-link" href="../21-controllers-contd/gvk-gvr-and-api-terminology.html">GVK, GVR, and API Terminology</a>
+  </li>
+  <li class="nav-item" data-depth="2">
+    <a class="nav-link" href="../21-controllers-contd/controller-runtime-and-kubebuilder.html">Controller-runtime and Kubebuilder</a>
+  </li>
+  <li class="nav-item" data-depth="2">
+    <a class="nav-link" href="../21-controllers-contd/spec-status-and-conditions.html">Spec, Status, and Conditions</a>
+  </li>
+  <li class="nav-item" data-depth="2">
+    <a class="nav-link" href="../21-controllers-contd/api-validation-and-linting.html">API Validation and Linting</a>
+  </li>
+  <li class="nav-item" data-depth="2">
+    <a class="nav-link" href="../21-controllers-contd/update-patch-and-server-side-apply.html">Update, Patch, and Server-Side Apply</a>
+  </li>
+</ul>
+  </li>
+</ul>
+  </li>
+  <li class="nav-item" data-depth="0">
+<ul class="nav-list">
+  <li class="nav-item" data-depth="1">
+    <button class="nav-item-toggle"></button>
+    <a class="nav-link" href="../22-going-distributed-locks-leases-ownership-eventual-consistency/22-going-distributed-locks-leases-ownership-eventual-consistency.html">Week 2.2&#8201;&#8212;&#8201;Going Distributed</a>
+<ul class="nav-list">
+  <li class="nav-item" data-depth="2">
+    <a class="nav-link" href="../22-going-distributed-locks-leases-ownership-eventual-consistency/idempotent-reconciliation.html">Idempotent Reconciliation</a>
+  </li>
+  <li class="nav-item" data-depth="2">
+    <a class="nav-link" href="../22-going-distributed-locks-leases-ownership-eventual-consistency/distributed-locking-theory.html">Distributed Locking Theory</a>
+  </li>
+  <li class="nav-item" data-depth="2">
+    <a class="nav-link" href="../22-going-distributed-locks-leases-ownership-eventual-consistency/leader-election-in-kubernetes.html">Leader Election in Kubernetes</a>
+  </li>
+  <li class="nav-item" data-depth="2">
+    <a class="nav-link" href="../22-going-distributed-locks-leases-ownership-eventual-consistency/controller-sharding.html">Controller Sharding</a>
+  </li>
+</ul>
+  </li>
+</ul>
+  </li>
+  <li class="nav-item" data-depth="0">
+<ul class="nav-list">
+  <li class="nav-item" data-depth="1">
+    <button class="nav-item-toggle"></button>
+    <a class="nav-link" href="../31-taking-more-control-admissions-and-beyond-the-kube-apiserver-to-writing-your-own-api-server/31-taking-more-control-admissions-and-beyond-the-kube-apiserver-to-writing-your-own-api-server.html">Week 3.1 Overview</a>
+<ul class="nav-list">
+  <li class="nav-item" data-depth="2">
+    <a class="nav-link" href="../31-taking-more-control-admissions-and-beyond-the-kube-apiserver-to-writing-your-own-api-server/admission-control-webhooks.html">Admission Control Webhooks</a>
+  </li>
+  <li class="nav-item" data-depth="2">
+    <a class="nav-link" href="../31-taking-more-control-admissions-and-beyond-the-kube-apiserver-to-writing-your-own-api-server/policy-engines-and-gatekeeper.html">Policy Engines and Gatekeeper</a>
+  </li>
+  <li class="nav-item" data-depth="2">
+    <a class="nav-link" href="../31-taking-more-control-admissions-and-beyond-the-kube-apiserver-to-writing-your-own-api-server/api-discovery-and-aggregation.html">API Discovery and Aggregation</a>
+  </li>
+  <li class="nav-item" data-depth="2">
+    <a class="nav-link" href="../31-taking-more-control-admissions-and-beyond-the-kube-apiserver-to-writing-your-own-api-server/custom-api-servers.html">Custom API Servers</a>
+  </li>
+</ul>
+  </li>
+</ul>
+  </li>
+  <li class="nav-item" data-depth="0">
+<ul class="nav-list">
+  <li class="nav-item" data-depth="1">
+    <button class="nav-item-toggle"></button>
+    <a class="nav-link" href="32-the-other-stuff.html">Week 3.2&#8201;&#8212;&#8201;The Other Stuff</a>
+<ul class="nav-list">
+  <li class="nav-item" data-depth="2">
+    <a class="nav-link" href="ingress-and-gateway-api.html">Ingress and Gateway API</a>
+  </li>
+  <li class="nav-item" data-depth="2">
+    <a class="nav-link" href="service-mesh-fundamentals.html">Service Mesh Fundamentals</a>
+  </li>
+  <li class="nav-item" data-depth="2">
+    <a class="nav-link" href="authentication-and-authorization.html">Authentication and Authorization</a>
+  </li>
+  <li class="nav-item is-current-page" data-depth="2">
+    <a class="nav-link" href="security-context-and-hardening.html">Security Context and Hardening</a>
+  </li>
+</ul>
+  </li>
+</ul>
+  </li>
+  <li class="nav-item" data-depth="0">
+<ul class="nav-list">
+  <li class="nav-item" data-depth="1">
+    <button class="nav-item-toggle"></button>
+    <a class="nav-link" href="../41-all-about-kube-scheduler/41-all-about-kube-scheduler.html">Week 4.1&#8201;&#8212;&#8201;All About kube-scheduler</a>
+<ul class="nav-list">
+  <li class="nav-item" data-depth="2">
+    <a class="nav-link" href="../41-all-about-kube-scheduler/how-the-scheduler-works.html">How the Scheduler Works</a>
+  </li>
+  <li class="nav-item" data-depth="2">
+    <a class="nav-link" href="../41-all-about-kube-scheduler/resource-management.html">Resource Management</a>
+  </li>
+  <li class="nav-item" data-depth="2">
+    <a class="nav-link" href="../41-all-about-kube-scheduler/dynamic-resource-allocation.html">Dynamic Resource Allocation</a>
+  </li>
+</ul>
+  </li>
+</ul>
+  </li>
+  <li class="nav-item" data-depth="0">
+<ul class="nav-list">
+  <li class="nav-item" data-depth="1">
+    <button class="nav-item-toggle"></button>
+    <a class="nav-link" href="../42-ubiquitous-topics/42-ubiquitous-topics.html">Week 4.2&#8201;&#8212;&#8201;Ubiquitous Topics</a>
+<ul class="nav-list">
+  <li class="nav-item" data-depth="2">
+    <a class="nav-link" href="../42-ubiquitous-topics/operator-landscape.html">The Operator Landscape</a>
+  </li>
+  <li class="nav-item" data-depth="2">
+    <a class="nav-link" href="../42-ubiquitous-topics/alternative-control-planes-and-form-factors.html">Alternative Control Planes and Form Factors</a>
+  </li>
+</ul>
+  </li>
+</ul>
+  </li>
+  <li class="nav-item" data-depth="0">
+<ul class="nav-list">
+  <li class="nav-item" data-depth="1">
+    <button class="nav-item-toggle"></button>
+    <a class="nav-link" href="../exercises/exercises.html">Exercises</a>
+<ul class="nav-list">
+  <li class="nav-item" data-depth="2">
+    <a class="nav-link" href="../exercises/1-build-a-controller-using-client-go-from-scratch.html">Exercise 1: Build a Controller</a>
+  </li>
+  <li class="nav-item" data-depth="2">
+    <a class="nav-link" href="../exercises/2-implement-optimistic-locking-and-leader-election-via-lease.html">Exercise 2: Leader Election</a>
+  </li>
+  <li class="nav-item" data-depth="2">
+    <a class="nav-link" href="../exercises/3-develop-a-custom-validating-webhook-for-container-registry-enforcement.html">Exercise 3: Validating Webhook</a>
+  </li>
+</ul>
+  </li>
+</ul>
+  </li>
+  <li class="nav-item" data-depth="0">
+<ul class="nav-list">
+  <li class="nav-item" data-depth="1">
+    <a class="nav-link" href="../recommended-reading/recommended-reading.html">Recommended Reading</a>
+  </li>
+  <li class="nav-item" data-depth="1">
+    <button class="nav-item-toggle"></button>
+    <a class="nav-link" href="../recommended-reading/recommended-reading.html">Recommended Reading</a>
+<ul class="nav-list">
+  <li class="nav-item" data-depth="2">
+    <a class="nav-link" href="../recommended-reading/programming-kubernetes-hausenblas-schimanski.html">Programming Kubernetes (Hausenblas, Schimanski)</a>
+  </li>
+  <li class="nav-item" data-depth="2">
+    <a class="nav-link" href="../recommended-reading/kubernetes-operators-dobies-wood.html">Kubernetes Operators (Dobies, Wood)</a>
+  </li>
+  <li class="nav-item" data-depth="2">
+    <a class="nav-link" href="../recommended-reading/cncf-operator-whitepaper.html">CNCF Operator Whitepaper</a>
+  </li>
+</ul>
+  </li>
+</ul>
+  </li>
+  <li class="nav-item" data-depth="0">
+<ul class="nav-list">
+  <li class="nav-item" data-depth="1">
+    <a class="nav-link" href="../suggested-reading/suggested-reading.html">Suggested Reading</a>
+  </li>
+  <li class="nav-item" data-depth="1">
+    <button class="nav-item-toggle"></button>
+    <a class="nav-link" href="../suggested-reading/suggested-reading.html">Suggested Reading</a>
+<ul class="nav-list">
+  <li class="nav-item" data-depth="2">
+    <a class="nav-link" href="../suggested-reading/kubernetes-security-and-observability-creane-gupta.html">Kubernetes Security and Observability (Creane, Gupta)</a>
+  </li>
+  <li class="nav-item" data-depth="2">
+    <a class="nav-link" href="../suggested-reading/designing-distributed-systems-burns.html">Designing Distributed Systems (Burns)</a>
+  </li>
+</ul>
+  </li>
+</ul>
+  </li>
+  <li class="nav-item" data-depth="0">
+<ul class="nav-list">
+  <li class="nav-item" data-depth="1">
+    <a class="nav-link" href="../appendix/appendix.html">Appendix</a>
+  </li>
+</ul>
+  </li>
+</ul>
+  </nav>
+</div>
+<div class="nav-panel-explore" data-panel="explore">
+  <div class="context">
+    <span class="title">Kubernetes Developer Learning Path</span>
+    <span class="version">1.0.0</span>
+  </div>
+  <ul class="components">
+    <li class="component is-current">
+      <a class="title" href="../index.html">Kubernetes Developer Learning Path</a>
+      <ul class="versions">
+        <li class="version is-current is-latest">
+          <a href="../index.html">1.0.0</a>
+        </li>
+      </ul>
+    </li>
+  </ul>
+</div>
+    </div>
+  </aside>
+</div>
+<main class="article">
+<div class="toolbar" role="navigation">
+<button class="nav-toggle"></button>
+  <a href="../index.html" class="home-link"></a>
+<nav class="breadcrumbs" aria-label="breadcrumbs">
+  <ul>
+    <li><a href="../index.html">Kubernetes Developer Learning Path</a></li>
+    <li><a href="32-the-other-stuff.html">Week 3.2&#8201;&#8212;&#8201;The Other Stuff</a></li>
+    <li><a href="security-context-and-hardening.html">Security Context and Hardening</a></li>
+  </ul>
+</nav>
+</div>
+  <div class="content">
+<aside class="toc sidebar" data-title="Contents" data-levels="2">
+  <div class="toc-menu"></div>
+</aside>
+<article class="doc">
+<h1 class="page">Security Context and Hardening</h1>
+<div id="preamble">
+<div class="sectionbody">
+<div class="paragraph">
+<p>A <code>SecurityContext</code> defines privilege and access control settings for a pod or container.
+It is the primary mechanism for hardening workloads at the pod spec level.</p>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_pod_level_vs_container_level_securitycontext"><a class="anchor" href="#_pod_level_vs_container_level_securitycontext"></a>Pod-level vs container-level SecurityContext</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>Kubernetes supports security context at two scopes:</p>
+</div>
+<div class="ulist">
+<ul>
+<li>
+<p><strong>Pod-level</strong> (<code>spec.securityContext</code>)&#8201;&#8212;&#8201;applies to all containers in the pod.
+Fields like <code>runAsUser</code>, <code>runAsGroup</code>, <code>fsGroup</code>, and <code>supplementalGroups</code> are set here.</p>
+</li>
+<li>
+<p><strong>Container-level</strong> (<code>spec.containers[].securityContext</code>)&#8201;&#8212;&#8201;overrides pod-level settings for a specific container.
+Fields like <code>allowPrivilegeEscalation</code>, <code>capabilities</code>, <code>readOnlyRootFilesystem</code>, and <code>seccompProfile</code> are typically set here.</p>
+</li>
+</ul>
+</div>
+<div class="paragraph">
+<p>When both levels specify the same field, the container-level value takes precedence.</p>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_key_securitycontext_fields"><a class="anchor" href="#_key_securitycontext_fields"></a>Key SecurityContext fields</h2>
+<div class="sectionbody">
+<table class="tableblock frame-all grid-all stretch">
+<colgroup>
+<col style="width: 40%;">
+<col style="width: 60%;">
+</colgroup>
+<thead>
+<tr>
+<th class="tableblock halign-left valign-top">Field</th>
+<th class="tableblock halign-left valign-top">Purpose</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>runAsUser</code> / <code>runAsGroup</code></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Sets the UID and primary GID for all processes in the container.</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>runAsNonRoot</code></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Rejects the pod at admission if the container image would run as UID 0.</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>readOnlyRootFilesystem</code></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Mounts the container&#8217;s root filesystem as read-only, preventing writes outside of explicitly mounted volumes.</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>allowPrivilegeEscalation</code></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Controls whether a child process can gain more privileges than its parent. Setting this to <code>false</code> sets the <code>no_new_privs</code> kernel flag.</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>capabilities</code></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Adds or drops Linux capabilities. A hardened container drops <code>ALL</code> and adds back only what it needs.</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>seccompProfile</code></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Selects a seccomp profile that filters which syscalls the process can make. <code>RuntimeDefault</code> is the baseline.</p></td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_a_minimal_hardened_pod"><a class="anchor" href="#_a_minimal_hardened_pod"></a>A minimal hardened pod</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>The following pod spec demonstrates a defense-in-depth configuration that is compatible with most workloads:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-yaml hljs" data-lang="yaml">apiVersion: v1
+kind: Pod
+metadata:
+  name: hardened-pod
+spec:
+  securityContext:
+    runAsNonRoot: true
+    runAsUser: 1000
+    fsGroup: 2000
+    seccompProfile:
+      type: RuntimeDefault
+  containers:
+  - name: app
+    image: registry.example.com/app:v1
+    securityContext:
+      allowPrivilegeEscalation: false
+      capabilities:
+        drop: ["ALL"]
+      readOnlyRootFilesystem: true</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>This configuration ensures the container cannot run as root, cannot escalate privileges, cannot write to its root filesystem, and is restricted to the runtime&#8217;s default set of allowed syscalls.</p>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_security_profiles_operator"><a class="anchor" href="#_security_profiles_operator"></a>Security Profiles Operator</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>Managing seccomp, SELinux, and AppArmor profiles manually across nodes is operationally painful.
+The <a href="https://github.com/kubernetes-sigs/security-profiles-operator">Security Profiles Operator</a> (SPO) is a Kubernetes-sigs project that automates profile lifecycle management.</p>
+</div>
+<div class="paragraph">
+<p>SPO provides CRDs for each profile type:</p>
+</div>
+<div class="ulist">
+<ul>
+<li>
+<p><code>SeccompProfile</code>&#8201;&#8212;&#8201;declares a seccomp filter and distributes it to nodes.</p>
+</li>
+<li>
+<p><code>SELinuxProfile</code>&#8201;&#8212;&#8201;defines and installs SELinux policies.</p>
+</li>
+<li>
+<p><code>AppArmorProfile</code>&#8201;&#8212;&#8201;manages AppArmor profiles on nodes that support them.</p>
+</li>
+</ul>
+</div>
+<div class="paragraph">
+<p>Two additional features make SPO especially useful:</p>
+</div>
+<div class="ulist">
+<ul>
+<li>
+<p><strong>Profile recording</strong>&#8201;&#8212;&#8201;SPO can observe a running workload (via audit logs or eBPF) and generate a least-privilege profile automatically.</p>
+</li>
+<li>
+<p><strong>Profile binding</strong>&#8201;&#8212;&#8201;a <code>ProfileBinding</code> resource links a profile to a container image, so the profile is applied automatically whenever that image is deployed.</p>
+</li>
+</ul>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_openshift_securitycontextconstraints"><a class="anchor" href="#_openshift_securitycontextconstraints"></a>OpenShift SecurityContextConstraints</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>OpenShift extends the upstream Pod Security model with <strong>SecurityContextConstraints</strong> (SCCs)&#8201;&#8212;&#8201;cluster-scoped policies that define what security contexts a pod is allowed to use.</p>
+</div>
+<div class="paragraph">
+<p>SCCs are evaluated by an admission controller at pod creation time.
+The controller checks the pod&#8217;s service account against the available SCCs and rejects the pod if its requested security context violates the constraints.</p>
+</div>
+<div class="paragraph">
+<p>OpenShift ships with several default SCCs:</p>
+</div>
+<div class="ulist">
+<ul>
+<li>
+<p><code>restricted-v2</code>&#8201;&#8212;&#8201;the default for most workloads.
+Prevents running as root, drops all capabilities, and requires a seccomp profile.</p>
+</li>
+<li>
+<p><code>anyuid</code>&#8201;&#8212;&#8201;allows the container to run as any UID, useful for legacy images that require root.</p>
+</li>
+<li>
+<p><code>privileged</code>&#8201;&#8212;&#8201;unrestricted access, reserved for infrastructure components like CNI plugins and storage drivers.</p>
+</li>
+</ul>
+</div>
+<div class="admonitionblock warning">
+<table>
+<tr>
+<td class="icon">
+<i class="fa icon-warning" title="Warning"></i>
+</td>
+<td class="content">
+<div class="paragraph">
+<p>Granting the <code>privileged</code> SCC to a workload effectively disables all pod-level security controls.
+Use it only for infrastructure components that genuinely require host-level access, and always through a dedicated service account.</p>
+</div>
+</td>
+</tr>
+</table>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_references"><a class="anchor" href="#_references"></a>References</h2>
+<div class="sectionbody">
+<div class="ulist">
+<ul>
+<li>
+<p><a href="https://kubernetes.io/docs/tasks/configure-pod-container/security-context/">Configure a Security Context</a></p>
+</li>
+<li>
+<p><a href="https://github.com/kubernetes-sigs/security-profiles-operator">Security Profiles Operator</a></p>
+</li>
+</ul>
+</div>
+</div>
+</div>
+<nav class="pagination">
+  <span class="prev"><a href="authentication-and-authorization.html">Authentication and Authorization</a></span>
+  <span class="next"><a href="../41-all-about-kube-scheduler/41-all-about-kube-scheduler.html">Week 4.1&#8201;&#8212;&#8201;All About kube-scheduler</a></span>
+</nav>
+</article>
+  </div>
+</main>
+</div>
+<footer class="footer">
+  <img src="../../../_/img/rhl-logo-red.png" height="40px" alt="Red Hat"  href="https://redhat.com" >
+</footer><script id="site-script" src="../../../_/js/site.js" data-ui-root-path="../../../_"></script>
+<script async src="../../../_/js/vendor/highlight.js"></script>
+<script defer src="../../../_/js/vendor/tabs.js"></script>
+<script defer src="../../../_/js/vendor/reading-time.js"></script>
+  </body>
+</html>
