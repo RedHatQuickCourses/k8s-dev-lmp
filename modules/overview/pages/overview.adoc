@@ -14,49 +14,49 @@ This module orients you with how the API server, etcd, and controllers work toge
 
 xref:familiarizing-with-koobrnehteez:familiarizing-with-koobrnehteez.adoc[Go to Module]
 
-=== Kubernetes Resource Model
+=== 1.1 — Kubernetes Resource Model
 
 A walkthrough on kube-apiserver essentials -- the declarative intent of Kubernetes Resources and all the plugin layers (authentication, audit, impersonation, priority & fairness, authorization, admission, storage).
 
 xref:11-kubernetes-resource-model:11-kubernetes-resource-model.adoc[Go to Module]
 
-=== Controllers, Informers, and client-go
+=== 1.2 — Controllers, Informers, and client-go
 
 The basic building blocks behind operators -- client-go architecture, Informers, listers, workqueues, caches, and error handling.
 
 xref:12-controllers-informers-client-go:12-controllers-informers-client-go.adoc[Go to Module]
 
-=== Controllers with controller-runtime
+=== 2.1 — Controllers with controller-runtime
 
 Writing concrete Kube APIs with controller-runtime -- Reconcile loop, kubebuilder, Spec vs Status, Conditions, API validation, CRUD operations, Apply vs Patch vs Update.
 
 xref:21-controllers-contd:21-controllers-contd.adoc[Go to Module]
 
-=== Going Distributed
+=== 2.2 — Going Distributed: Locks, Leases, Ownership, Eventual Consistency
 
 Distributed systems challenges -- Idempotency, locks, leases, leader election, controller sharding (with OpenShift Ingress Controller case study).
 
 xref:22-going-distributed-locks-leases-ownership-eventual-consistency:22-going-distributed-locks-leases-ownership-eventual-consistency.adoc[Go to Module]
 
-=== Admissions and Beyond the kube-apiserver
+=== 3.1 — Taking More Control: Admissions and Beyond the kube-apiserver to Writing Your Own API Server
 
 From admission control webhooks into writing your own apiserver -- ValidatingWebhooks, MutatingWebhooks, policy engines, API discovery, aggregated APIs, custom API servers.
 
 xref:31-taking-more-control-admissions-and-beyond-the-kube-apiserver-to-writing-your-own-api-server:31-taking-more-control-admissions-and-beyond-the-kube-apiserver-to-writing-your-own-api-server.adoc[Go to Module]
 
-=== The Other Stuff
+=== 3.2 — The Other Stuff
 
 Networking (Ingress, Gateway API), Service Mesh, AuthN/AuthZ in OpenShift, Security, Cluster Hardening.
 
 xref:32-the-other-stuff:32-the-other-stuff.adoc[Go to Module]
 
-=== All About kube-scheduler
+=== 4.1 — All About kube-scheduler
 
 kube-scheduler deep dive -- scheduling, de-scheduling, resource requests and limits, Dynamic Resource Allocation.
 
 xref:41-all-about-kube-scheduler:41-all-about-kube-scheduler.adoc[Go to Module]
 
-=== Ubiquitous Topics
+=== 4.2 — Ubiquitous Topics
 
 Operator landscape and alternative control plane architectures -- HyperShift, kcp, MicroShift, k3s.
 
