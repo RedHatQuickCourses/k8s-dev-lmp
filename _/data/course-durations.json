@@ -1,11 +1,11 @@
 {
-  "totalSeconds": 8016,
-  "pageCount": 68,
+  "totalSeconds": 7553,
+  "pageCount": 64,
   "pages": [
     {
       "module": "ROOT",
       "page": "index.adoc",
-      "seconds": 75
+      "seconds": 72
     },
     {
       "module": "LABENV",
@@ -15,67 +15,57 @@
     {
       "module": "overview",
       "page": "overview.adoc",
-      "seconds": 112
-    },
-    {
-      "module": "overview",
-      "page": "overview.adoc",
-      "seconds": 112
+      "seconds": 72
     },
     {
       "module": "overview",
       "page": "kubernetes-architecture-overview-and-extensibility-mechanisms.adoc",
-      "seconds": 161
+      "seconds": 160
     },
     {
       "module": "overview",
       "page": "control-plane-authentication-authorization-and-validation.adoc",
-      "seconds": 158
+      "seconds": 157
     },
     {
       "module": "overview",
       "page": "platform-automation-through-custom-resources-and-operators.adoc",
-      "seconds": 127
+      "seconds": 125
     },
     {
       "module": "overview",
       "page": "distributed-system-principles-for-high-availability.adoc",
-      "seconds": 199
+      "seconds": 194
     },
     {
       "module": "overview",
       "page": "advanced-networking-traffic-management-and-control-plane-architectures.adoc",
-      "seconds": 136
+      "seconds": 134
     },
     {
       "module": "who-is-this-for-pre-requisites",
       "page": "who-is-this-for-pre-requisites.adoc",
-      "seconds": 88
-    },
-    {
-      "module": "who-is-this-for-pre-requisites",
-      "page": "who-is-this-for-pre-requisites.adoc",
-      "seconds": 88
+      "seconds": 68
     },
     {
       "module": "who-is-this-for-pre-requisites",
       "page": "target-audience-engineers-sys-admins-and-developers-with-container-experience.adoc",
-      "seconds": 95
+      "seconds": 92
     },
     {
       "module": "who-is-this-for-pre-requisites",
       "page": "recommended-prerequisites-basic-distributed-systems-knowledge.adoc",
-      "seconds": 117
+      "seconds": 116
     },
     {
       "module": "who-is-this-for-pre-requisites",
       "page": "ideal-baseline-ckad-certification-or-red-hat-do-180-and-do-280-tracks.adoc",
-      "seconds": 95
+      "seconds": 92
     },
     {
       "module": "familiarizing-with-koobrnehteez",
       "page": "familiarizing-with-koobrnehteez.adoc",
-      "seconds": 20
+      "seconds": 22
     },
     {
       "module": "familiarizing-with-koobrnehteez",
@@ -90,7 +80,7 @@
     {
       "module": "11-kubernetes-resource-model",
       "page": "11-kubernetes-resource-model.adoc",
-      "seconds": 42
+      "seconds": 44
     },
     {
       "module": "11-kubernetes-resource-model",
@@ -110,7 +100,7 @@
     {
       "module": "12-controllers-informers-client-go",
       "page": "12-controllers-informers-client-go.adoc",
-      "seconds": 35
+      "seconds": 38
     },
     {
       "module": "12-controllers-informers-client-go",
@@ -135,7 +125,7 @@
     {
       "module": "21-controllers-contd",
       "page": "21-controllers-contd.adoc",
-      "seconds": 35
+      "seconds": 37
     },
     {
       "module": "21-controllers-contd",
@@ -165,7 +155,7 @@
     {
       "module": "22-going-distributed-locks-leases-ownership-eventual-consistency",
       "page": "22-going-distributed-locks-leases-ownership-eventual-consistency.adoc",
-      "seconds": 32
+      "seconds": 35
     },
     {
       "module": "22-going-distributed-locks-leases-ownership-eventual-consistency",
@@ -190,7 +180,7 @@
     {
       "module": "31-taking-more-control-admissions-and-beyond-the-kube-apiserver-to-writing-your-own-api-server",
       "page": "31-taking-more-control-admissions-and-beyond-the-kube-apiserver-to-writing-your-own-api-server.adoc",
-      "seconds": 29
+      "seconds": 34
     },
     {
       "module": "31-taking-more-control-admissions-and-beyond-the-kube-apiserver-to-writing-your-own-api-server",
@@ -215,7 +205,7 @@
     {
       "module": "32-the-other-stuff",
       "page": "32-the-other-stuff.adoc",
-      "seconds": 34
+      "seconds": 35
     },
     {
       "module": "32-the-other-stuff",
@@ -240,7 +230,7 @@
     {
       "module": "41-all-about-kube-scheduler",
       "page": "41-all-about-kube-scheduler.adoc",
-      "seconds": 26
+      "seconds": 27
     },
     {
       "module": "41-all-about-kube-scheduler",
@@ -260,7 +250,7 @@
     {
       "module": "42-ubiquitous-topics",
       "page": "42-ubiquitous-topics.adoc",
-      "seconds": 23
+      "seconds": 24
     },
     {
       "module": "42-ubiquitous-topics",
@@ -275,7 +265,7 @@
     {
       "module": "exercises",
       "page": "exercises.adoc",
-      "seconds": 16
+      "seconds": 15
     },
     {
       "module": "exercises",
@@ -295,47 +285,37 @@
     {
       "module": "recommended-reading",
       "page": "recommended-reading.adoc",
-      "seconds": 92
-    },
-    {
-      "module": "recommended-reading",
-      "page": "recommended-reading.adoc",
-      "seconds": 92
+      "seconds": 63
     },
     {
       "module": "recommended-reading",
       "page": "programming-kubernetes-hausenblas-schimanski.adoc",
-      "seconds": 125
+      "seconds": 124
     },
     {
       "module": "recommended-reading",
       "page": "kubernetes-operators-dobies-wood.adoc",
-      "seconds": 151
+      "seconds": 150
     },
     {
       "module": "recommended-reading",
       "page": "cncf-operator-whitepaper.adoc",
-      "seconds": 142
+      "seconds": 141
     },
     {
       "module": "suggested-reading",
       "page": "suggested-reading.adoc",
-      "seconds": 55
-    },
-    {
-      "module": "suggested-reading",
-      "page": "suggested-reading.adoc",
-      "seconds": 55
+      "seconds": 37
     },
     {
       "module": "suggested-reading",
       "page": "kubernetes-security-and-observability-creane-gupta.adoc",
-      "seconds": 143
+      "seconds": 141
     },
     {
       "module": "suggested-reading",
       "page": "designing-distributed-systems-burns.adoc",
-      "seconds": 190
+      "seconds": 188
     },
     {
       "module": "appendix",
