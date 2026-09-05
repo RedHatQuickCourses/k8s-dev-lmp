@@ -1,6 +1,6 @@
-#  Ubiquitous Topics
+#  4.2 — Ubiquitous Topics
 
-= Ubiquitous Topics
+= 4.2 — Ubiquitous Topics
 
 This final module zooms out to the broader operator ecosystem and alternative Kubernetes form factors.
 We examine the operator capability model and framework landscape, then survey control plane architectures that diverge from the standard self-hosted model.

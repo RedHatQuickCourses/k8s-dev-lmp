@@ -1,7 +1,6 @@
-#  Going Distributed: Locks, Leases, Ownership, Eventual Consistency
+#  2.2 — Going Distributed: Locks, Leases, Ownership, Eventual Consistency
 
-= Going Distributed: Locks, Leases, Ownership, Eventual Consistency
-Going Distributed
+= 2.2 — Going Distributed: Locks, Leases, Ownership, Eventual Consistency
 
 When multiple controller replicas manage shared resources, you step squarely into the territory of distributed systems.
 Race conditions, stale caches, and split-brain scenarios are no longer theoretical -- they are daily operational realities.

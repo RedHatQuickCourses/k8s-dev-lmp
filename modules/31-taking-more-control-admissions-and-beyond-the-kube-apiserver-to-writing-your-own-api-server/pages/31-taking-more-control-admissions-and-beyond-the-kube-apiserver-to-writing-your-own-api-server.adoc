@@ -1,7 +1,6 @@
-#  Taking More Control: Admissions and Beyond the kube-apiserver to Writing Your Own API Server
+#  3.1 — Taking More Control: Admissions and Beyond the kube-apiserver to Writing Your Own API Server
 
-= Taking More Control: Admissions and Beyond the kube-apiserver to Writing Your Own API Server
-Overview
+= 3.1 — Taking More Control: Admissions and Beyond the kube-apiserver to Writing Your Own API Server
 
 This module takes us deeper into the kube-apiserver's extension points.
 We start with admission control webhooks for intercepting and modifying API requests before they reach storage.

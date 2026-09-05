@@ -1,6 +1,6 @@
-#  Controllers with controller-runtime
+#  2.1 — Controllers with controller-runtime
 
-= Controllers with controller-runtime
+= 2.1 — Controllers with controller-runtime
 
 This module moves from the raw client-go informer and workqueue machinery covered in the previous module to the higher-level abstractions that most production controllers use.
 We begin with the foundational terminology -- Groups, Versions, Kinds, and Resources -- that underpins every Kubernetes API interaction.
