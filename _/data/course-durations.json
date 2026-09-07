@@ -1,5 +1,5 @@
 {
-  "totalSeconds": 6797,
+  "totalSeconds": 6873,
   "pageCount": 59,
   "pages": [
     {
@@ -10,7 +10,7 @@
     {
       "module": "LABENV",
       "page": "index.adoc",
-      "seconds": 4
+      "seconds": 50
     },
     {
       "module": "overview",
@@ -240,22 +240,22 @@
     {
       "module": "exercises",
       "page": "exercises.adoc",
-      "seconds": 15
+      "seconds": 23
     },
     {
       "module": "exercises",
       "page": "1-build-a-controller-using-client-go-from-scratch.adoc",
-      "seconds": 76
+      "seconds": 82
     },
     {
       "module": "exercises",
       "page": "2-implement-optimistic-locking-and-leader-election-via-lease.adoc",
-      "seconds": 73
+      "seconds": 82
     },
     {
       "module": "exercises",
       "page": "3-develop-a-custom-validating-webhook-for-container-registry-enforcement.adoc",
-      "seconds": 74
+      "seconds": 81
     },
     {
       "module": "recommended-reading",

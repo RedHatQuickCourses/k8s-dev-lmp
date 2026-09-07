@@ -364,8 +364,72 @@
 </aside>
 <article class="doc">
 <h1 class="page">Lab Environment</h1>
+<h1 id="_lab_environment" class="sect0"><a class="anchor" href="#_lab_environment"></a>Lab Environment</h1>
 <div class="paragraph">
-<p>FIXME: Instructions for accessing the lab environment for this hands-on based training.</p>
+<p>For the hands-on exercises in this learning path you will need access to a running OpenShift cluster. You can request a self-service demo cluster from the Red Hat Demo Platform.</p>
+</div>
+<div class="sect1">
+<h2 id="_requesting_a_demo_cluster"><a class="anchor" href="#_requesting_a_demo_cluster"></a>Requesting a Demo Cluster</h2>
+<div class="sectionbody">
+<div class="olist arabic">
+<ol class="arabic">
+<li>
+<p>Open the catalog item: <a href="https://catalog.demo.redhat.com/catalog/babylon-catalog-prod?item=babylon-catalog-prod/published.ocp4-cluster.prod" target="_blank" rel="noopener">Red Hat OpenShift Container Platform Cluster (Multi-Cloud)</a></p>
+</li>
+<li>
+<p>Click <strong>Order</strong> to open the order form and complete the required fields:</p>
+<div class="openblock">
+<div class="content">
+<div class="ulist">
+<ul>
+<li>
+<p><strong>Activity</strong> — select the option that matches your context (e.g. <strong>Practice / Enablement</strong>).</p>
+</li>
+<li>
+<p><strong>Purpose</strong> — choose the appropriate purpose from the dropdown.</p>
+</li>
+<li>
+<p><strong>Salesforce IDs</strong> — provide an Opportunity, Campaign or Project ID if required by your activity, otherwise acknowledge that you will supply it within 48 hours.</p>
+</li>
+<li>
+<p><strong>Cloud Provider</strong> — <strong>AWS</strong> is preferred, but not mandatory; any provider is acceptable.</p>
+</li>
+<li>
+<p><strong>OpenShift Version</strong> — any version of OpenShift is fine.</p>
+</li>
+<li>
+<p><strong>cluster size</strong> — select a size suited to your needs.</p>
+</li>
+<li>
+<p><strong>Create users on cluster?</strong> — set as needed.</p>
+</li>
+</ul>
+</div>
+</div>
+</div>
+</li>
+<li>
+<p>Submit the order and wait for the cluster to be provisioned.</p>
+</li>
+</ol>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_accessing_your_cluster"><a class="anchor" href="#_accessing_your_cluster"></a>Accessing Your Cluster</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>Once the cluster is ready, the dashboard provides a <strong>KUBECONFIG</strong> for your cluster. Download it and link it into your local path so that <code>oc</code> / <code>kubectl</code> use it by default, for example:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-bash hljs" data-lang="bash">export KUBECONFIG=~/path/to/downloaded/kubeconfig</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>You are now ready to begin the hands-on exercises.</p>
+</div>
+</div>
 </div>
 <nav class="pagination">
   <span class="prev"><a href="../index.html">Home</a></span>
