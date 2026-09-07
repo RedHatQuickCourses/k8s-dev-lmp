@@ -2,11 +2,18 @@ site:
   title:  Kubernetes Developer Learning Path
   start_page: k8s-dev-lmp::index.adoc
 
+antora:
+  extensions:
+  - require: '@antora/lunr-extension'
+    index_latest_only: true
+  
 content:
   sources:
   - url: ./
 
 asciidoc:
+  extensions:
+  - '@asciidoctor/tabs'  
   attributes:
     page-pagination: true
 
