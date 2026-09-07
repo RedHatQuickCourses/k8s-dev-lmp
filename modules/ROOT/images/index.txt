@@ -1,0 +1,17 @@
+Welcome to the Kubernetes Developer Learning Path. This course is designed to provide a comprehensive overview of Kubernetes architecture and its powerful extensibility mechanisms.
+
+We will begin by examining how the Kubernetes API functions behind the scenes, exploring how cluster requests are authenticated, authorized, and validated by the control plane. The core of this course focuses on platform automation, where you will learn how to extend Kubernetes by defining custom resources and writing custom controllers or operators to automatically manage different workloads.
+
+To ensure these extensions remain robust, we will also cover essential distributed system principles necessary for building highly available components and safely handling concurrent updates. Finally, we will explore advanced networking and traffic management concepts, along with an overview of alternative control plane architectures like HyperShift and kcp.
+
+This course is structured into several key topics. We will start with a general course roadmap and a discussion of the target audience and prerequisites. You will gain a deeper understanding of what Kubernetes really is, followed by an exploration of the Kubernetes Resource Model, focusing on declarative intent and the essentials of the Kube API server.
+
+We will then dive into the building blocks behind operators, including controllers, informers, and the client-go library. You will learn how to write Kubernetes APIs and reconcile state using controller-runtime. After that, we move into distributed systems, covering topics such as locks, leases, ownership, and eventual consistency.
+
+As we progress, we will look at how to take more control through admissions and custom API servers, followed by discussions on networking, security, and cluster hardening. We will also dedicate time to the Kube-scheduler, including scheduling logic, resources, and dynamic resource allocation. The course concludes with an exploration of the operator landscape and alternative control plane architectures. You will also have access to hands-on labs to put these concepts into practice.
+
+Before you begin, please ensure you meet the necessary prerequisites. This course assumes you have experience running and managing container workloads within Kubernetes environments, a basic understanding of distributed systems—specifically concepts like concurrency, leasing, and synchronization—and a knowledge baseline equivalent to the Certified Kubernetes Application Developer certification, or completion of Red Hat’s DO-180 and DO-280 tracks. 
+
+For a full list of prerequisites and a self-assessment checklist, please consult the "Who is this for?" section of the documentation. 
+
+Finally, for those looking to expand their knowledge further, we have provided a list of recommended core texts as well as supplementary reading materials. We hope you enjoy this learning path and look forward to helping you master Kubernetes development.

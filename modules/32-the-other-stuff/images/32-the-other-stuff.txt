@@ -1,0 +1,9 @@
+In this module, we will explore several essential topics that complement the operator and controller focus of this course. We will cover networking, service mesh, authentication, authorization, and cluster security hardening.
+
+First, we will look at the Ingress and Gateway API. This covers how external traffic reaches your services, starting with the original Ingress resource and moving to its role-oriented successor, the Gateway API.
+
+Next, we move to service mesh fundamentals. You will learn the problems a service mesh solves, its underlying architecture, and how Istio specifically implements traffic management, security, and observability.
+
+We will also discuss authentication and authorization. We’ll explore how Kubernetes identifies users and determines their permissions, including the Node authorizer and emerging Relationship-Based Access Control approaches.
+
+Finally, we will examine security context and hardening. We will focus on how to lock down pods using SecurityContext fields, the Security Profiles Operator, and OpenShift SecurityContextConstraints.

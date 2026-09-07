@@ -1,0 +1,25 @@
+Welcome to this module on Declarative Configuration Layers.
+
+Declarative configuration management tools are designed to let you define a desired state for a system. The tool then automatically compares that desired state to the reality of the system, updating it as needed to ensure the two match. To better understand how these systems are structured—and specifically why Kubernetes makes the architectural choices it does—it is helpful to look at a three-layer model.
+
+Let’s examine these three distinct layers.
+
+First is the Resource Schema. This layer defines which types of resources the tool can manage and what properties they possess. For example, Puppet uses types like files or mounts, while Terraform utilizes types such as Amazon Web Services instances or Google Compute networks. Kubernetes features a very explicit resource schema, publishing its core resource types as protocol buffer definitions. Custom resource types can also provide an OpenAPIv3 validation schema to document and enforce their structure.
+
+Second is the Concrete Resource Syntax. While the schema tells us what types of resources exist, we need a way to express specific instances—a syntax we can type into an editor, check into version control, and provide to our tools. Systems like Puppet and Terraform often solve this by creating a custom language that handles both resource definition and abstraction, such as variables or loops. However, Kubernetes takes a different approach. The only concrete syntax the core tool accepts is raw JSON or YAML. The complex work of abstraction—like parameterization or iteration—is pushed entirely to external tools like Helm, Kustomize, or Jsonnet.
+
+Third is the Convergence Engine. This component takes your concrete resource catalog and updates the managed system to match that state. Because the configuration only specifies the desired end result, the engine must figure out the steps to get there. In Kubernetes, this is handled by controllers. Each controller watches a specific set of resource types, continuously running reconciliation loops to bring the observed state in line with the desired state.
+
+Understanding this strict layering is important for three main reasons:
+
+First, testability. Because you can generate your configuration separately from the convergence engine, you can write tests that validate your catalog without needing to touch a live cluster. This allows CI pipelines to compare generated manifests against a baseline to catch errors before they ever reach production.
+
+Second, confidence in refactoring. You can pursue refactors with great certainty. If a new version of your tooling produces the same resource catalog as the previous version, you can be confident that the change has had no functional impact on your cluster.
+
+Third, the separation of concerns. Kubernetes handles the resource schemas and the convergence controllers, but it leaves the choice of abstraction tool to you. Whether you prefer a templating engine, a general-purpose programming language, or plain YAML, you are free to choose the tool that best fits your specific needs.
+
+When comparing Kubernetes to other systems, the primary difference lies in how these layers are managed. Puppet and Chef often conflate resource definition with abstraction, which can lead to complex, ad-hoc language growth. Terraform provides its own built-in abstraction layer, which is tightly coupled to its resource schema. 
+
+Kubernetes, by contrast, achieves the purest separation of these layers. By refusing to embed abstraction into its core, it keeps the API surface simple and empowers developers to use familiar tools and styles to manage their configurations.
+
+For further exploration, you may want to consult the Kubernetes resource management design proposal or the additional architectural resources provided in the course documentation.

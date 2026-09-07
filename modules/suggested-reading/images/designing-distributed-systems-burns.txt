@@ -1,0 +1,28 @@
+When designing systems for Kubernetes, transitioning from a single-instance controller to a resilient, distributed operator requires a fundamental shift in how we perceive state. Drawing on the foundational patterns identified by Brendan Burns in *Designing Distributed Systems*, we can build robust operators using `client-go` and `controller-runtime`. The key is to move away from transactional thinking—where you expect a command to succeed immediately—and instead embrace the principle of eventual consistency.
+
+Let’s look at the core distributed principles for Kubernetes. When scaling controllers or ensuring high availability, we rely on four primary patterns. 
+
+First, the Sidecar pattern allows us to extend the functionality of a primary container without modifying its source code. In controller design, we see this in how Admission Webhooks intercept and modify resource requests before they reach the etcd database. 
+
+Second, the Ambassador pattern offloads communication logic, such as retries or mutual TLS, to a sidecar. This is the same logic used by Service Mesh architectures like Istio or Linkerd to handle traffic management outside of the application logic. 
+
+Third, the Work Queue pattern is essential for `client-go` informers. By decoupling the observation of state events from the actual processing of that state in the Reconcile loop, we ensure that spikes in API traffic do not crash the controller. 
+
+Finally, the Replicated Worker pattern serves as the foundation for controller sharding. When running multiple instances of a controller, this pattern ensures that instances do not conflict while managing the same resources.
+
+Now, let’s explore how to implement distributed state machines. This transition is defined by two critical factors: idempotency and state ownership. 
+
+Regarding idempotency and atomicity, it is important to remember that in a distributed system, you cannot assume a request will only arrive once. Your Reconcile function must be idempotent—meaning that performing the operation multiple times yields the same result as performing it once. Always verify the current cluster state before applying changes. If the resource is already in the desired state, your Reconcile loop should exit gracefully without making unnecessary API calls.
+
+Regarding state ownership, if you are running multiple replicas for high availability, you face a "Split Brain" risk, where two controllers attempt to modify the same resource simultaneously. To solve this, Kubernetes uses the Lease resource within the `coordination.k8s.io` API group to implement distributed locking. In this workflow, controllers compete to acquire a Lease object. The controller that holds the lock becomes the leader, while other instances remain in a standby mode. If the leader fails to renew the lease, a new leader is elected.
+
+If a single controller becomes a bottleneck—for example, when managing thousands of Ingress resources—you should implement sharding. By partitioning the work so that each replica is responsible for only a specific subset of resources, you increase throughput while maintaining the simplicity of individual controllers.
+
+When writing your own reconcile logic, keep the following workflow in mind. First, always fetch the latest state from the API server rather than relying on cached memory. Second, apply idempotent logic to check if work is actually needed before proceeding. Third, perform the necessary action, ensuring the call is atomic or repeatable. Finally, update the status using patch or update operations to implement optimistic locking, which prevents you from accidentally overwriting changes made by other controllers.
+
+To wrap up, keep these key takeaways in mind: 
+Always design for failure, assuming the network is unreliable and the API server might reject your requests. Use exponential backoff in your work queues. 
+Always respect the state, remembering that Kubernetes is the ultimate source of truth; your controller is simply a tool to drive the cluster toward a desired configuration. 
+And finally, leverage existing patterns. Do not reinvent locking mechanisms; instead, use the `client-go` leader election packages that utilize the Lease API to keep your implementation clean and idiomatic. 
+
+For further study, I highly recommend Brendan Burns’ *Designing Distributed Systems* as an essential resource for mastering the transition from standalone scripts to production-grade Kubernetes operators.

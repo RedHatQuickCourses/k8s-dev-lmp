@@ -1,0 +1,26 @@
+When working with the Kubernetes API, you will constantly encounter four core terms: Groups, Versions, Kinds, and Resources. Understanding these concepts, along with the common shorthand references GVK and GVR, is essential before you begin writing controllers.
+
+Let’s start with API Groups. An API Group is a logical collection of related functionality. Core resources reside in what is known as the empty group, often written as "core" or simply as an empty string. Other resources belong to specific, named groups such as "apps," "batch," or "networking.k8s.io." It is worth noting that group names follow DNS subdomain conventions, and the Kubernetes project reserves single-word names and the ".k8s.io" suffix for itself.
+
+Next, we have Versions. Each group exposes one or more versions, such as "v1" or "v1beta1." These versions indicate the stability and maturity of the API surface. While a Kind may change its structure between versions, every version must be able to round-trip all data stored by other versions. This ensures that upgrading or downgrading your cluster never results in lost information.
+
+Moving on to Kinds: A Kind is the type name of an API object. Kinds are always written in CamelCase and are singular—examples include "Deployment," "Pod," or "CronJob." The API server uses the "kind" and "apiVersion" fields in every JSON payload to determine which schema to apply to the data.
+
+Now, let's distinguish these from Resources. A Resource is the lowercase, plural form of the object, which appears in REST URLs, such as "deployments," "pods," or "cronjobs." In most cases, there is a one-to-one mapping between a Kind and a Resource. However, there are exceptions. For example, the "Scale" Kind is returned by multiple resources, such as "deployments/scale" or "replicasets/scale." This flexibility is what allows the Horizontal Pod Autoscaler to work across different resource types.
+
+This brings us to the difference between GVK and GVR. Group-Version-Kind, or GVK, identifies the underlying Go type, such as "apps/v1.Deployment." Group-Version-Resource, or GVR, identifies the specific REST endpoint, such as "apps/v1/deployments." 
+
+The system uses a "REST mapper" to translate between GVK and GVR. When you call "client.Get" in controller-runtime, the framework uses the GVK—which is looked up via the Scheme—to find the correct GVR and issue the appropriate HTTP request.
+
+Speaking of the Scheme, think of it as a registry that maps Go types to their GVKs for the purposes of serialization and deserialization. When you register a type, the Scheme records that a specific Go struct corresponds to a particular Kind within a specific group-version. This allows the framework to construct an object from JSON or determine the correct API path when you submit an update. In code, this is handled by importing the "runtime" package, creating a new scheme, and adding your types to that registry.
+
+A helpful tip to remember: GVK always uses CamelCase and the singular form, like "CronJob," while GVR uses lowercase and the plural form, like "cronjobs." Also, when using controller-runtime, the "client.Get" method resolves the GVK through the Scheme internally, so you will rarely need to work with GVR directly.
+
+To summarize these concepts:
+Groups are logical collections of related API types. 
+Versions represent the stability level and enable API evolution. 
+Kinds, or GVKs, identify the Go type and its schema. 
+Resources, or GVRs, identify the REST endpoint. 
+And the Scheme acts as the central map between Go types and their GVKs.
+
+For further reading, you can consult the Kubernetes API conventions documentation or the Kubebuilder project's guide on API terminology.
