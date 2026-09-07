@@ -1,0 +1,17 @@
+Let’s explore how Kubernetes handles external traffic through the Ingress and Gateway APIs.
+
+To begin, we’ll look at the original HTTP routing API, known as Ingress. Since Kubernetes version 1.19, the Ingress resource has been a stable way to expose HTTP and HTTPS routes from outside your cluster to internal Services. When you create an Ingress object, an Ingress controller—such as NGINX, HAProxy, or a cloud-native load balancer—monitors that object and configures the underlying data plane to handle the traffic.
+
+There are four key concepts you should understand when working with Ingress. First is the IngressClass, which selects which controller handles a specific Ingress; if you omit this, the cluster uses its default. Next are path types, which determine how traffic is matched: "Exact" is a literal match, "Prefix" matches by path prefix, and "ImplementationSpecific" lets the controller decide the logic. Third is TLS termination, where an Ingress uses a Kubernetes Secret containing a certificate and private key to handle encryption, offloading that work from your backend pods. Finally, there is the default backend, which acts as a catch-all for any request that doesn't match a defined rule.
+
+A minimal Ingress configuration specifies the ingressClassName, followed by the rules defining the path and the backend service. However, it is very important to note that the Ingress API has been frozen. The Kubernetes project now recommends the Gateway API for all new work and will not be making further changes to the Ingress specification.
+
+This brings us to the Gateway API, which is the role-oriented successor to Ingress. The Gateway API is a family of Custom Resource Definitions designed to provide dynamic infrastructure provisioning and advanced traffic routing. It is built on four core principles: it is role-oriented, portable, expressive, and extensible. It includes four stable resource types: GatewayClass, Gateway, HTTPRoute, and GRPCRoute.
+
+The major improvement here is the separation of concerns across organizational roles. The infrastructure provider manages the GatewayClass, which defines the controller implementation—think of this as being similar to a StorageClass for volumes. The cluster operator manages the Gateway itself, which provisions the load balancer instance and configures listeners, ports, and TLS settings. Finally, the application developer manages the HTTPRoute or GRPCRoute, defining the specific routing rules that attach to a Gateway. This structure allows platform teams to focus on managing load balancers while developers independently manage their own application routing.
+
+When setting up a Gateway and an HTTPRoute, keep in mind that by default, a Gateway only accepts routes from its own namespace. If you need cross-namespace routing, you must explicitly configure the "allowedRoutes" setting on the listener. 
+
+Because the Gateway API does not include an Ingress kind, migrating from Ingress is a one-time conversion process. You can find a detailed, step-by-step migration guide on the official Kubernetes Gateway API documentation website. For deeper insights into managing traffic in large-scale environments, you may also want to explore the documentation on controller sharding.
+
+For additional information, please consult the official Kubernetes documentation for both Ingress and the Gateway API.

@@ -1,0 +1,25 @@
+This appendix provides a quick-reference guide for the key technical terms and concepts covered in this course. You can also download the full course PDF by clicking the link provided in the resources section.
+
+Let’s review the glossary of core Kubernetes and controller development terms.
+
+First, the **API Server**, or **kube-apiserver**, is the central management component of the Kubernetes control plane. It exposes the Kubernetes API, handles validation, configures data for API objects, and serves as the front end for the cluster’s shared state.
+
+Next, a **Custom Resource Definition**, or **CRD**, is a mechanism that allows you to extend the Kubernetes API by defining new resource types without having to build a custom API server. This lets you manage custom objects using standard Kubernetes tooling.
+
+A **Controller** acts as a control loop that watches the state of a cluster through the API server, making changes to ensure the current state matches the desired state. This is the core automation mechanism in Kubernetes. To simplify this, we often use **controller-runtime**, a set of Go libraries that provide high-level abstractions—like the Reconcile loop—to help you build controllers and operators efficiently.
+
+For interacting with the API, we use **client-go**, the official Go client library. It provides the essential tools for working with Kubernetes, such as typed and dynamic clients, informers, listers, and workqueues. Within this library, the **Reflector** watches the API server and pushes changes into a **DeltaFIFO** queue, which is a queue implementation that stores object changes and feeds them to event handlers in the order they were received.
+
+You should also be familiar with **etcd**, the distributed key-value store that acts as the backing store for all Kubernetes cluster data, and **Finalizers**, which are keys on a resource that prevent it from being deleted until the responsible controller has finished its cleanup logic.
+
+When identifying objects, we use two primary tuples. **GVK**, or **GroupVersionKind**, identifies the type of an object, such as an app's deployment. **GVR**, or **GroupVersionResource**, identifies the API resource endpoint used for RESTful URL construction.
+
+To maintain efficiency, we use an **Informer**, which watches for changes and maintains an in-memory cache to reduce load on the API server. Related to this is the **Lister**, which reads objects directly from that local cache for fast, low-latency access. You can manage these efficiently using a **SharedInformerFactory**, which allows multiple controllers to share the same informers.
+
+For development quality, the **KAL**, or **kube-api-linter**, checks your Go struct definitions against Kubernetes API guidelines to ensure best practices.
+
+Regarding coordination and concurrency, a **Lease** is a lightweight resource used for distributed tasks like leader election—where multiple replicas of a controller elect one active leader. To handle data consistency, the API server uses **Optimistic Concurrency Control**, or **OCC**, which detects conflicting writes by checking a resource version. If a client attempts an update with a stale version, the server rejects it, forcing the client to re-read and try again. Alternatively, **Server-Side Apply** tracks field ownership per manager, allowing for safer concurrent updates and reducing merge conflicts.
+
+Finally, an **Operator** is a design pattern for managing applications using custom resources and controllers. The core logic of an operator happens in a **Reconcile Loop**, where the controller compares the current state to the desired state. This loop relies on a **Workqueue** to process events in a rate-limited, de-duplicated manner. 
+
+Within the API machinery, the **Scheme** acts as a registry that maps Go types to their corresponding GVKs, which is critical for serialization. Every resource is divided into a **Spec**, where users or controllers declare the desired state, and a **Status**, where controllers report the observed state of the system.

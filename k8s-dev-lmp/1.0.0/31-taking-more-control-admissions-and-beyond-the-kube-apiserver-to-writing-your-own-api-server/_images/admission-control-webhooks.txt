@@ -1,0 +1,27 @@
+Admission control is a critical component of the Kubernetes request pipeline. It runs after a request has been authenticated and authorized, but before the object is actually persisted to storage. Think of it as the final line of defense for enforcing policies on write operations, such as creating, updating, or deleting objects. It is important to note that read operations—like get, watch, and list—bypass admission control entirely.
+
+The admission process is divided into two distinct phases. First is the Mutating phase, where controllers can modify the incoming object, for example by injecting default values. Second is the Validating phase, where controllers can accept or reject the request, but they are not permitted to modify the object. If any controller in either phase rejects a request, the entire process fails immediately and an error is returned to the client. If you would like a refresher on how this fits into the broader request lifecycle, please consult the API Request Lifecycle documentation.
+
+Kubernetes includes several built-in admission controllers compiled directly into the API server binary. Some of the most important ones include:
+
+First, NamespaceLifecycle, which prevents the creation of objects in namespaces that are terminating or do not exist, and blocks the deletion of system namespaces like default, kube-system, or kube-public.
+
+Next is LimitRanger, which enforces constraints defined in LimitRange objects and can apply default resource requests to pods.
+
+The ServiceAccount controller automates setup for pods, including injecting tokens and managing image pull secret references.
+
+The MutatingAdmissionWebhook and ValidatingAdmissionWebhook controllers call external webhooks. Mutating webhooks run in serial and may modify the object, while validating webhooks run in parallel and can reject the request.
+
+Finally, the ResourceQuota controller enforces aggregate resource consumption limits for a given namespace.
+
+When you are ready to extend this functionality, you can write your own custom webhook. A webhook is essentially an HTTPS server that accepts an AdmissionReview request and returns an AdmissionReview response. The API server sends a JSON payload describing the operation, and your webhook replies with an allowed true or false decision.
+
+You register these webhooks using either a ValidatingWebhookConfiguration or a MutatingWebhookConfiguration resource. When configuring these, there are three key fields to keep in mind. The rules field defines which API groups, versions, resources, and operations trigger your webhook. The clientConfig specifies how to reach your service, either via an in-cluster service reference or an external URL, and includes the CA bundle for TLS verification. The failurePolicy is also critical; it controls behavior when the webhook is unreachable. A policy of Fail will reject the request, while Ignore will allow it to proceed.
+
+The example provided in the course materials demonstrates a ValidatingWebhookConfiguration designed to intercept pod creation. This configuration specifies the API group and version, the operation, and the resource type, along with the necessary service details.
+
+For developers, the OpenShift generic-admission-server library is a great tool, as it simplifies webhook development by handling the underlying infrastructure for TLS, authentication, and authorization.
+
+Before you begin, keep these important considerations in mind regarding webhook behavior. First, there are implications to webhook chaining; mutating webhooks may run multiple times if an earlier webhook modifies the object, causing previous ones to trigger again. Furthermore, the order between multiple webhooks of the same type is not guaranteed. A final, crucial tip for production environments is to always set your failure policy to Fail. This prevents you from silently skipping validation if a webhook becomes unreachable.
+
+When you are ready to practice, please proceed to the exercise on developing a custom validating webhook for container registry enforcement. For further reading, you can also consult the official Kubernetes documentation on Admission Controllers or the generic-admission-server repository on GitHub.
