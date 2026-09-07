@@ -1,5 +1,3 @@
-#  3.2 — The Other Stuff
-
 = 3.2 — The Other Stuff
 
 This module covers the other important topics that complement the operator and controller focus of the course -- networking (Ingress and Gateway API), service mesh, authentication and authorization, and cluster security hardening.

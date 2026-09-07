@@ -1,5 +1,3 @@
-#  Recommended prerequisites: Basic distributed systems knowledge
-
 = Prerequisites: Preparing for the Kubernetes Developer Learning Path
 
 To succeed in this advanced Kubernetes development track, it is essential to have a solid foundation. While this course focuses on the internal mechanics of Kubernetes extensibility—such as custom controllers, admission webhooks, and distributed state management—these concepts rely heavily on the principles of distributed systems.

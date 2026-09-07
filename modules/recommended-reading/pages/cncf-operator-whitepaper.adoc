@@ -1,5 +1,3 @@
-#  CNCF Operator Whitepaper
-
 = CNCF Operator Whitepaper
 
 The CNCF Operator Whitepaper serves as the foundational architectural guide for developers looking to extend Kubernetes through automation. As you transition from managing individual resources to building autonomous systems, understanding the principles defined in this document is essential for creating resilient, production-grade Operators.

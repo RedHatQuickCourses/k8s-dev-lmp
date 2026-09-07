@@ -1,5 +1,3 @@
-#  Kubernetes Operators (Dobies, Wood)
-
 = Kubernetes Operators: Automating the Orchestration Platform
 
 Understanding the operational paradigm of Kubernetes requires moving beyond simple deployments toward the concept of **Operators**. As defined by Jason Dobies and Joshua Wood in *Kubernetes Operators: Automating the Container Orchestration Platform*, an Operator is essentially a software extension to Kubernetes that makes use of custom resources to manage applications and their components.

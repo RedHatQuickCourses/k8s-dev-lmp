@@ -1,5 +1,3 @@
-#  4.2 — Ubiquitous Topics
-
 = 4.2 — Ubiquitous Topics
 
 This final module zooms out to the broader operator ecosystem and alternative Kubernetes form factors.

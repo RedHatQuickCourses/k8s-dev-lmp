@@ -1,5 +1,3 @@
-#  Kubernetes Security and Observability (Creane, Gupta)
-
 = Kubernetes Security and Observability
 
 [abstract]

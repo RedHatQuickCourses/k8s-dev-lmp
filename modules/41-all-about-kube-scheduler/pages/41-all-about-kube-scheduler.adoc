@@ -1,5 +1,3 @@
-#  4.1 — All About kube-scheduler
-
 = 4.1 — All About kube-scheduler
 
 The kube-scheduler is at the heart of workload placement.

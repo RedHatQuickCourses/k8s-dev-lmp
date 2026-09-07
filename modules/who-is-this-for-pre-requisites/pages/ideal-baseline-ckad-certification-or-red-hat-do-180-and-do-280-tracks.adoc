@@ -1,5 +1,3 @@
-#  Ideal baseline: CKAD certification, or Red Hat DO-180 and DO-280 tracks
-
 = Preparing for the Kubernetes Developer Learning Path
 
 To succeed in this curriculum, you must possess a solid foundation in container orchestration. This learning path is designed for engineers, system administrators, and developers who are ready to transition from *using* Kubernetes to *extending* it.

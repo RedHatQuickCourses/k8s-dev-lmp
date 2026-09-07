@@ -1,5 +1,3 @@
-#  Target audience: Engineers, sys admins, and developers with container experience
-
 = Target Audience and Prerequisites
 
 This learning path is designed for technical professionals who have moved beyond basic container usage and are ready to master the internal mechanics, extensibility, and architectural patterns of Kubernetes.

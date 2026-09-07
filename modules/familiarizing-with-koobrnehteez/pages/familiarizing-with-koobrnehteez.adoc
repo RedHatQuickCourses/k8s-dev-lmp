@@ -1,5 +1,3 @@
-#  Familiarizing with Kubernetes
-
 = Familiarizing with Kubernetes
 
 Welcome to the orientation module of the Kubernetes Developer Learning Path.
