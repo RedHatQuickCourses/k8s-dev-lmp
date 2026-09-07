@@ -1,3 +1,32 @@
+#  Lab Environment
+
 = Lab Environment
 
-FIXME: Instructions for accessing the lab environment for this hands-on based training.
+For the hands-on exercises in this learning path you will need access to a running OpenShift cluster. You can request a self-service demo cluster from the Red Hat Demo Platform.
+
+== Requesting a Demo Cluster
+
+. Open the catalog item: https://catalog.demo.redhat.com/catalog/babylon-catalog-prod?item=babylon-catalog-prod/published.ocp4-cluster.prod[Red Hat OpenShift Container Platform Cluster (Multi-Cloud),window=_blank]
+. Click **Order** to open the order form and complete the required fields:
++
+--
+- **Activity** — select the option that matches your context (e.g. *Practice / Enablement*).
+- **Purpose** — choose the appropriate purpose from the dropdown.
+- **Salesforce IDs** — provide an Opportunity, Campaign or Project ID if required by your activity, otherwise acknowledge that you will supply it within 48 hours.
+- **Cloud Provider** — *AWS* is preferred, but not mandatory; any provider is acceptable.
+- **OpenShift Version** — any version of OpenShift is fine.
+- **cluster size** — select a size suited to your needs.
+- **Create users on cluster?** — set as needed.
+--
+. Submit the order and wait for the cluster to be provisioned.
+
+== Accessing Your Cluster
+
+Once the cluster is ready, the dashboard provides a **KUBECONFIG** for your cluster. Download it and link it into your local path so that `oc` / `kubectl` use it by default, for example:
+
+[source,bash]
+----
+export KUBECONFIG=~/path/to/downloaded/kubeconfig
+----
+
+You are now ready to begin the hands-on exercises.

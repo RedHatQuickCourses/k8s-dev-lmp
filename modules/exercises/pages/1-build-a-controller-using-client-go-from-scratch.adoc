@@ -6,8 +6,8 @@ By the end you will have a working program that watches for Pod events, processe
 
 == Prerequisites
 
-* Go 1.22+ installed
-* Access to a Kubernetes cluster (Kind, Minikube, or OpenShift Local)
+* A running Golang development environment (Go 1.22+) or a Go-capable IDE (e.g. VS Code with the Go extension, or GoLand)
+* Access to a running OpenShift cluster -- see xref:LABENV:index.adoc[Lab Environment] to request one
 * `kubeconfig` configured to point to your cluster
 
 == Part 1: Project Setup

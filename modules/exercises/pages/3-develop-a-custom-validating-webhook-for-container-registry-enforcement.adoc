@@ -6,9 +6,9 @@ This applies the concepts from xref:31-taking-more-control-admissions-and-beyond
 
 == Prerequisites
 
-* A running Kubernetes cluster (Kind or Minikube)
+* A running Python 3 environment (Python 3.10+) or a Python-capable IDE (e.g. VS Code with the Python extension, or PyCharm)
+* Access to a running OpenShift cluster -- see xref:LABENV:index.adoc[Lab Environment] to request one
 * cert-manager installed (for webhook TLS certificates)
-* Go 1.22+ installed
 
 == Step 1: Implement the Webhook Handler
 

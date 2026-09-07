@@ -2,7 +2,10 @@
 :navtitle: Exercises
 
 These hands-on labs reinforce the concepts covered in the modules.
-Each exercise builds a small but complete Go program that you can run against a local Kubernetes cluster.
+Each exercise builds a small but complete program that you can run against a Kubernetes cluster.
+
+All exercises require access to a running OpenShift cluster.
+If you do not already have one, follow xref:LABENV:index.adoc[Lab Environment] to request a demo cluster and configure your `KUBECONFIG`.
 
 * xref:1-build-a-controller-using-client-go-from-scratch.adoc[] -- Wire up the client-go pipeline from scratch
 * xref:2-implement-optimistic-locking-and-leader-election-via-lease.adoc[] -- Add leader election to your controller

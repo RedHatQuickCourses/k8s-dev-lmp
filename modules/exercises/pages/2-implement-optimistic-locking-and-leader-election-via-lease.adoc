@@ -6,6 +6,8 @@ This builds on the concepts from xref:22-going-distributed-locks-leases-ownershi
 
 == Prerequisites
 
+* A running Golang development environment (Go 1.22+) or a Go-capable IDE (e.g. VS Code with the Go extension, or GoLand)
+* Access to a running OpenShift cluster -- see xref:LABENV:index.adoc[Lab Environment] to request one
 * The working controller from xref:1-build-a-controller-using-client-go-from-scratch.adoc[Exercise 1]
 * `k8s.io/client-go/tools/leaderelection` and `k8s.io/client-go/tools/leaderelection/resourcelock` imported
 
