@@ -1,4 +1,6 @@
 = Alternative Control Planes and Form Factors
+:page-audio-src: alternative-control-planes-and-form-factors.wav
+:page-transcript-src: alternative-control-planes-and-form-factors.txt
 :navtitle: Alternative Control Planes and Form Factors
 
 In a standard Kubernetes cluster the control plane -- `kube-apiserver`, `etcd`, `kube-controller-manager`, and `kube-scheduler` -- runs alongside the workload nodes, either on dedicated machines or as static pods on control-plane nodes.

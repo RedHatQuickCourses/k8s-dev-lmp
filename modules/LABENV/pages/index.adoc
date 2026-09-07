@@ -1,4 +1,6 @@
 = Lab Environment
+:page-audio-src: index.wav
+:page-transcript-src: index.txt
 
 For the hands-on exercises in this learning path you will need access to a running OpenShift cluster. You can request a self-service demo cluster from the Red Hat Demo Platform.
 

@@ -1,4 +1,6 @@
 = Resource Management
+:page-audio-src: resource-management.wav
+:page-transcript-src: resource-management.txt
 :navtitle: Resource Management
 
 == Requests vs. limits

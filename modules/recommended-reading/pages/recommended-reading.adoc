@@ -1,4 +1,6 @@
 = Recommended Reading
+:page-audio-src: recommended-reading.wav
+:page-transcript-src: recommended-reading.txt
 :navtitle: Recommended Reading
 
 The following resources are strongly recommended as companions to this course.

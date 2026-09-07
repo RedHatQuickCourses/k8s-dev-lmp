@@ -1,4 +1,6 @@
 = Exercise 1: Build a Controller Using client-go
+:page-audio-src: 1-build-a-controller-using-client-go-from-scratch.wav
+:page-transcript-src: 1-build-a-controller-using-client-go-from-scratch.txt
 :navtitle: Exercise 1: Build a Controller
 
 In this exercise you will build a Kubernetes controller from scratch using client-go.

@@ -1,4 +1,6 @@
 = What Kubernetes Really Is
+:page-audio-src: what-kubernetes-really-is.wav
+:page-transcript-src: what-kubernetes-really-is.txt
 :navtitle: What Kubernetes Really Is
 
 At its core, Kubernetes is an API-centric, declarative configuration management and container orchestration system.

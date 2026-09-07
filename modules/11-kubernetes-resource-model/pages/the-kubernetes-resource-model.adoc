@@ -1,4 +1,6 @@
 = The Kubernetes Resource Model
+:page-audio-src: the-kubernetes-resource-model.wav
+:page-transcript-src: the-kubernetes-resource-model.txt
 :navtitle: The Kubernetes Resource Model
 
 == Kubernetes is API-Centric

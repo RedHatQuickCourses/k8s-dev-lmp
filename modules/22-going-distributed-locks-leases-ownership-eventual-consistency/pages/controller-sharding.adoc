@@ -1,4 +1,6 @@
 = Controller Sharding
+:page-audio-src: controller-sharding.wav
+:page-transcript-src: controller-sharding.txt
 :navtitle: Controller Sharding
 
 Leader election provides high availability -- if the active replica fails, a standby takes over.

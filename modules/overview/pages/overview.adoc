@@ -1,4 +1,6 @@
 = Course Overview
+:page-audio-src: overview.wav
+:page-transcript-src: overview.txt
 :navtitle: Overview
 
 This course provides a comprehensive overview of the Kubernetes architecture and its powerful extensibility mechanisms.

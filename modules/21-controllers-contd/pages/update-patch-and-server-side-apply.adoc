@@ -1,4 +1,6 @@
 = Update, Patch, and Server-Side Apply
+:page-audio-src: update-patch-and-server-side-apply.wav
+:page-transcript-src: update-patch-and-server-side-apply.txt
 :navtitle: Update, Patch, and Server-Side Apply
 
 Kubernetes provides several mechanisms for modifying API objects.

@@ -1,4 +1,6 @@
 = Leader Election in Kubernetes
+:page-audio-src: leader-election-in-kubernetes.wav
+:page-transcript-src: leader-election-in-kubernetes.txt
 :navtitle: Leader Election in Kubernetes
 
 Leader election allows multiple controller replicas to coordinate so that only one replica -- the leader -- actively reconciles resources at any given time.

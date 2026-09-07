@@ -1,4 +1,6 @@
 = GVK, GVR, and API Terminology
+:page-audio-src: gvk-gvr-and-api-terminology.wav
+:page-transcript-src: gvk-gvr-and-api-terminology.txt
 :navtitle: GVK, GVR, and API Terminology
 
 When working with the Kubernetes API, four terms appear everywhere: *Groups*, *Versions*, *Kinds*, and *Resources*.

@@ -1,4 +1,6 @@
 = Kubernetes Developer Learning Path
+:page-audio-src: index.wav
+:page-transcript-src: index.txt
 :navtitle: Home
 
 == Introduction

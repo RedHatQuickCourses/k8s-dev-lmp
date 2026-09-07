@@ -1,4 +1,6 @@
 = Preparing for the Kubernetes Developer Learning Path
+:page-audio-src: ideal-baseline-ckad-certification-or-red-hat-do-180-and-do-280-tracks.wav
+:page-transcript-src: ideal-baseline-ckad-certification-or-red-hat-do-180-and-do-280-tracks.txt
 
 To succeed in this curriculum, you must possess a solid foundation in container orchestration. This learning path is designed for engineers, system administrators, and developers who are ready to transition from *using* Kubernetes to *extending* it.
 

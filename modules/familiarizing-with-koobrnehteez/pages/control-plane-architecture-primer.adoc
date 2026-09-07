@@ -1,4 +1,6 @@
 = Control Plane Architecture Primer
+:page-audio-src: control-plane-architecture-primer.wav
+:page-transcript-src: control-plane-architecture-primer.txt
 :navtitle: Control Plane Architecture Primer
 
 The Kubernetes control plane is the set of components responsible for maintaining the desired state of your cluster.

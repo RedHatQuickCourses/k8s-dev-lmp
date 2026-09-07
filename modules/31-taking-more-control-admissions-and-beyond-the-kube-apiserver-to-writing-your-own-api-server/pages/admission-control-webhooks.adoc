@@ -1,4 +1,6 @@
 = Admission Control Webhooks
+:page-audio-src: admission-control-webhooks.wav
+:page-transcript-src: admission-control-webhooks.txt
 :navtitle: Admission Control Webhooks
 
 == Admission Control in the Request Pipeline

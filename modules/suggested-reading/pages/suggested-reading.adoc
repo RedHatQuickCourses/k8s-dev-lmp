@@ -1,4 +1,6 @@
 = Suggested Reading
+:page-audio-src: suggested-reading.wav
+:page-transcript-src: suggested-reading.txt
 :navtitle: Suggested Reading
 
 The following resources provide additional depth on topics covered in this course.

@@ -1,4 +1,6 @@
 = Recommended Reading: Programming Kubernetes
+:page-audio-src: programming-kubernetes-hausenblas-schimanski.wav
+:page-transcript-src: programming-kubernetes-hausenblas-schimanski.txt
 
 In the journey toward becoming a Kubernetes developer, understanding the "how" and "why" of the control plane is essential. Michael Hausenblas and Stefan Schimanski’s *Programming Kubernetes: Developing Cloud-Native Applications* serves as the definitive foundational text for mastering the Kubernetes API and extending the platform.
 

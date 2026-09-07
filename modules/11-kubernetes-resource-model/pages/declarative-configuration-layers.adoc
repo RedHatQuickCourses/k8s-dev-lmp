@@ -1,4 +1,6 @@
 = Declarative Configuration Layers
+:page-audio-src: declarative-configuration-layers.wav
+:page-transcript-src: declarative-configuration-layers.txt
 :navtitle: Declarative Configuration Layers
 
 Declarative configuration management tools let you declare a desired state for some system and then automatically compare that desired state to reality, updating the managed system to match.

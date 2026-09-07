@@ -1,4 +1,6 @@
 = Policy Engines and Gatekeeper
+:page-audio-src: policy-engines-and-gatekeeper.wav
+:page-transcript-src: policy-engines-and-gatekeeper.txt
 :navtitle: Policy Engines and Gatekeeper
 
 == Webhooks vs Policy Engines

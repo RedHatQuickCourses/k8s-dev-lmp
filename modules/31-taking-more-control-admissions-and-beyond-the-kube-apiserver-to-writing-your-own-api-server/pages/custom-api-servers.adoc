@@ -1,4 +1,6 @@
 = Custom API Servers
+:page-audio-src: custom-api-servers.wav
+:page-transcript-src: custom-api-servers.txt
 :navtitle: Custom API Servers
 
 == When CRDs Are Not Enough

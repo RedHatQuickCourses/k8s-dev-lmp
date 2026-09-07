@@ -1,4 +1,6 @@
 = API Request Lifecycle
+:page-audio-src: api-request-lifecycle.wav
+:page-transcript-src: api-request-lifecycle.txt
 :navtitle: API Request Lifecycle
 
 Every interaction with a Kubernetes cluster -- whether from `kubectl`, an internal controller, or an external operator -- passes through the kube-apiserver's request pipeline.

@@ -1,4 +1,6 @@
 = Spec, Status, and Conditions
+:page-audio-src: spec-status-and-conditions.wav
+:page-transcript-src: spec-status-and-conditions.txt
 :navtitle: Spec, Status, and Conditions
 
 == Spec vs Status Convention

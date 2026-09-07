@@ -1,4 +1,6 @@
 = Familiarizing with Kubernetes
+:page-audio-src: familiarizing-with-koobrnehteez.wav
+:page-transcript-src: familiarizing-with-koobrnehteez.txt
 
 Welcome to the orientation module of the Kubernetes Developer Learning Path.
 In this module we define what Kubernetes really is at its core -- an API-centric, declarative configuration management and container orchestration system.

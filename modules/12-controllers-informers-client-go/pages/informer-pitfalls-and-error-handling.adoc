@@ -1,4 +1,6 @@
 = Informer Pitfalls and Error Handling
+:page-audio-src: informer-pitfalls-and-error-handling.wav
+:page-transcript-src: informer-pitfalls-and-error-handling.txt
 :navtitle: Informer Pitfalls and Error Handling
 
 Informers are elegant in small clusters but introduce subtle failure modes at scale.

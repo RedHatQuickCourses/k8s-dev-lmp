@@ -1,4 +1,6 @@
 = Exercise 2: Leader Election via Lease
+:page-audio-src: 2-implement-optimistic-locking-and-leader-election-via-lease.wav
+:page-transcript-src: 2-implement-optimistic-locking-and-leader-election-via-lease.txt
 :navtitle: Exercise 2: Leader Election
 
 In this exercise you will add leader election to your controller so that only one replica is active at a time.

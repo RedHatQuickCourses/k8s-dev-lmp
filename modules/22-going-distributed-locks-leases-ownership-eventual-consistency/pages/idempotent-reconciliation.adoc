@@ -1,4 +1,6 @@
 = Idempotent Reconciliation
+:page-audio-src: idempotent-reconciliation.wav
+:page-transcript-src: idempotent-reconciliation.txt
 :navtitle: Idempotent Reconciliation
 
 A controller that cannot be safely re-run on the same input is a controller waiting to break.

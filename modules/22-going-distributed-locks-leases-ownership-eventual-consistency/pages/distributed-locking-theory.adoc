@@ -1,4 +1,6 @@
 = Distributed Locking Theory
+:page-audio-src: distributed-locking-theory.wav
+:page-transcript-src: distributed-locking-theory.txt
 :navtitle: Distributed Locking Theory
 
 Distributed locks appear simple but conceal subtle failure modes.

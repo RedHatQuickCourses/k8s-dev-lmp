@@ -1,4 +1,6 @@
 = The Operator Landscape
+:page-audio-src: operator-landscape.wav
+:page-transcript-src: operator-landscape.txt
 :navtitle: The Operator Landscape
 
 The operator concept has been formalised through years of building controllers for stateful workloads.

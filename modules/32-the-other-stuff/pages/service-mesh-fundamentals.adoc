@@ -1,4 +1,6 @@
 = Service Mesh Fundamentals
+:page-audio-src: service-mesh-fundamentals.wav
+:page-transcript-src: service-mesh-fundamentals.txt
 :navtitle: Service Mesh Fundamentals
 
 == What a service mesh solves

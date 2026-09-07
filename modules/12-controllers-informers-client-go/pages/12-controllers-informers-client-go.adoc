@@ -1,4 +1,6 @@
 = 1.2 — Controllers, Informers, and client-go
+:page-audio-src: 12-controllers-informers-client-go.wav
+:page-transcript-src: 12-controllers-informers-client-go.txt
 
 This module covers the fundamental building blocks that power every Kubernetes operator and controller.
 We begin with the architecture of *client-go*, the official Go client library, examining its core components -- Reflector, DeltaFIFO, Indexer, and SharedInformerFactory -- and how they form a pipeline from the API server to your controller logic.

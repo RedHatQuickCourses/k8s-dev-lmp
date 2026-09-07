@@ -1,4 +1,6 @@
 = Authentication and Authorization
+:page-audio-src: authentication-and-authorization.wav
+:page-transcript-src: authentication-and-authorization.txt
 :navtitle: Authentication and Authorization
 
 Every request to the Kubernetes API server passes through authentication, then authorization, before it reaches admission control and storage.

@@ -1,4 +1,6 @@
 = Sample Controller Walkthrough
+:page-audio-src: sample-controller-walkthrough.wav
+:page-transcript-src: sample-controller-walkthrough.txt
 :navtitle: Sample Controller Walkthrough
 
 The https://github.com/kubernetes/sample-controller[sample-controller] is the official Kubernetes example operator.

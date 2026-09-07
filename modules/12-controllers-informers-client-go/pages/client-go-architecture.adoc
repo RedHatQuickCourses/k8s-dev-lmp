@@ -1,4 +1,6 @@
 = client-go Architecture
+:page-audio-src: client-go-architecture.wav
+:page-transcript-src: client-go-architecture.txt
 :navtitle: client-go Architecture
 
 == What is client-go?

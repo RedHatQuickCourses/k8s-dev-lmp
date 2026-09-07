@@ -1,4 +1,6 @@
 = Informers, Listers, and Workqueues
+:page-audio-src: informers-listers-workqueues.wav
+:page-transcript-src: informers-listers-workqueues.txt
 :navtitle: Informers, Listers, and Workqueues
 
 Your controller needs three things: *eyes* to watch for changes, *memory* to recall current state, and a *task list* to schedule work.

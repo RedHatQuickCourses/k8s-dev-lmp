@@ -1,4 +1,6 @@
 = Who Is This For? Prerequisites
+:page-audio-src: who-is-this-for-pre-requisites.wav
+:page-transcript-src: who-is-this-for-pre-requisites.txt
 :navtitle: Who Is This For? Prerequisites
 
 == Target Audience

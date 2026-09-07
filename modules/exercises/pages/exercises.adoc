@@ -1,4 +1,6 @@
 = Exercises
+:page-audio-src: exercises.wav
+:page-transcript-src: exercises.txt
 :navtitle: Exercises
 
 These hands-on labs reinforce the concepts covered in the modules.

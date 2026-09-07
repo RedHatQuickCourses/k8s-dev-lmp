@@ -1,4 +1,6 @@
 = Designing Distributed Systems: Foundations for Kubernetes Controllers
+:page-audio-src: designing-distributed-systems-burns.wav
+:page-transcript-src: designing-distributed-systems-burns.txt
 
 In the context of Kubernetes development, transitioning from a single-instance controller to a resilient, distributed operator requires a fundamental shift in how we perceive state. Brendan Burns’ *Designing Distributed Systems* provides the theoretical bedrock for the patterns we implement in `client-go` and `controller-runtime`.
 

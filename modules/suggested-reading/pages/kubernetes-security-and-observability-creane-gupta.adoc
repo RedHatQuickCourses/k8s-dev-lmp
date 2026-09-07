@@ -1,4 +1,6 @@
 = Kubernetes Security and Observability
+:page-audio-src: kubernetes-security-and-observability-creane-gupta.wav
+:page-transcript-src: kubernetes-security-and-observability-creane-gupta.txt
 
 [abstract]
 As Kubernetes clusters move from experimental projects to production-grade infrastructure, the complexity of securing and monitoring the environment grows exponentially. This module explores the core concepts of Kubernetes security and observability, drawing from the architectural insights provided by Brendan Creane and Amit Gupta in *Kubernetes Security and Observability*.

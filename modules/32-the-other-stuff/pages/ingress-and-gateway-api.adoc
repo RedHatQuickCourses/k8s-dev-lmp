@@ -1,4 +1,6 @@
 = Ingress and Gateway API
+:page-audio-src: ingress-and-gateway-api.wav
+:page-transcript-src: ingress-and-gateway-api.txt
 :navtitle: Ingress and Gateway API
 
 == Ingress: the original HTTP routing API

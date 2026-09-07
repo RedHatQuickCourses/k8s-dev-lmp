@@ -1,4 +1,6 @@
 = Security Context and Hardening
+:page-audio-src: security-context-and-hardening.wav
+:page-transcript-src: security-context-and-hardening.txt
 :navtitle: Security Context and Hardening
 
 A `SecurityContext` defines privilege and access control settings for a pod or container.

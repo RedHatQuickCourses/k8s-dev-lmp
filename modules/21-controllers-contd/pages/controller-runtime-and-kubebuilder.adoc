@@ -1,4 +1,6 @@
 = Controller-runtime and Kubebuilder
+:page-audio-src: controller-runtime-and-kubebuilder.wav
+:page-transcript-src: controller-runtime-and-kubebuilder.txt
 :navtitle: Controller-runtime and Kubebuilder
 
 == From client-go to controller-runtime

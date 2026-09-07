@@ -1,4 +1,6 @@
 = Exercise 3: Validating Webhook for Registry Enforcement
+:page-audio-src: 3-develop-a-custom-validating-webhook-for-container-registry-enforcement.wav
+:page-transcript-src: 3-develop-a-custom-validating-webhook-for-container-registry-enforcement.txt
 :navtitle: Exercise 3: Validating Webhook
 
 In this exercise you will build and deploy a validating admission webhook that rejects Pods referencing unauthorized container registries.

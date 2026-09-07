@@ -1,4 +1,6 @@
 = API Discovery and Aggregation
+:page-audio-src: api-discovery-and-aggregation.wav
+:page-transcript-src: api-discovery-and-aggregation.txt
 :navtitle: API Discovery and Aggregation
 
 == API Discovery

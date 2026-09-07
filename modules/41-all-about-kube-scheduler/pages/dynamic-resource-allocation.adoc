@@ -1,4 +1,6 @@
 = Dynamic Resource Allocation
+:page-audio-src: dynamic-resource-allocation.wav
+:page-transcript-src: dynamic-resource-allocation.txt
 :navtitle: Dynamic Resource Allocation
 
 == The problem DRA solves

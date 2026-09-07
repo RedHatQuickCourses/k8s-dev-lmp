@@ -1,4 +1,6 @@
 = API Validation and Linting
+:page-audio-src: api-validation-and-linting.wav
+:page-transcript-src: api-validation-and-linting.txt
 :navtitle: API Validation and Linting
 
 Well-designed CRD schemas catch invalid input before it reaches your controller.

@@ -1,4 +1,6 @@
 = How the Scheduler Works
+:page-audio-src: how-the-scheduler-works.wav
+:page-transcript-src: how-the-scheduler-works.txt
 :navtitle: How the Scheduler Works
 
 == What the scheduler does
