@@ -34,13 +34,16 @@ When beginning your development journey, choosing the right toolset is vital. Wh
 == Recommended Practical Workflow
 To successfully implement the concepts discussed by Dobies and Wood, align your development process with these industry standards:
 
-1.  **Define your API:** Before writing logic, follow the https://github.com/kubernetes/community/blob/master/contributors/devel/sigarchitecture/api-conventions.md[Kubernetes API Conventions].
+1.  **Define your API:** Before writing logic, follow the https://github.com/kubernetes/community/blob/main/contributors/devel/sig-architecture/api-conventions.md[Kubernetes API Conventions, window=_blank].
 2.  **Lint your API:** Use `kube-api-linter` integrated with `golangci-lint` to catch common mistakes in your CRD definitions (e.g., missing validation or incorrect field types).
 3.  **Choose your Abstraction:** If you are building high-performance, complex systems, prioritize `controller-runtime` (via Kubebuilder) to maintain fine-grained control over the reconcile loop.
 4.  **Manage State:** Always prefer `PATCH` or `UPDATE` semantics that account for optimistic concurrency. Use standard Kubernetes `ResourceVersion` checks to prevent race conditions during updates.
 
 == Further Learning
 For deep dives into the topics covered, refer to these resources:
+
 *   *Kubernetes Operators* by Dobies and Wood (O'Reilly).
-*   https://tag-app-delivery.cncf.io/whitepapers/operator/[CNCF Operator Whitepaper]: Provides a comprehensive view of how Operators fit into the broader cloud-native ecosystem.
-*   https://book.kubebuilder.io/[The Kubebuilder Book]: Essential documentation for mastering the reconciliation pattern in Go.
+
+*   https://tag-app-delivery.cncf.io/whitepapers/operator/[CNCF Operator Whitepaper, window=_blank]: Provides a comprehensive view of how Operators fit into the broader cloud-native ecosystem.
+
+*   https://book.kubebuilder.io/[The Kubebuilder Book, window=_blank]: Essential documentation for mastering the reconciliation pattern in Go.

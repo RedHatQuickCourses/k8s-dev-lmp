@@ -410,7 +410,7 @@ Verify your logic locally before deploying: save the sample request JSON from ea
 
 == References
 
-* https://kubernetes.io/docs/reference/access-authn-authz/extensible-admission-controllers/[Dynamic Admission Control]
-* https://kubernetes.io/docs/reference/access-authn-authz/admission-controllers/#webhook-request-and-response[Webhook Request and Response Format]
+* https://kubernetes.io/docs/reference/access-authn-authz/extensible-admission-controllers/[Dynamic Admission Control, window=_blank]
+* https://kubernetes.io/docs/reference/access-authn-authz/admission-controllers/#webhook-request-and-response[Webhook Request and Response Format, window=_blank]
 </content>
 </invoke>
