@@ -1,0 +1,17 @@
+In this lesson, we will explore the architecture of the Kubernetes control plane. This is the set of components responsible for maintaining the desired state of your cluster. Let’s take a look at the core components that make this possible.
+
+First is the kube-apiserver. This acts as the central coordination point for the entire cluster. All communication—whether from users, controllers, or the kubelet—must flow through the API server. It exposes a RESTful API, handles authentication, authorization, and admission control. Furthermore, it is the only component that communicates directly with the cluster’s data store.
+
+That data store is known as etcd. It is a distributed key-value store that holds the entire desired state of your cluster. It uses the Raft consensus algorithm to ensure consistency across replicas. A key architectural detail to remember is that for performance and consistency, etcd typically scales vertically by adding more CPU and RAM. You should avoid scaling horizontally, as expanding beyond three or five members introduces significant consensus overhead.
+
+Next, we have the kube-scheduler. Its job is to watch for newly created Pods that haven't been assigned a node yet, and then select the most suitable node for each one. When making these scheduling decisions, the scheduler considers resource requirements, affinity and anti-affinity rules, taints, tolerations, and various other constraints.
+
+Finally, the kube-controller-manager runs a collection of built-in controllers, such as those for Deployments, ReplicaSets, and Jobs. These controllers work to continuously reconcile the current state of the cluster with the desired state declared in the API server.
+
+Before we move on, please note that in an OpenShift cluster, additional API servers—such as the OpenShift API server—run alongside the standard kube-apiserver. These are registered through the API aggregation layer, allowing the platform to add OpenShift-specific resource types while maintaining the same architectural patterns you are learning here.
+
+Now, let's examine the API request lifecycle. Every request that reaches the API server passes through a well-defined, four-stage pipeline.
+
+First is authentication, where the system verifies the identity of the caller. Second is authorization, where the system determines if that identity is permitted to perform the requested action. Third is admission control, where mutating and validating webhooks inspect, modify, or reject the request. Finally, if the request passes all these checks, it reaches the storage phase, where the resource is persisted to etcd.
+
+This lifecycle serves as the gateway for all changes to your cluster's state. We will explore each of these stages in much greater detail in our upcoming modules.

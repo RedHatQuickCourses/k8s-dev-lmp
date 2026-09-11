@@ -1,0 +1,11 @@
+Welcome to this module on the kube-scheduler.
+
+The kube-scheduler is at the heart of workload placement within your cluster. In this section, we will examine how the scheduler selects nodes for your pods, how resource requests and limits affect both scheduling and runtime behavior, and how Dynamic Resource Allocation extends those capabilities to manage non-fungible resources, such as GPUs.
+
+We have three main areas to cover:
+
+First, we will explore how the scheduler works. We’ll look at the filtering, scoring, and binding pipeline that transforms a pending pod into a running workload.
+
+Second, we will discuss resource management. This includes understanding requests, limits, Quality of Service classes, and the kernel enforcement mechanisms that power them.
+
+Finally, we will cover Dynamic Resource Allocation. This will introduce you to the claim-based model used for scheduling specialized hardware—resources that simple CPU and memory metrics alone cannot fully describe.
