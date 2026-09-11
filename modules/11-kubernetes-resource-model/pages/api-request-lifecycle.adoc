@@ -81,5 +81,5 @@ The discovery endpoints are also what client libraries like client-go use under 
 
 == References
 
-* https://kubernetes.io/docs/reference/access-authn-authz/admission-controllers[Admission Controllers Reference]
-* https://www.youtube.com/watch?v=Hc0jj-654lA[The Life of a Kubernetes API Request]
+* https://kubernetes.io/docs/reference/access-authn-authz/admission-controllers[Admission Controllers Reference, window=_blank]
+* https://www.youtube.com/watch?v=Hc0jj-654lA[The Life of a Kubernetes API Request, window=_blank]

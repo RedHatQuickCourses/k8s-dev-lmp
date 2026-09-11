@@ -1,5 +1,5 @@
 {
-  "totalSeconds": 6838,
+  "totalSeconds": 6846,
   "pageCount": 59,
   "pages": [
     {
@@ -10,7 +10,7 @@
     {
       "module": "LABENV",
       "page": "index.adoc",
-      "seconds": 49
+      "seconds": 47
     },
     {
       "module": "overview",
@@ -30,7 +30,7 @@
     {
       "module": "who-is-this-for-pre-requisites",
       "page": "recommended-prerequisites-basic-distributed-systems-knowledge.adoc",
-      "seconds": 116
+      "seconds": 117
     },
     {
       "module": "who-is-this-for-pre-requisites",
@@ -65,12 +65,12 @@
     {
       "module": "11-kubernetes-resource-model",
       "page": "api-request-lifecycle.adoc",
-      "seconds": 73
+      "seconds": 74
     },
     {
       "module": "11-kubernetes-resource-model",
       "page": "declarative-configuration-layers.adoc",
-      "seconds": 233
+      "seconds": 234
     },
     {
       "module": "12-controllers-informers-client-go",
@@ -80,22 +80,22 @@
     {
       "module": "12-controllers-informers-client-go",
       "page": "client-go-architecture.adoc",
-      "seconds": 176
+      "seconds": 178
     },
     {
       "module": "12-controllers-informers-client-go",
       "page": "informers-listers-workqueues.adoc",
-      "seconds": 101
+      "seconds": 102
     },
     {
       "module": "12-controllers-informers-client-go",
       "page": "sample-controller-walkthrough.adoc",
-      "seconds": 150
+      "seconds": 152
     },
     {
       "module": "12-controllers-informers-client-go",
       "page": "informer-pitfalls-and-error-handling.adoc",
-      "seconds": 233
+      "seconds": 235
     },
     {
       "module": "21-controllers-contd",
