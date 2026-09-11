@@ -6,124 +6,364 @@
 In this exercise you will build and deploy a validating admission webhook that rejects Pods referencing unauthorized container registries.
 This applies the concepts from xref:31-taking-more-control-admissions-and-beyond-the-kube-apiserver-to-writing-your-own-api-server:admission-control-webhooks.adoc[].
 
+The good news is that a webhook is just an HTTPS server with a single endpoint. The API server sends it a JSON request, and it replies with a JSON response saying "allow" or "deny".
+You will write that endpoint in plain Python using any framework of your choice, no client-go, no Kubernetes SDK are required.
+
 == Prerequisites
 
 * A running Python 3 environment (Python 3.10+) or a Python-capable IDE (e.g. VS Code with the Python extension, or PyCharm)
+* Docker or Podman installed and available on your machine
 * Access to a running OpenShift cluster -- see xref:LABENV:index.adoc[Lab Environment] to request one
-* cert-manager installed (for webhook TLS certificates)
+* `kubectl` (or `oc`) and `openssl` available on your machine
 
-== Step 1: Implement the Webhook Handler
+[NOTE]
+====
+A valid TLS certificate is required to be used in the HTTPS webserver running the webhook, a small shell script (provided in Step 3) generates the TLS certificate that the webhook needs for apiserver's communication.
+====
 
-Create an HTTP server that receives an `AdmissionReview` request, inspects the Pod's container images, and returns an allow or deny response:
+== How admission webhooks talk to the API server
 
-[source,go]
+When someone creates a Pod, the API server pauses the request and POSTs an `AdmissionReview` JSON document to your webhook's `/validate` path.
+Your job is to read the Pod out of that document, decide, and POST back an `AdmissionReview` that echoes the same `uid` and sets `allowed` to `true` or `false`.
+
+.Request the API server sends to your webhook
+[source,json]
 ----
-func handleValidation(w http.ResponseWriter, r *http.Request) {
-    var review admissionv1.AdmissionReview
-    if err := json.NewDecoder(r.Body).Decode(&review); err != nil {
-        http.Error(w, err.Error(), http.StatusBadRequest)
-        return
+{
+  "apiVersion": "admission.k8s.io/v1",
+  "kind": "AdmissionReview",
+  "request": {
+    "uid": "705ab4f5-6393-11e8-b7cc-42010a800002",
+    "kind": { "group": "", "version": "v1", "kind": "Pod" },
+    "operation": "CREATE",
+    "object": {
+      "apiVersion": "v1",
+      "kind": "Pod",
+      "metadata": { "name": "test", "namespace": "default" },
+      "spec": {
+        "containers": [
+          { "name": "app", "image": "docker.io/library/nginx:latest" }
+        ]
+      }
     }
-
-    var pod corev1.Pod
-    json.Unmarshal(review.Request.Object.Raw, &pod)
-
-    allowed := true
-    var message string
-    for _, c := range pod.Spec.Containers {
-        if !isImageAllowed(c.Image) {
-            allowed = false
-            message = fmt.Sprintf("image %q is not from an approved registry", c.Image)
-            break
-        }
-    }
-
-    review.Response = &admissionv1.AdmissionResponse{
-        UID:     review.Request.UID,
-        Allowed: allowed,
-        Result:  &metav1.Status{Message: message},
-    }
-    json.NewEncoder(w).Encode(review)
+  }
 }
 ----
 
-== Step 2: Registry Allow-List
-
-Accept a list of approved registry prefixes via a command-line flag:
-
-[source,go]
+.Response your webhook must return (deny example)
+[source,json]
 ----
-var allowedRegistries []string
-
-func init() {
-    flag.Func("allowed-registries",
-        "Comma-separated list of approved registries", func(s string) error {
-        allowedRegistries = strings.Split(s, ",")
-        return nil
-    })
-}
-
-func isImageAllowed(image string) bool {
-    for _, prefix := range allowedRegistries {
-        if strings.HasPrefix(image, prefix) {
-            return true
-        }
+{
+  "apiVersion": "admission.k8s.io/v1",
+  "kind": "AdmissionReview",
+  "response": {
+    "uid": "705ab4f5-6393-11e8-b7cc-42010a800002",
+    "allowed": false,
+    "status": {
+      "code": 403,
+      "message": "image docker.io/library/nginx:latest is not from an approved registry"
     }
-    return false
+  }
 }
 ----
 
-== Step 3: Register the Webhook
+To allow the request instead, return the same shape with `"allowed": true` and no `status` needed:
 
-Create a `ValidatingWebhookConfiguration` that tells the API server to send Pod CREATE and UPDATE requests to your webhook:
+[source,json]
+----
+{
+  "apiVersion": "admission.k8s.io/v1",
+  "kind": "AdmissionReview",
+  "response": {
+    "uid": "705ab4f5-6393-11e8-b7cc-42010a800002",
+    "allowed": true
+  }
+}
+----
+
+[IMPORTANT]
+====
+The `uid` in your response *must* match the `uid` from the request, or the API server rejects the answer.
+The webhook is always reached over HTTPS, so the API server needs to trust your server's certificate -- that is what Step 3 sets up.
+====
+
+== Step 1: Scaffold the Webhook Server
+
+Create a file named `webhook.py`.
+You need one HTTPS endpoint that accepts `POST /validate`, reads the `AdmissionReview` request, and returns an `AdmissionReview` response in the shape shown above.
+
+Use whatever HTTP framework you like -- the standard-library `http.server`, Flask, FastAPI, or anything else.
+The only hard requirements are that it serves *HTTPS* (the API server never calls a webhook over plain HTTP) and that it POSTs back a response echoing the request `uid`.
+
+The scaffold below uses the standard library so it has zero dependencies.
+Notice the two helpers are done for you -- `review_response()` builds the exact JSON the API server expects, and `main()` reads the approved registries from a flag and wraps the socket in TLS.
+The one function left blank, `handle_admission()`, is the actual policy -- you will fill it in under xref:#_challenge[Challenge].
+
+[source,python]
+----
+#!/usr/bin/env python3
+"""Validating admission webhook — scaffold. Implement handle_admission() (see Challenge)."""
+
+import argparse
+import json
+import ssl
+from http.server import HTTPServer, BaseHTTPRequestHandler
+
+APPROVED_REGISTRIES = []
+
+
+def review_response(uid: str, allowed: bool, message: str = "") -> dict:
+    """Build the AdmissionReview response the API server expects."""
+    response = {
+        "apiVersion": "admission.k8s.io/v1",
+        "kind": "AdmissionReview",
+        "response": {"uid": uid, "allowed": allowed},
+    }
+    if not allowed:
+        response["response"]["status"] = {"code": 403, "message": message}
+    return response
+
+
+def handle_admission(admission_review: dict) -> dict:
+    """Decide whether to allow the request. THIS IS YOUR JOB — see the Challenge."""
+    request = admission_review["request"]
+    uid = request["uid"]
+    pod_spec = request.get("object", {}).get("spec", {})
+
+    # TODO (Challenge): inspect pod_spec["containers"], decide allow vs. deny,
+    # and return review_response(uid, allowed, message).
+    raise NotImplementedError("Implement the registry validation — see the Challenge section")
+
+
+class WebhookHandler(BaseHTTPRequestHandler):
+    def do_POST(self):
+        length = int(self.headers.get("Content-Length", 0))
+        body = self.rfile.read(length)
+        result = handle_admission(json.loads(body))
+        self.send_response(200)
+        self.send_header("Content-Type", "application/json")
+        self.end_headers()
+        self.wfile.write(json.dumps(result).encode())
+
+
+def main():
+    parser = argparse.ArgumentParser(description="Image registry validating webhook")
+    parser.add_argument("--approved-registries", required=True,
+                        help="Comma-separated approved registries, e.g. docker.io,quay.io")
+    parser.add_argument("--tls-cert", required=True, help="Path to TLS certificate")
+    parser.add_argument("--tls-key", required=True, help="Path to TLS private key")
+    parser.add_argument("--port", type=int, default=8443)
+    args = parser.parse_args()
+
+    global APPROVED_REGISTRIES
+    APPROVED_REGISTRIES = [r.strip() for r in args.approved_registries.split(",") if r.strip()]
+    print(f"Approved registries: {APPROVED_REGISTRIES}")
+
+    server = HTTPServer(("0.0.0.0", args.port), WebhookHandler)
+    ctx = ssl.SSLContext(ssl.PROTOCOL_TLS_SERVER)
+    ctx.load_cert_chain(args.tls_cert, args.tls_key)
+    server.socket = ctx.wrap_socket(server.socket, server_side=True)
+    print(f"Webhook listening on :{args.port}")
+    server.serve_forever()
+
+
+if __name__ == "__main__":
+    main()
+----
+
+[TIP]
+====
+Prefer a framework like Flask or FastAPI? Go for it.
+Map a `POST /validate` route to a handler that parses the JSON body, calls your `handle_admission()`, and returns its dict as JSON.
+Just make sure the server terminates TLS with the certificate from Step 2 (both Flask's built-in server and Uvicorn accept a cert/key pair).
+====
+
+== Step 2: Generate TLS Certificates
+
+The API server only talks to webhooks over HTTPS, and it must trust the certificate.
+Instead of installing cert-manager, generate a self-signed certificate whose subject alternative name (SAN) matches the webhook's in-cluster Service DNS name.
+
+Save this as `generate-certs.sh` and run it (`bash generate-certs.sh`):
+
+[source,bash]
+----
+#!/bin/bash
+set -euo pipefail
+
+SERVICE_NAME="image-webhook"
+NAMESPACE="image-webhook"
+CERT_DIR="certs"
+mkdir -p "$CERT_DIR"
+
+# Certificate Authority
+openssl genrsa -out "$CERT_DIR/ca.key" 2048
+openssl req -x509 -new -nodes -key "$CERT_DIR/ca.key" \
+  -subj "/CN=Webhook CA" -days 3650 -out "$CERT_DIR/ca.crt"
+
+# Server key + CSR config with the Service DNS names as SANs
+openssl genrsa -out "$CERT_DIR/tls.key" 2048
+cat > "$CERT_DIR/csr.conf" <<EOF
+[req]
+req_extensions = v3_req
+distinguished_name = req_distinguished_name
+prompt = no
+[req_distinguished_name]
+CN = ${SERVICE_NAME}.${NAMESPACE}.svc
+[v3_req]
+basicConstraints = CA:FALSE
+keyUsage = digitalSignature, keyEncipherment
+extendedKeyUsage = serverAuth
+subjectAltName = @alt_names
+[alt_names]
+DNS.1 = ${SERVICE_NAME}
+DNS.2 = ${SERVICE_NAME}.${NAMESPACE}
+DNS.3 = ${SERVICE_NAME}.${NAMESPACE}.svc
+DNS.4 = ${SERVICE_NAME}.${NAMESPACE}.svc.cluster.local
+EOF
+
+# Sign the server certificate with the CA
+openssl req -new -key "$CERT_DIR/tls.key" -out "$CERT_DIR/tls.csr" -config "$CERT_DIR/csr.conf"
+openssl x509 -req -in "$CERT_DIR/tls.csr" -CA "$CERT_DIR/ca.crt" -CAkey "$CERT_DIR/ca.key" \
+  -CAcreateserial -out "$CERT_DIR/tls.crt" -days 3650 \
+  -extensions v3_req -extfile "$CERT_DIR/csr.conf"
+
+echo "CA bundle (base64) for the webhook config:"
+base64 < "$CERT_DIR/ca.crt" | tr -d '\n'; echo
+----
+
+The script prints a base64-encoded CA bundle at the end.
+Copy it -- you will paste it into the webhook configuration in Step 4.
+
+Store the server certificate and key in a Secret the webhook Pod can mount:
+
+[source,bash]
+----
+kubectl create namespace image-webhook
+kubectl create secret tls image-webhook-tls \
+  --cert=certs/tls.crt --key=certs/tls.key -n image-webhook
+----
+
+== Step 3: Build, Push, and Deploy
+
+Package the webhook in a container image. Create this `Dockerfile`:
+
+[source,dockerfile]
+----
+FROM python:3.12-slim
+WORKDIR /app
+COPY webhook.py .
+ENTRYPOINT ["python", "webhook.py"]
+----
+
+Build and push it with Docker or Podman (substitute a registry your cluster can pull from):
+
+[source,bash]
+----
+docker build -t <your-registry>/image-webhook:latest .
+docker push  <your-registry>/image-webhook:latest
+----
+
+Deploy the webhook, wiring in the approved registries and mounting the TLS Secret:
+
+[source,yaml]
+----
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: image-webhook
+  namespace: image-webhook
+spec:
+  replicas: 1
+  selector:
+    matchLabels: { app: image-webhook }
+  template:
+    metadata:
+      labels: { app: image-webhook }
+    spec:
+      containers:
+        - name: webhook
+          image: <your-registry>/image-webhook:latest   # image from the step above
+          args:
+            - "--approved-registries=quay.io,gcr.io"
+            - "--tls-cert=/tls/tls.crt"
+            - "--tls-key=/tls/tls.key"
+          ports:
+            - containerPort: 8443
+          volumeMounts:
+            - name: tls-certs
+              mountPath: /tls
+              readOnly: true
+      volumes:
+        - name: tls-certs
+          secret:
+            secretName: image-webhook-tls
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: image-webhook
+  namespace: image-webhook
+spec:
+  selector: { app: image-webhook }
+  ports:
+    - port: 443
+      targetPort: 8443
+----
+
+== Step 4: Register the Webhook
+
+Create a `ValidatingWebhookConfiguration` that tells the API server to send Pod CREATE and UPDATE requests to your Service.
+Replace `CA_BUNDLE_BASE64` with the value printed by `generate-certs.sh` in Step 2:
 
 [source,yaml]
 ----
 apiVersion: admissionregistration.k8s.io/v1
 kind: ValidatingWebhookConfiguration
 metadata:
-  name: registry-validator
+  name: image-registry-webhook
 webhooks:
-- name: validate.registry.example.com
-  rules:
-  - operations: ["CREATE", "UPDATE"]
-    apiGroups: [""]
-    apiVersions: ["v1"]
-    resources: ["pods"]
-  clientConfig:
-    service:
-      name: webhook-service
-      namespace: default
-      path: "/validate"
-  admissionReviewVersions: ["v1"]
-  sideEffects: None
-  failurePolicy: Fail
+  - name: image-registry.webhook.example.com
+    admissionReviewVersions: ["v1"]
+    sideEffects: None
+    failurePolicy: Fail
+    clientConfig:
+      service:
+        name: image-webhook
+        namespace: image-webhook
+        path: /validate
+        port: 443
+      caBundle: CA_BUNDLE_BASE64   # base64 CA cert from generate-certs.sh
+    rules:
+      - apiGroups: [""]
+        apiVersions: ["v1"]
+        operations: ["CREATE", "UPDATE"]
+        resources: ["pods"]
+    namespaceSelector:
+      matchExpressions:
+        - key: kubernetes.io/metadata.name
+          operator: NotIn
+          values: ["kube-system", "image-webhook"]
 ----
 
 [WARNING]
 ====
-Set `failurePolicy: Fail` in production so that Pods are blocked when the webhook is unreachable.
-Using `Ignore` silently skips validation, which defeats the purpose of the policy.
+`failurePolicy: Fail` means Pods are blocked when the webhook is unreachable -- the safe default for a security policy.
+The `namespaceSelector` exempts `kube-system` and the webhook's own namespace so you cannot lock yourself out.
 ====
 
-== Step 4: Deploy and Test
+== Step 5: Test
 
-. Build a container image for your webhook and push it to your cluster's registry.
-. Create a `Deployment` and `Service` for the webhook in the `default` namespace.
-. Ensure cert-manager injects TLS certificates (the API server requires HTTPS to reach webhooks).
-. Apply the `ValidatingWebhookConfiguration`.
-
-Test with an unauthorized image:
+Try an unauthorized image -- it should be denied:
 
 [source,bash]
 ----
 kubectl run test --image=docker.io/library/nginx:latest
 # Expected: Error from server: admission webhook
-#   "validate.registry.example.com" denied the request:
+#   "image-registry.webhook.example.com" denied the request:
 #   image "docker.io/library/nginx:latest" is not from an approved registry
 ----
 
-Test with an authorized image (assuming `quay.io` is in your allow-list):
+Now try an authorized image (`quay.io` is in the allow-list above) -- it should succeed:
 
 [source,bash]
 ----
@@ -131,8 +371,46 @@ kubectl run test --image=quay.io/myorg/myapp:latest
 # Expected: pod/test created
 ----
 
+== Challenge
+
+The scaffold in Step 1 does everything *except* decide.
+Implement `handle_admission()` so it enforces the registry policy:
+
+. Walk every container in `pod_spec["containers"]` and read its `image`.
+. Work out the registry host for each image. This needs a little parsing, because image references are not uniform:
++
+[cols="1,1",options="header"]
+|===
+| Image reference | Registry
+| `quay.io/org/app:v1` | `quay.io`
+| `my-registry.com:5000/app` | `my-registry.com:5000`
+| `docker.io/library/nginx` | `docker.io`
+| `library/nginx` | `docker.io` (implicit)
+| `nginx:latest` | `docker.io` (implicit)
+|===
++
+Hint: split off any `@sha256:...` digest and `:tag`, then split on `/`. If the first segment contains a `.` or `:`, or equals `localhost`, treat it as the registry host; otherwise the image lives on `docker.io`.
+. Compare each registry against the `APPROVED_REGISTRIES` list that `main()` populated from the `--approved-registries` flag.
+. If *every* image is approved, return `review_response(uid, True)`. Otherwise return `review_response(uid, False, message)` with a message that names the offending image(s) -- that text is what the user sees on `kubectl` errors, so make it clear.
+
+Verify your logic locally before deploying: save the sample request JSON from earlier to `sample.json` and call `handle_admission(json.load(open("sample.json")))` from a Python shell -- it should deny the `nginx` image and allow a `quay.io` image.
+
+=== Going further
+
+* Also inspect `initContainers` and `ephemeralContainers`, not just `containers`.
+* Extend the webhook rules and parsing to cover workloads such as Deployments and Jobs, whose Pod template lives under `spec.template.spec`.
+* Support digest-pinned images (`registry/app@sha256:...`) and per-namespace allow-lists.
+
 == Tips
 
-* Use `kubectl run --dry-run=server` during development to test webhook responses without creating actual Pods.
-* Check webhook logs if requests are being denied unexpectedly -- the `AdmissionReview` request object contains the full Pod spec.
+* Use `kubectl run --dry-run=server` during development to trigger the webhook without creating actual Pods.
+* Watch the webhook logs (`kubectl logs -n image-webhook deploy/image-webhook`) to see each `AdmissionReview` decision -- the request object contains the full Pod spec.
+* If every request fails with a TLS error, the `caBundle` in Step 4 probably does not match the certificate from Step 2, or the Service DNS name does not match a SAN.
 * For a declarative alternative to hand-coded webhooks, see xref:31-taking-more-control-admissions-and-beyond-the-kube-apiserver-to-writing-your-own-api-server:policy-engines-and-gatekeeper.adoc[Policy Engines and Gatekeeper].
+
+== References
+
+* https://kubernetes.io/docs/reference/access-authn-authz/extensible-admission-controllers/[Dynamic Admission Control]
+* https://kubernetes.io/docs/reference/access-authn-authz/admission-controllers/#webhook-request-and-response[Webhook Request and Response Format]
+</content>
+</invoke>
