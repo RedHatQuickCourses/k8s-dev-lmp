@@ -19,7 +19,7 @@ The capabilities of a service mesh fall into three categories:
 
 A service mesh consists of two layers:
 
-* *Data plane* -- lightweight network proxies (typically https://www.envoyproxy.io/[Envoy]) deployed alongside each service instance.
+* *Data plane* -- lightweight network proxies (typically https://www.envoyproxy.io/[Envoy, window=_blank]) deployed alongside each service instance.
 In the traditional sidecar model every pod gets its own proxy container.
 The proxies intercept all inbound and outbound traffic, apply routing rules, enforce mTLS, and emit telemetry.
 * *Control plane* -- a centralized component that configures the proxies at runtime.
@@ -90,6 +90,6 @@ Evaluate whether your application genuinely needs mesh-level traffic management,
 
 == References
 
-* https://www.baeldung.com/ops/istio-service-mesh[Service Mesh Architecture with Istio]
-* https://istio.io/latest/about/service-mesh/[The Istio Service Mesh]
-* https://gateway-api.sigs.k8s.io/mesh/[GAMMA: Gateway API for Service Mesh]
+* https://www.baeldung.com/ops/istio-service-mesh[Service Mesh Architecture with Istio, window=_blank]
+* https://istio.io/latest/about/service-mesh/[The Istio Service Mesh, window=_blank]
+* https://gateway-api.sigs.k8s.io/mesh/[GAMMA: Gateway API for Service Mesh, window=_blank]

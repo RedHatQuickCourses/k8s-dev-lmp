@@ -14,7 +14,7 @@ Instead of deploying a new webhook for each rule, you deploy the engine once and
 
 == OPA Gatekeeper
 
-https://github.com/open-policy-agent/gatekeeper[OPA Gatekeeper] v3 integrates the https://www.openpolicyagent.org/[Open Policy Agent] with Kubernetes using the OPA Constraint Framework.
+https://github.com/open-policy-agent/gatekeeper[OPA Gatekeeper, window=_blank] v3 integrates the https://www.openpolicyagent.org/[Open Policy Agent, window=_blank] with Kubernetes using the OPA Constraint Framework.
 The architecture centers on two CRD types:
 
 *ConstraintTemplates* define the policy logic written in Rego (OPA's query language) along with a parameter schema.
@@ -86,7 +86,7 @@ Gatekeeper supports data replication via a `Config` CRD that specifies which res
 == ValidatingAdmissionPolicy (CEL-based)
 
 Starting in Kubernetes v1.30, `ValidatingAdmissionPolicy` reached stable status as a built-in alternative to external webhook infrastructure.
-Instead of calling out to an HTTP server, policies are expressed as https://kubernetes.io/docs/reference/using-api/cel/[CEL (Common Expression Language)] expressions evaluated directly inside the API server.
+Instead of calling out to an HTTP server, policies are expressed as https://kubernetes.io/docs/reference/using-api/cel/[CEL (Common Expression Language), window=_blank] expressions evaluated directly inside the API server.
 
 This eliminates the need for a separate webhook deployment, TLS certificates, and network round-trips.
 CEL-based policies are best suited for straightforward validation rules -- such as checking label presence or resource limits -- where the full power of Rego or Go code is not needed.
@@ -99,4 +99,4 @@ Use *ValidatingAdmissionPolicy* for simpler, latency-sensitive validations that 
 
 == References
 
-* https://kubernetes.io/blog/2019/08/06/opa-gatekeeper-policy-and-governance-for-kubernetes/[OPA Gatekeeper: Policy and Governance for Kubernetes]
+* https://kubernetes.io/blog/2019/08/06/opa-gatekeeper-policy-and-governance-for-kubernetes/[OPA Gatekeeper: Policy and Governance for Kubernetes, window=_blank]

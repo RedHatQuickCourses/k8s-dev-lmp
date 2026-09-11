@@ -24,7 +24,7 @@ For example, a driver might publish a `gpu-class` that covers all GPU models it 
 
 *ResourceClaim*::
 A request for access to one or more devices.
-A ResourceClaim references a DeviceClass and can use https://cel.dev[CEL] selectors to filter for specific device attributes -- model, VRAM size, driver version, and so on.
+A ResourceClaim references a DeviceClass and can use https://cel.dev[CEL, window=_blank] selectors to filter for specific device attributes -- model, VRAM size, driver version, and so on.
 The scheduler coordinates with the DRA driver to find a node that has a matching device and allocates it to the claim.
 
 *ResourceClaimTemplate*::
@@ -98,9 +98,9 @@ In practice, pods that use DRA set both traditional resource requests _and_ Reso
 ====
 DRA is a rapidly evolving area.
 Some features like workload-level claims and device taints are still in alpha or beta.
-Check the upstream https://kubernetes.io/docs/concepts/scheduling-eviction/dynamic-resource-allocation/[DRA documentation] for the latest API stability and feature gates.
+Check the upstream https://kubernetes.io/docs/concepts/scheduling-eviction/dynamic-resource-allocation/[DRA documentation, window=_blank] for the latest API stability and feature gates.
 ====
 
 == References
 
-* https://kubernetes.io/docs/concepts/scheduling-eviction/dynamic-resource-allocation/[Dynamic Resource Allocation]
+* https://kubernetes.io/docs/concepts/scheduling-eviction/dynamic-resource-allocation/[Dynamic Resource Allocation, window=_blank]

@@ -107,4 +107,4 @@ If you want to avoid compiling a binary entirely, Metacontroller's webhook model
 
 == References
 
-* https://tag-app-delivery.cncf.io/whitepapers/operator/[CNCF Operator White Paper]
+* https://tag-app-delivery.cncf.io/whitepapers/operator/[CNCF Operator White Paper, window=_blank]

@@ -13,7 +13,7 @@ In a leader-elected controller with thousands of resources, a single reconciler 
 
 == Sharding via Labels
 
-The https://github.com/timebertt/kubernetes-controller-sharding[kubernetes-controller-sharding] project implements a label-based sharding mechanism:
+The https://github.com/timebertt/kubernetes-controller-sharding[kubernetes-controller-sharding, window=_blank] project implements a label-based sharding mechanism:
 
 * Each shard instance announces itself by maintaining a `Lease` object with a state label (`ready` or `dead`).
 * A *sharder webhook* (`MutatingWebhookConfiguration`) intercepts `CREATE` and `UPDATE` requests for the sharded resource types.
@@ -81,6 +81,6 @@ When multiple Ingress Controllers serve the same Route (overlapped mode), each c
 
 == References
 
-* https://github.com/timebertt/kubernetes-controller-sharding/blob/main/docs/getting-started.md[Controller Sharding Getting Started]
-* https://docs.redhat.com/en/documentation/openshift_container_platform/4.11/html/networking/ingress-sharding[Ingress Sharding in OpenShift]
-* https://gist.github.com/swghosh/5fe1dc5a04ce1db48f6bef837b11c0e6[OpenShift Ingress Controller Sharding Case Study Notes]
+* https://github.com/timebertt/kubernetes-controller-sharding/blob/main/docs/getting-started.md[Controller Sharding Getting Started, window=_blank]
+* https://docs.redhat.com/en/documentation/openshift_container_platform/4.11/html/networking/ingress-sharding[Ingress Sharding in OpenShift, window=_blank]
+* https://gist.github.com/swghosh/5fe1dc5a04ce1db48f6bef837b11c0e6[OpenShift Ingress Controller Sharding Case Study Notes, window=_blank]

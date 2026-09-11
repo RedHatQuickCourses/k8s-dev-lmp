@@ -103,11 +103,11 @@ Cross-namespace routing requires configuring `allowedRoutes` on the listener.
 === Migrating from Ingress
 
 The Gateway API does not include an Ingress kind, so migration is a one-time conversion.
-The upstream https://gateway-api.sigs.k8s.io/guides/getting-started/migrating-from-ingress[migration guide] walks through the process step by step.
+The upstream https://gateway-api.sigs.k8s.io/guides/getting-started/migrating-from-ingress[migration guide, window=_blank] walks through the process step by step.
 
-For more on how ingress controllers can be sharded across nodes in large clusters, see xref:22-going-distributed-locks-leases-ownership-eventual-consistency:controller-sharding.adoc[on controller sharding].
+For more on how ingress controllers can be sharded across nodes in large clusters, see xref:22-going-distributed-locks-leases-ownership-eventual-consistency:controller-sharding.adoc[on controller sharding, window=_blank].
 
 == References
 
-* https://kubernetes.io/docs/concepts/services-networking/ingress/[Ingress]
-* https://kubernetes.io/docs/concepts/services-networking/gateway/[Gateway API]
+* https://kubernetes.io/docs/concepts/services-networking/ingress/[Ingress, window=_blank]
+* https://kubernetes.io/docs/concepts/services-networking/gateway/[Gateway API, window=_blank]

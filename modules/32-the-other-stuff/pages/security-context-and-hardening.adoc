@@ -74,7 +74,7 @@ This configuration ensures the container cannot run as root, cannot escalate pri
 == Security Profiles Operator
 
 Managing seccomp, SELinux, and AppArmor profiles manually across nodes is operationally painful.
-The https://github.com/kubernetes-sigs/security-profiles-operator[Security Profiles Operator] (SPO) is a Kubernetes-sigs project that automates profile lifecycle management.
+The https://github.com/kubernetes-sigs/security-profiles-operator[Security Profiles Operator, window=_blank] (SPO) is a Kubernetes-sigs project that automates profile lifecycle management.
 
 SPO provides CRDs for each profile type:
 
@@ -109,5 +109,5 @@ Use it only for infrastructure components that genuinely require host-level acce
 
 == References
 
-* https://kubernetes.io/docs/tasks/configure-pod-container/security-context/[Configure a Security Context]
-* https://github.com/kubernetes-sigs/security-profiles-operator[Security Profiles Operator]
+* https://kubernetes.io/docs/tasks/configure-pod-container/security-context/[Configure a Security Context, window=_blank]
+* https://github.com/kubernetes-sigs/security-profiles-operator[Security Profiles Operator, window=_blank]

@@ -73,10 +73,10 @@ The API server sends a `SubjectAccessReview` to the webhook, which can return `A
 
 === ReBAC: relation-based access control
 
-ReBAC is an emerging approach inspired by the https://research.google/pubs/pub48190/[Google Zanzibar paper].
+ReBAC is an emerging approach inspired by the https://research.google/pubs/pub48190/[Google Zanzibar paper, window=_blank].
 Instead of flat role-to-permission mappings, authorization state is modelled as a graph with typed nodes and directed relations -- for example, `user:alice -- editor -> document:secret`.
 
-The https://github.com/luxas/kube-rebac-authorizer[kube-rebac-authorizer] prototype demonstrates how ReBAC (built on the CNCF project https://openfga.dev/[OpenFGA]) can replace both the RBAC and Node authorizers with a single graph-based engine.
+The https://github.com/luxas/kube-rebac-authorizer[kube-rebac-authorizer, window=_blank] prototype demonstrates how ReBAC (built on the CNCF project https://openfga.dev/[OpenFGA, window=_blank]) can replace both the RBAC and Node authorizers with a single graph-based engine.
 Key advantages over RBAC include:
 
 * *Native deny rules* -- the RBAC authorizer is additive-only, but ReBAC can express deny decisions directly.
@@ -87,6 +87,6 @@ ReBAC is still experimental in the Kubernetes ecosystem, but it signals the dire
 
 == References
 
-* https://kubernetes.io/docs/reference/access-authn-authz/authentication/[Authenticating]
-* https://raesene.github.io/blog/2023/04/08/lets-talk-about-kubelet-authorization/[Let's Talk About Kubelet Authorization]
-* https://github.com/luxas/kube-rebac-authorizer[kube-rebac-authorizer]
+* https://kubernetes.io/docs/reference/access-authn-authz/authentication/[Authenticating, window=_blank]
+* https://raesene.github.io/blog/2023/04/08/lets-talk-about-kubelet-authorization/[Let's Talk About Kubelet Authorization, window=_blank]
+* https://github.com/luxas/kube-rebac-authorizer[kube-rebac-authorizer, window=_blank]

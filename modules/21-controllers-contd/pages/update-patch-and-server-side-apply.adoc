@@ -126,5 +126,5 @@ For resources with a single owner, traditional Update is simpler and avoids the 
 
 == References
 
-* https://kubernetes.io/docs/tasks/manage-kubernetes-objects/update-api-object-kubectl-patch/[Update API Objects Using kubectl patch]
-* https://opensource.googleblog.com/2021/10/server-side-apply-in-kubernetes.html[Server-Side Apply in Kubernetes]
+* https://kubernetes.io/docs/tasks/manage-kubernetes-objects/update-api-object-kubectl-patch/[Update API Objects Using kubectl patch, window=_blank]
+* https://opensource.googleblog.com/2021/10/server-side-apply-in-kubernetes.html[Server-Side Apply in Kubernetes, window=_blank]
