@@ -101,4 +101,4 @@ If you need to avoid redundant reconciliations during resync, compare the `Resou
 
 == References
 
-* https://medium.com/@dhruvbhl/informers-listers-workqueues-the-brain-behind-your-controller-f5b0967026de[Informers, Listers & Workqueues]
+* https://medium.com/@dhruvbhl/informers-listers-workqueues-the-brain-behind-your-controller-f5b0967026de[Informers, Listers & Workqueues, window=_blank]

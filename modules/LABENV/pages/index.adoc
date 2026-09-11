@@ -13,7 +13,7 @@ For the hands-on exercises in this learning path you will need access to a runni
 - **Activity** — select the option that matches your context (e.g. *Practice / Enablement*).
 - **Purpose** — choose the appropriate purpose from the dropdown.
 - **Salesforce IDs** — provide an Opportunity, Campaign or Project ID if required by your activity, otherwise acknowledge that you will supply it within 48 hours.
-- **Cloud Provider** — *AWS* is preferred, but not mandatory; any provider is acceptable.
+- **Cloud Provider** — *CNV* is preferred.
 - **OpenShift Version** — any version of OpenShift is fine.
 - **cluster size** — select a size suited to your needs.
 - **Create users on cluster?** — set as needed.

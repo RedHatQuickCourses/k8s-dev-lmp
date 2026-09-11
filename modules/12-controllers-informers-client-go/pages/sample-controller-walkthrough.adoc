@@ -3,7 +3,7 @@
 :page-transcript-src: sample-controller-walkthrough.txt
 :navtitle: Sample Controller Walkthrough
 
-The https://github.com/kubernetes/sample-controller[sample-controller] is the official Kubernetes example operator.
+The https://github.com/kubernetes/sample-controller[sample-controller, window=_blank] is the official Kubernetes example operator.
 It shows you how to build a controller using client-go from scratch, managing a custom resource called *Foo* that creates and manages Deployments.
 
 == The Foo Custom Resource
@@ -212,5 +212,5 @@ For a hands-on exercise building a controller from scratch using this same patte
 
 == References
 
-* https://chishengliu.com/posts/kubernetes-operator-sample-controller/[How to Write a Kubernetes Operator Using client-go]
-* https://www.youtube.com/watch?v=AUNPLQVxvmw[Writing Kube Controllers for Everyone - Maciej Szulik]
+* https://chishengliu.com/posts/kubernetes-operator-sample-controller/[How to Write a Kubernetes Operator Using client-go, window=_blank]
+* https://www.youtube.com/watch?v=AUNPLQVxvmw[Writing Kube Controllers for Everyone - Maciej Szulik, window=_blank]
