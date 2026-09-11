@@ -1,0 +1,21 @@
+While Custom Resource Definitions, or CRDs, handle the vast majority of Kubernetes extension use cases, there are specific scenarios where their limitations become significant blockers. 
+
+First, consider storage. CRDs must store objects in etcd. If your data lives in a relational database, a time-series store like Prometheus, or an external catalog service, CRDs simply won't work for you. 
+
+Second is the requirement for day-zero validation. With CRDs, you create the definition first, and then deploy a validating webhook. This creates a window of time where invalid objects can be created. A custom API server, however, has validation logic compiled in from the very start. 
+
+Third, consider subresources. CRDs only support status and scale. If your implementation requires custom subresources like logs, exec, or proxy, you will need a custom API server. 
+
+Finally, there is the matter of protocol buffer support. Because CRDs only serve JSON, an aggregated API server is the only way to provide protobuf serialization for performance-sensitive clients.
+
+Now, let's look at the API Aggregation Layer. This feature allows you to register a custom API server so that the primary kube-apiserver acts as a reverse proxy for your API group. To clients, this creates a unified API surface, where requests to your custom group are transparently forwarded to your server. 
+
+Registration is performed by creating an APIService object. This object defines your API group, the version, and the target service namespace. Once registered, the kube-apiserver handles authentication, authorization, and audit logging before forwarding the request to your service.
+
+If you decide to build one, the k8s.io/apiserver library provides the necessary framework. It handles complex tasks like TLS termination, authentication, and OpenAPI schema generation. A typical development workflow includes defining your API types, running code generation for your clients and informers, implementing the storage backend via the rest.Storage interface, and finally wiring it all together in a server binary. For those looking for a starting point, the Kubernetes sample-apiserver repository serves as the standard reference implementation.
+
+To see this in action, look at the Operator Lifecycle Manager, or OLM. OLM uses an aggregated API server to provide PackageManifest resources. Because these resources are sourced from gRPC catalog services, storing them as CRDs would create massive overhead in etcd. By using an aggregated API server, OLM computes these manifests on the fly, eliminating storage costs and the complexity of synchronization. Other components, such as the monitoring and OAuth API servers, use this same pattern to interface with external systems like Prometheus or specialized token stores.
+
+Before you commit to this path, keep in mind the operational cost. Unlike CRDs, a custom API server requires you to build, deploy, and maintain a separate binary. You must also manage version skew with the kube-apiserver and implement your own health checks. Because of this added complexity, you should only choose this approach when your technical requirements genuinely demand it.
+
+For further information, please consult the official Kubernetes documentation on extending the API, or explore the referenced sample-apiserver and package-server-manager repositories.

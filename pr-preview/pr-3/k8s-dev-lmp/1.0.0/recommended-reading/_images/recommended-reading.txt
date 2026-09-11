@@ -1,0 +1,9 @@
+To supplement this course, we have compiled a list of recommended resources that will deepen your understanding of the topics we cover. Each of these references aligns with specific modules in our curriculum.
+
+First, for a deep dive into the technical foundations of Kubernetes, we highly recommend the book *Programming Kubernetes*, written by Michael Hausenblas and Stefan Schimanski. This is considered the definitive guide to client-go internals, custom resources, and the API machinery that powers Kubernetes extensibility. It serves as an excellent companion to our modules on the Kubernetes resource model and controller foundations, as it provides a thorough look at how the API server processes requests and how you can build robust clients and controllers.
+
+Next, if you are interested in the operator pattern, check out the book *Kubernetes Operators* by Jason Dobies and Joshua Wood. This resource covers the operator pattern from start to finish, including the Operator SDK and the lifecycle management of complex applications. It pairs perfectly with our modules on advanced controllers and extending the Kubernetes API server, offering practical, real-world guidance on how to package, deploy, and upgrade operators for production environments.
+
+Finally, we suggest reviewing the CNCF Operator White Paper, published by the CNCF TAG App Delivery group. This industry-standard document defines the operator capability model and provides a comprehensive comparison of different operator frameworks. It is an ideal companion to our module on ubiquitous topics, where we survey the broader operator landscape. This white paper offers a valuable, vendor-neutral perspective on when and how to approach building operators. 
+
+You can find a link to the white paper in the course documentation. We encourage you to explore these resources as you progress through the course to enhance your practical expertise.

@@ -1,0 +1,507 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width,initial-scale=1">
+    <title>Designing Distributed Systems: Foundations for Kubernetes Controllers :: Kubernetes Developer Learning Path</title>
+    <link rel="prev" href="kubernetes-security-and-observability-creane-gupta.html">
+    <link rel="next" href="../appendix/appendix.html">
+    <meta name="generator" content="Antora 3.2.0-alpha.12">
+    <link rel="stylesheet" href="../../../_/css/site.css">
+    <link rel="stylesheet" href="../../../_/css/vendor/tabs.css">
+    <link rel="stylesheet" href="../../../_/css/vendor/collapsible.css">
+    <link rel="stylesheet" href="../../../_/css/vendor/reading-time.css">
+    <link rel="stylesheet" href="../../../_/css/vendor/audio-transcript.css">
+    <script>var uiRootPath = '../../../_'</script>
+  </head>
+  <body class="article">
+<header class="header">
+  <nav class="navbar">
+    <div class="navbar-brand">
+      <a class="navbar-item" href="https://www.redhat.com" target="_blank"><img src="../../../_/img/redhat-logo.png" height="40px" alt="Red Hat"></a>
+      <a class="navbar-item" style="font-size: 24px; color: white" href="../../..">Kubernetes Developer Learning Path</a>
+      <button class="navbar-burger" data-target="topbar-nav">
+        <span></span>
+        <span></span>
+        <span></span>
+      </button>
+    </div>
+    <div id="topbar-nav" class="navbar-menu">
+      <div class="navbar-end">
+        <a class="navbar-item" href="https://github.com/RedHatQuickCourses/REPLACEREPONAME/issues" target="_blank">Report Issues</a>
+      </div>
+    </div>
+  </nav>
+</header>
+<div class="body">
+<div class="nav-container" data-component="k8s-dev-lmp" data-version="1.0.0">
+  <aside class="nav">
+    <div class="panels">
+<div class="nav-panel-menu is-active" data-panel="menu">
+  <nav class="nav-menu">
+    <h3 class="title"><a href="../index.html">Kubernetes Developer Learning Path</a></h3>
+<ul class="nav-list">
+  <li class="nav-item" data-depth="0">
+<ul class="nav-list">
+  <li class="nav-item" data-depth="1">
+    <a class="nav-link" href="../index.html">Home</a>
+  </li>
+</ul>
+  </li>
+  <li class="nav-item" data-depth="0">
+<ul class="nav-list">
+  <li class="nav-item" data-depth="1">
+    <a class="nav-link" href="../LABENV/index.html">Lab Environment</a>
+  </li>
+</ul>
+  </li>
+  <li class="nav-item" data-depth="0">
+<ul class="nav-list">
+  <li class="nav-item" data-depth="1">
+    <a class="nav-link" href="../overview/overview.html">Overview</a>
+  </li>
+</ul>
+  </li>
+  <li class="nav-item" data-depth="0">
+<ul class="nav-list">
+  <li class="nav-item" data-depth="1">
+    <button class="nav-item-toggle"></button>
+    <a class="nav-link" href="../who-is-this-for-pre-requisites/who-is-this-for-pre-requisites.html">Who Is This For? Prerequisites</a>
+<ul class="nav-list">
+  <li class="nav-item" data-depth="2">
+    <a class="nav-link" href="../who-is-this-for-pre-requisites/target-audience-engineers-sys-admins-and-developers-with-container-experience.html">Target Audience and Prerequisites</a>
+  </li>
+  <li class="nav-item" data-depth="2">
+    <a class="nav-link" href="../who-is-this-for-pre-requisites/recommended-prerequisites-basic-distributed-systems-knowledge.html">Prerequisites: Preparing for the Kubernetes Developer Learning Path</a>
+  </li>
+  <li class="nav-item" data-depth="2">
+    <a class="nav-link" href="../who-is-this-for-pre-requisites/ideal-baseline-ckad-certification-or-red-hat-do-180-and-do-280-tracks.html">Preparing for the Kubernetes Developer Learning Path</a>
+  </li>
+</ul>
+  </li>
+</ul>
+  </li>
+  <li class="nav-item" data-depth="0">
+<ul class="nav-list">
+  <li class="nav-item" data-depth="1">
+    <button class="nav-item-toggle"></button>
+    <a class="nav-link" href="../familiarizing-with-koobrnehteez/familiarizing-with-koobrnehteez.html">Familiarizing with Kubernetes</a>
+<ul class="nav-list">
+  <li class="nav-item" data-depth="2">
+    <a class="nav-link" href="../familiarizing-with-koobrnehteez/what-kubernetes-really-is.html">What Kubernetes Really Is</a>
+  </li>
+  <li class="nav-item" data-depth="2">
+    <a class="nav-link" href="../familiarizing-with-koobrnehteez/control-plane-architecture-primer.html">Control Plane Architecture Primer</a>
+  </li>
+</ul>
+  </li>
+</ul>
+  </li>
+  <li class="nav-item" data-depth="0">
+<ul class="nav-list">
+  <li class="nav-item" data-depth="1">
+    <button class="nav-item-toggle"></button>
+    <a class="nav-link" href="../11-kubernetes-resource-model/11-kubernetes-resource-model.html">1.1 — Kubernetes Resource Model</a>
+<ul class="nav-list">
+  <li class="nav-item" data-depth="2">
+    <a class="nav-link" href="../11-kubernetes-resource-model/the-kubernetes-resource-model.html">The Kubernetes Resource Model</a>
+  </li>
+  <li class="nav-item" data-depth="2">
+    <a class="nav-link" href="../11-kubernetes-resource-model/api-request-lifecycle.html">API Request Lifecycle</a>
+  </li>
+  <li class="nav-item" data-depth="2">
+    <a class="nav-link" href="../11-kubernetes-resource-model/declarative-configuration-layers.html">Declarative Configuration Layers</a>
+  </li>
+</ul>
+  </li>
+</ul>
+  </li>
+  <li class="nav-item" data-depth="0">
+<ul class="nav-list">
+  <li class="nav-item" data-depth="1">
+    <button class="nav-item-toggle"></button>
+    <a class="nav-link" href="../12-controllers-informers-client-go/12-controllers-informers-client-go.html">1.2 — Controllers, Informers, and client-go</a>
+<ul class="nav-list">
+  <li class="nav-item" data-depth="2">
+    <a class="nav-link" href="../12-controllers-informers-client-go/client-go-architecture.html">client-go Architecture</a>
+  </li>
+  <li class="nav-item" data-depth="2">
+    <a class="nav-link" href="../12-controllers-informers-client-go/informers-listers-workqueues.html">Informers, Listers, and Workqueues</a>
+  </li>
+  <li class="nav-item" data-depth="2">
+    <a class="nav-link" href="../12-controllers-informers-client-go/sample-controller-walkthrough.html">Sample Controller Walkthrough</a>
+  </li>
+  <li class="nav-item" data-depth="2">
+    <a class="nav-link" href="../12-controllers-informers-client-go/informer-pitfalls-and-error-handling.html">Informer Pitfalls and Error Handling</a>
+  </li>
+</ul>
+  </li>
+</ul>
+  </li>
+  <li class="nav-item" data-depth="0">
+<ul class="nav-list">
+  <li class="nav-item" data-depth="1">
+    <button class="nav-item-toggle"></button>
+    <a class="nav-link" href="../21-controllers-contd/21-controllers-contd.html">2.1 — Controllers with controller-runtime</a>
+<ul class="nav-list">
+  <li class="nav-item" data-depth="2">
+    <a class="nav-link" href="../21-controllers-contd/gvk-gvr-and-api-terminology.html">GVK, GVR, and API Terminology</a>
+  </li>
+  <li class="nav-item" data-depth="2">
+    <a class="nav-link" href="../21-controllers-contd/controller-runtime-and-kubebuilder.html">Controller-runtime and Kubebuilder</a>
+  </li>
+  <li class="nav-item" data-depth="2">
+    <a class="nav-link" href="../21-controllers-contd/spec-status-and-conditions.html">Spec, Status, and Conditions</a>
+  </li>
+  <li class="nav-item" data-depth="2">
+    <a class="nav-link" href="../21-controllers-contd/api-validation-and-linting.html">API Validation and Linting</a>
+  </li>
+  <li class="nav-item" data-depth="2">
+    <a class="nav-link" href="../21-controllers-contd/update-patch-and-server-side-apply.html">Update, Patch, and Server-Side Apply</a>
+  </li>
+</ul>
+  </li>
+</ul>
+  </li>
+  <li class="nav-item" data-depth="0">
+<ul class="nav-list">
+  <li class="nav-item" data-depth="1">
+    <button class="nav-item-toggle"></button>
+    <a class="nav-link" href="../22-going-distributed-locks-leases-ownership-eventual-consistency/22-going-distributed-locks-leases-ownership-eventual-consistency.html">2.2 — Going Distributed: Locks, Leases, Ownership, Eventual Consistency</a>
+<ul class="nav-list">
+  <li class="nav-item" data-depth="2">
+    <a class="nav-link" href="../22-going-distributed-locks-leases-ownership-eventual-consistency/idempotent-reconciliation.html">Idempotent Reconciliation</a>
+  </li>
+  <li class="nav-item" data-depth="2">
+    <a class="nav-link" href="../22-going-distributed-locks-leases-ownership-eventual-consistency/distributed-locking-theory.html">Distributed Locking Theory</a>
+  </li>
+  <li class="nav-item" data-depth="2">
+    <a class="nav-link" href="../22-going-distributed-locks-leases-ownership-eventual-consistency/leader-election-in-kubernetes.html">Leader Election in Kubernetes</a>
+  </li>
+  <li class="nav-item" data-depth="2">
+    <a class="nav-link" href="../22-going-distributed-locks-leases-ownership-eventual-consistency/controller-sharding.html">Controller Sharding</a>
+  </li>
+</ul>
+  </li>
+</ul>
+  </li>
+  <li class="nav-item" data-depth="0">
+<ul class="nav-list">
+  <li class="nav-item" data-depth="1">
+    <button class="nav-item-toggle"></button>
+    <a class="nav-link" href="../31-taking-more-control-admissions-and-beyond-the-kube-apiserver-to-writing-your-own-api-server/31-taking-more-control-admissions-and-beyond-the-kube-apiserver-to-writing-your-own-api-server.html">3.1 — Taking More Control: Admissions and Beyond the kube-apiserver to Writing Your Own API Server</a>
+<ul class="nav-list">
+  <li class="nav-item" data-depth="2">
+    <a class="nav-link" href="../31-taking-more-control-admissions-and-beyond-the-kube-apiserver-to-writing-your-own-api-server/admission-control-webhooks.html">Admission Control Webhooks</a>
+  </li>
+  <li class="nav-item" data-depth="2">
+    <a class="nav-link" href="../31-taking-more-control-admissions-and-beyond-the-kube-apiserver-to-writing-your-own-api-server/policy-engines-and-gatekeeper.html">Policy Engines and Gatekeeper</a>
+  </li>
+  <li class="nav-item" data-depth="2">
+    <a class="nav-link" href="../31-taking-more-control-admissions-and-beyond-the-kube-apiserver-to-writing-your-own-api-server/api-discovery-and-aggregation.html">API Discovery and Aggregation</a>
+  </li>
+  <li class="nav-item" data-depth="2">
+    <a class="nav-link" href="../31-taking-more-control-admissions-and-beyond-the-kube-apiserver-to-writing-your-own-api-server/custom-api-servers.html">Custom API Servers</a>
+  </li>
+</ul>
+  </li>
+</ul>
+  </li>
+  <li class="nav-item" data-depth="0">
+<ul class="nav-list">
+  <li class="nav-item" data-depth="1">
+    <button class="nav-item-toggle"></button>
+    <a class="nav-link" href="../32-the-other-stuff/32-the-other-stuff.html">3.2 — The Other Stuff</a>
+<ul class="nav-list">
+  <li class="nav-item" data-depth="2">
+    <a class="nav-link" href="../32-the-other-stuff/ingress-and-gateway-api.html">Ingress and Gateway API</a>
+  </li>
+  <li class="nav-item" data-depth="2">
+    <a class="nav-link" href="../32-the-other-stuff/service-mesh-fundamentals.html">Service Mesh Fundamentals</a>
+  </li>
+  <li class="nav-item" data-depth="2">
+    <a class="nav-link" href="../32-the-other-stuff/authentication-and-authorization.html">Authentication and Authorization</a>
+  </li>
+  <li class="nav-item" data-depth="2">
+    <a class="nav-link" href="../32-the-other-stuff/security-context-and-hardening.html">Security Context and Hardening</a>
+  </li>
+</ul>
+  </li>
+</ul>
+  </li>
+  <li class="nav-item" data-depth="0">
+<ul class="nav-list">
+  <li class="nav-item" data-depth="1">
+    <button class="nav-item-toggle"></button>
+    <a class="nav-link" href="../41-all-about-kube-scheduler/41-all-about-kube-scheduler.html">4.1 — All About kube-scheduler</a>
+<ul class="nav-list">
+  <li class="nav-item" data-depth="2">
+    <a class="nav-link" href="../41-all-about-kube-scheduler/how-the-scheduler-works.html">How the Scheduler Works</a>
+  </li>
+  <li class="nav-item" data-depth="2">
+    <a class="nav-link" href="../41-all-about-kube-scheduler/resource-management.html">Resource Management</a>
+  </li>
+  <li class="nav-item" data-depth="2">
+    <a class="nav-link" href="../41-all-about-kube-scheduler/dynamic-resource-allocation.html">Dynamic Resource Allocation</a>
+  </li>
+</ul>
+  </li>
+</ul>
+  </li>
+  <li class="nav-item" data-depth="0">
+<ul class="nav-list">
+  <li class="nav-item" data-depth="1">
+    <button class="nav-item-toggle"></button>
+    <a class="nav-link" href="../42-ubiquitous-topics/42-ubiquitous-topics.html">4.2 — Ubiquitous Topics</a>
+<ul class="nav-list">
+  <li class="nav-item" data-depth="2">
+    <a class="nav-link" href="../42-ubiquitous-topics/operator-landscape.html">The Operator Landscape</a>
+  </li>
+  <li class="nav-item" data-depth="2">
+    <a class="nav-link" href="../42-ubiquitous-topics/alternative-control-planes-and-form-factors.html">Alternative Control Planes and Form Factors</a>
+  </li>
+</ul>
+  </li>
+</ul>
+  </li>
+  <li class="nav-item" data-depth="0">
+<ul class="nav-list">
+  <li class="nav-item" data-depth="1">
+    <button class="nav-item-toggle"></button>
+    <a class="nav-link" href="../exercises/exercises.html">Exercises</a>
+<ul class="nav-list">
+  <li class="nav-item" data-depth="2">
+    <a class="nav-link" href="../exercises/1-build-a-controller-using-client-go-from-scratch.html">Exercise 1: Build a Controller</a>
+  </li>
+  <li class="nav-item" data-depth="2">
+    <a class="nav-link" href="../exercises/2-implement-optimistic-locking-and-leader-election-via-lease.html">Exercise 2: Leader Election</a>
+  </li>
+  <li class="nav-item" data-depth="2">
+    <a class="nav-link" href="../exercises/3-develop-a-custom-validating-webhook-for-container-registry-enforcement.html">Exercise 3: Validating Webhook</a>
+  </li>
+</ul>
+  </li>
+</ul>
+  </li>
+  <li class="nav-item" data-depth="0">
+<ul class="nav-list">
+  <li class="nav-item" data-depth="1">
+    <button class="nav-item-toggle"></button>
+    <a class="nav-link" href="../recommended-reading/recommended-reading.html">Recommended Reading</a>
+<ul class="nav-list">
+  <li class="nav-item" data-depth="2">
+    <a class="nav-link" href="../recommended-reading/programming-kubernetes-hausenblas-schimanski.html">Recommended Reading: Programming Kubernetes</a>
+  </li>
+  <li class="nav-item" data-depth="2">
+    <a class="nav-link" href="../recommended-reading/kubernetes-operators-dobies-wood.html">Kubernetes Operators: Automating the Orchestration Platform</a>
+  </li>
+  <li class="nav-item" data-depth="2">
+    <a class="nav-link" href="../recommended-reading/cncf-operator-whitepaper.html">CNCF Operator Whitepaper</a>
+  </li>
+</ul>
+  </li>
+</ul>
+  </li>
+  <li class="nav-item" data-depth="0">
+<ul class="nav-list">
+  <li class="nav-item" data-depth="1">
+    <button class="nav-item-toggle"></button>
+    <a class="nav-link" href="suggested-reading.html">Suggested Reading</a>
+<ul class="nav-list">
+  <li class="nav-item" data-depth="2">
+    <a class="nav-link" href="kubernetes-security-and-observability-creane-gupta.html">Kubernetes Security and Observability</a>
+  </li>
+  <li class="nav-item is-current-page" data-depth="2">
+    <a class="nav-link" href="designing-distributed-systems-burns.html">Designing Distributed Systems: Foundations for Kubernetes Controllers</a>
+  </li>
+</ul>
+  </li>
+</ul>
+  </li>
+  <li class="nav-item" data-depth="0">
+<ul class="nav-list">
+  <li class="nav-item" data-depth="1">
+    <a class="nav-link" href="../appendix/appendix.html">Appendix</a>
+  </li>
+</ul>
+  </li>
+</ul>
+  </nav>
+</div>
+<div class="nav-panel-explore" data-panel="explore">
+  <div class="context">
+    <span class="title">Kubernetes Developer Learning Path</span>
+    <span class="version">1.0.0</span>
+  </div>
+  <ul class="components">
+    <li class="component is-current">
+      <a class="title" href="../index.html">Kubernetes Developer Learning Path</a>
+      <ul class="versions">
+        <li class="version is-current is-latest">
+          <a href="../index.html">1.0.0</a>
+        </li>
+      </ul>
+    </li>
+  </ul>
+</div>
+    </div>
+  </aside>
+</div>
+<main class="article">
+<div class="toolbar" role="navigation">
+<button class="nav-toggle"></button>
+  <a href="../index.html" class="home-link"></a>
+<nav class="breadcrumbs" aria-label="breadcrumbs">
+  <ul>
+    <li><a href="../index.html">Kubernetes Developer Learning Path</a></li>
+    <li><a href="suggested-reading.html">Suggested Reading</a></li>
+    <li><a href="designing-distributed-systems-burns.html">Designing Distributed Systems: Foundations for Kubernetes Controllers</a></li>
+  </ul>
+</nav>
+</div>
+  <div class="content">
+<aside class="toc sidebar" data-title="Contents" data-levels="2">
+  <div class="toc-menu"></div>
+</aside>
+<article class="doc" data-audio-src="designing-distributed-systems-burns.wav" data-transcript-src="designing-distributed-systems-burns.txt">
+<h1 class="page">Designing Distributed Systems: Foundations for Kubernetes Controllers</h1>
+<div id="preamble">
+<div class="sectionbody">
+<div class="paragraph">
+<p>In the context of Kubernetes development, transitioning from a single-instance controller to a resilient, distributed operator requires a fundamental shift in how we perceive state. Brendan Burns’ <strong>Designing Distributed Systems</strong> provides the theoretical bedrock for the patterns we implement in <code>client-go</code> and <code>controller-runtime</code>.</p>
+</div>
+<div class="paragraph">
+<p>To build robust Kubernetes controllers, you must move away from "transactional" thinking—where you expect a command to succeed immediately—and move toward "eventual consistency."</p>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_core_distributed_principles_for_kubernetes"><a class="anchor" href="#_core_distributed_principles_for_kubernetes"></a>Core Distributed Principles for Kubernetes</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>When scaling controllers or ensuring high availability, we rely on specific patterns to manage state across distributed nodes:</p>
+</div>
+<div class="ulist">
+<ul>
+<li>
+<p><strong>The Sidecar Pattern:</strong> Extending the functionality of a primary container without modifying its source code. In controller design, this is mirrored in how we use <code>Admission Webhooks</code> to intercept and modify resource requests before they reach <code>etcd</code>.</p>
+</li>
+<li>
+<p><strong>The Ambassador Pattern:</strong> Offloading communication logic (like retries or mTLS) to a sidecar, similar to how Service Mesh architectures (like Istio or Linkerd) handle traffic management outside the application logic.</p>
+</li>
+<li>
+<p><strong>The Work Queue Pattern:</strong> Essential for <code>client-go</code> informers. By decoupling the observation of state (events) from the processing of state (the Reconcile loop), we ensure that a spike in API traffic does not crash our controller.</p>
+</li>
+<li>
+<p><strong>The Replicated Worker Pattern:</strong> The foundation of controller sharding. When you run multiple instances of a controller, you must ensure they don&#8217;t fight over the same resources.</p>
+</li>
+</ul>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_implementing_distributed_state_machines"><a class="anchor" href="#_implementing_distributed_state_machines"></a>Implementing Distributed State Machines</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>The transition from a basic controller to a distributed system is defined by how you handle conflicts and state ownership.</p>
+</div>
+<div class="sect2">
+<h3 id="_1_idempotency_and_atomicity"><a class="anchor" href="#_1_idempotency_and_atomicity"></a>1. Idempotency and Atomicity</h3>
+<div class="paragraph">
+<p>In a distributed system, you cannot assume a request will only arrive once. Your <code>Reconcile</code> function must be <strong>idempotent</strong>:
+*   <strong>Definition:</strong> An operation is idempotent if performing it multiple times yields the same result as performing it once.
+*   <strong>Application:</strong> Always verify current cluster state before applying changes. If the resource is already in the desired state, the <code>Reconcile</code> loop should exit gracefully without making unnecessary API calls.</p>
+</div>
+</div>
+<div class="sect2">
+<h3 id="_2_leader_election_leases"><a class="anchor" href="#_2_leader_election_leases"></a>2. Leader Election (Leases)</h3>
+<div class="paragraph">
+<p>Running multiple replicas of a controller for high availability (HA) introduces a "Split Brain" risk, where two controllers attempt to modify the same resource simultaneously.
+*   <strong>The Mechanism:</strong> Kubernetes uses the <code>Lease</code> resource (within the <code>coordination.k8s.io</code> API group) to implement distributed locking.
+*   <strong>The Workflow:</strong>
+    1. Controllers compete to acquire a <code>Lease</code> object.
+    2. The controller that holds the lock is the "Leader."
+    3. Other instances wait or remain in a "standby" mode.
+    4. If the leader fails to renew the lease, a new leader is elected.</p>
+</div>
+</div>
+<div class="sect2">
+<h3 id="_3_controller_sharding"><a class="anchor" href="#_3_controller_sharding"></a>3. Controller Sharding</h3>
+<div class="paragraph">
+<p>When a single controller becomes a bottleneck (e.g., managing thousands of Ingress resources), you implement <strong>sharding</strong>. By partitioning the work—where each replica is responsible for only a subset of resources (e.g., resources with a specific label or hash)—you increase throughput while maintaining individual controller simplicity.</p>
+</div>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_hands_on_concept_the_distributed_reconcile_logic"><a class="anchor" href="#_hands_on_concept_the_distributed_reconcile_logic"></a>Hands-on Concept: The Distributed Reconcile Logic</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>When writing your own controller (as outlined in our 2.2 objectives), apply these design principles:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-go hljs" data-lang="go">// Simplified pseudo-code for a Reconcile loop demonstrating distributed principles
+func (r *Reconcile) Reconcile(req ctrl.Request) (ctrl.Result, error) {
+    // 1. Fetch the latest state (Do not rely on cached memory)
+    instance := &amp;v1.MyResource{}
+    err := r.Get(ctx, req.NamespacedName, instance)
+
+    // 2. Idempotent logic: Check if work is actually needed
+    if instance.Status.Processed == true {
+        return ctrl.Result{}, nil
+    }
+
+    // 3. Perform the work
+    // Ensure this call is atomic or repeatable
+    err = r.performAction(instance)
+
+    // 4. Update Status (Optimistic Locking)
+    // Always use Patch/Update to ensure we don't overwrite changes made by other controllers
+    return ctrl.Result{}, err
+}</code></pre>
+</div>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_key_takeaways_for_the_developer"><a class="anchor" href="#_key_takeaways_for_the_developer"></a>Key Takeaways for the Developer</h2>
+<div class="sectionbody">
+<div class="ulist">
+<ul>
+<li>
+<p><strong>Design for Failure:</strong> Assume the network is unreliable and the API server may reject your request. Always use exponential backoff in your workqueues.</p>
+</li>
+<li>
+<p><strong>Respect the State:</strong> Kubernetes is the source of truth. Your controller is merely a tool to drive the cluster toward a desired configuration.</p>
+</li>
+<li>
+<p><strong>Leverage Existing Patterns:</strong> Don&#8217;t reinvent locks; use <code>client-go</code> leaderelection packages that utilize the <code>Lease</code> API to keep your implementation clean and idiomatic.</p>
+</li>
+</ul>
+</div>
+<div class="paragraph">
+<p>For further exploration, <strong>Designing Distributed Systems</strong> by Brendan Burns is essential reading to understand the transition from standalone scripts to production-grade, distributed Kubernetes operators.</p>
+</div>
+</div>
+</div>
+<nav class="pagination">
+  <span class="prev"><a href="kubernetes-security-and-observability-creane-gupta.html">Kubernetes Security and Observability</a></span>
+  <span class="next"><a href="../appendix/appendix.html">Appendix</a></span>
+</nav>
+</article>
+  </div>
+</main>
+</div>
+<footer class="footer">
+  <img src="../../../_/img/rhl-logo-red.png" height="40px" alt="Red Hat"  href="https://redhat.com" >
+</footer><script id="site-script" src="../../../_/js/site.js" data-ui-root-path="../../../_"></script>
+<script async src="../../../_/js/vendor/highlight.js"></script>
+<script defer src="../../../_/js/vendor/tabs.js"></script>
+<script defer src="../../../_/js/vendor/reading-time.js"></script>
+<script defer src="../../../_/js/vendor/audio-transcript.js"></script>
+<script src="../../../_/js/vendor/lunr.js"></script>
+<script src="../../../_/js/search-ui.js" id="search-ui-script" data-site-root-path="../../.." data-snippet-length="100" data-stylesheet="../../../_/css/search.css"></script>
+<script async src="../../../search-index.js"></script>
+  </body>
+</html>
