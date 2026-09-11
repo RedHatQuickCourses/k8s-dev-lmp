@@ -1,5 +1,5 @@
 {
-  "totalSeconds": 7027,
+  "totalSeconds": 7065,
   "pageCount": 59,
   "pages": [
     {
@@ -105,27 +105,27 @@
     {
       "module": "21-controllers-contd",
       "page": "gvk-gvr-and-api-terminology.adoc",
-      "seconds": 138
+      "seconds": 139
     },
     {
       "module": "21-controllers-contd",
       "page": "controller-runtime-and-kubebuilder.adoc",
-      "seconds": 122
+      "seconds": 123
     },
     {
       "module": "21-controllers-contd",
       "page": "spec-status-and-conditions.adoc",
-      "seconds": 144
+      "seconds": 145
     },
     {
       "module": "21-controllers-contd",
       "page": "api-validation-and-linting.adoc",
-      "seconds": 67
+      "seconds": 68
     },
     {
       "module": "21-controllers-contd",
       "page": "update-patch-and-server-side-apply.adoc",
-      "seconds": 209
+      "seconds": 210
     },
     {
       "module": "22-going-distributed-locks-leases-ownership-eventual-consistency",
@@ -135,22 +135,22 @@
     {
       "module": "22-going-distributed-locks-leases-ownership-eventual-consistency",
       "page": "idempotent-reconciliation.adoc",
-      "seconds": 52
+      "seconds": 54
     },
     {
       "module": "22-going-distributed-locks-leases-ownership-eventual-consistency",
       "page": "distributed-locking-theory.adoc",
-      "seconds": 106
+      "seconds": 107
     },
     {
       "module": "22-going-distributed-locks-leases-ownership-eventual-consistency",
       "page": "leader-election-in-kubernetes.adoc",
-      "seconds": 77
+      "seconds": 78
     },
     {
       "module": "22-going-distributed-locks-leases-ownership-eventual-consistency",
       "page": "controller-sharding.adoc",
-      "seconds": 111
+      "seconds": 114
     },
     {
       "module": "31-taking-more-control-admissions-and-beyond-the-kube-apiserver-to-writing-your-own-api-server",
@@ -160,22 +160,22 @@
     {
       "module": "31-taking-more-control-admissions-and-beyond-the-kube-apiserver-to-writing-your-own-api-server",
       "page": "admission-control-webhooks.adoc",
-      "seconds": 147
+      "seconds": 149
     },
     {
       "module": "31-taking-more-control-admissions-and-beyond-the-kube-apiserver-to-writing-your-own-api-server",
       "page": "policy-engines-and-gatekeeper.adoc",
-      "seconds": 139
+      "seconds": 142
     },
     {
       "module": "31-taking-more-control-admissions-and-beyond-the-kube-apiserver-to-writing-your-own-api-server",
       "page": "api-discovery-and-aggregation.adoc",
-      "seconds": 150
+      "seconds": 152
     },
     {
       "module": "31-taking-more-control-admissions-and-beyond-the-kube-apiserver-to-writing-your-own-api-server",
       "page": "custom-api-servers.adoc",
-      "seconds": 158
+      "seconds": 162
     },
     {
       "module": "32-the-other-stuff",
@@ -185,22 +185,22 @@
     {
       "module": "32-the-other-stuff",
       "page": "ingress-and-gateway-api.adoc",
-      "seconds": 67
+      "seconds": 69
     },
     {
       "module": "32-the-other-stuff",
       "page": "service-mesh-fundamentals.adoc",
-      "seconds": 141
+      "seconds": 143
     },
     {
       "module": "32-the-other-stuff",
       "page": "authentication-and-authorization.adoc",
-      "seconds": 197
+      "seconds": 200
     },
     {
       "module": "32-the-other-stuff",
       "page": "security-context-and-hardening.adoc",
-      "seconds": 161
+      "seconds": 163
     },
     {
       "module": "41-all-about-kube-scheduler",
@@ -210,17 +210,17 @@
     {
       "module": "41-all-about-kube-scheduler",
       "page": "how-the-scheduler-works.adoc",
-      "seconds": 193
+      "seconds": 194
     },
     {
       "module": "41-all-about-kube-scheduler",
       "page": "resource-management.adoc",
-      "seconds": 181
+      "seconds": 182
     },
     {
       "module": "41-all-about-kube-scheduler",
       "page": "dynamic-resource-allocation.adoc",
-      "seconds": 188
+      "seconds": 189
     },
     {
       "module": "42-ubiquitous-topics",
@@ -230,12 +230,12 @@
     {
       "module": "42-ubiquitous-topics",
       "page": "operator-landscape.adoc",
-      "seconds": 245
+      "seconds": 246
     },
     {
       "module": "42-ubiquitous-topics",
       "page": "alternative-control-planes-and-form-factors.adoc",
-      "seconds": 273
+      "seconds": 275
     },
     {
       "module": "exercises",
