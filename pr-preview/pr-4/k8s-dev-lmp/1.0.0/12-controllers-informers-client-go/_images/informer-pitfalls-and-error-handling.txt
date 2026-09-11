@@ -1,0 +1,34 @@
+In this session, we will explore common pitfalls and effective error-handling strategies when working with Informers in Kubernetes. While Informers are elegant and powerful in smaller clusters, they introduce subtle failure modes at scale. The concepts we’ll cover are drawn from both upstream Kubernetes controller guidelines and real-world production experience.
+
+First, let's discuss the most important principle for writing correct controllers: being level-driven rather than edge-driven. 
+
+A level-driven controller examines the current state of the world to determine what action to take. In contrast, an edge-driven controller reacts to the delta between an old and new state. It is critical that you do not compare the old and new objects in your UpdateFunc handler to decide whether to reconcile. Treating the old object as a reference is a common pitfall because Informers do not guarantee that you will see every intermediate state; events can be missed, reordered, or coalesced during high churn. Furthermore, if your controller restarts, it will receive the current state via an initial list, meaning there is no previous state to compare against. 
+
+The correct approach is to enqueue the object's key unconditionally in your UpdateFunc handler. Your sync handler should then read the current state directly from the cache and reconcile from there.
+
+Moving on to scaling, let's look at failure modes that emerge in production clusters with tens of thousands of resources. 
+
+When an Informer starts, it performs an initial list operation that returns all existing objects of the watched type. If you are watching pods in a large cluster, this can load a massive number of objects into memory simultaneously, triggering a cascade of add events. 
+
+These events are processed by handlers running serially on a ring buffer. If a handler performs a slow operation—like a network call—events will back up. This leads to a dangerous "Out of Memory" loop where the backlog grows, periodic resyncs compound the problem, and memory usage spikes until the process is killed and restarted.
+
+To mitigate these issues, always use a workqueue to move processing out of the event handler. This allows you to implement rate limiting, retries, and backoff. Additionally, use label selectors to restrict your watch to only the objects your controller needs, and consider using the SetTransform hook to strip out unnecessary fields to reduce your memory footprint.
+
+Regarding error handling, it is essential that you do not silently swallow errors. Instead, percolate them to the top of your sync handler. When an error is returned, the work loop should handle it by requeuing the item with an exponential backoff. 
+
+When managing the workqueue, remember these three vital calls: 
+First, "Done" must always be called to release the processing lock. 
+Second, use "Forget" on success to reset the backoff counter and allow the item to be processed immediately if it appears again. 
+Finally, use "AddRateLimited" on failure to ensure the controller retries the operation with an increasing delay.
+
+As we wrap up, let's review a few common mistakes to avoid. 
+
+First, never mutate cached objects directly. Because the Informer cache is shared, you must always call "DeepCopy" before modifying an object to prevent data corruption across other controllers. 
+
+Second, always wait for your cache to sync using "WaitForCacheSync" before you begin processing. If you start too early, your controller might make decisions based on an incomplete view of the cluster.
+
+Third, use the Lister for reading data, not the clientset. The Lister pulls data from the local cache, which is fast and avoids hitting the API server. Use the clientset only when performing writes. 
+
+Finally, remember that the Informer cache is eventually consistent. Before performing an update or patch, re-fetch the resource from the API server to ensure you have the most current resource version and avoid conflict errors.
+
+For further study, please consult the official Kubernetes controller guidelines and the additional technical resources provided in the documentation.

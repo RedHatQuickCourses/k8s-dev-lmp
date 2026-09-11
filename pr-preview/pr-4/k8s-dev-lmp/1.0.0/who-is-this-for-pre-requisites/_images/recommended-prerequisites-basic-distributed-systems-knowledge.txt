@@ -1,0 +1,19 @@
+Welcome to the Kubernetes Developer Learning Path. Before we dive into the advanced mechanics of Kubernetes extensibility, it is essential to ensure you have a solid foundation. This track focuses on complex topics like custom controllers, admission webhooks, and distributed state management, all of which rely heavily on the core principles of distributed systems.
+
+This curriculum is specifically designed for software engineers, site reliability engineers, and platform architects who are moving beyond standard application deployment and are now ready to extend the Kubernetes control plane itself.
+
+To succeed in this course, there are three primary areas where you should already be comfortable.
+
+First, regarding containerization, you should have proficiency in container lifecycles, OCI image standards, and resource management, including the use of requests and limits. Ideally, you should possess a level of knowledge equivalent to the DO-180 Introduction to Containers, Kubernetes, and Red Hat OpenShift course.
+
+Second, you should have a strong background in Kubernetes administration. This includes familiarity with standard cluster operations, such as using `kubectl`, understanding the structure of common resources like Pods, Deployments, and Services, and configuring standard Role-Based Access Control, or RBAC. This should be equivalent to the DO-280 course or the CKAD certification.
+
+Finally, we highly recommend strong proficiency in Go, or Golang. Because the Kubernetes codebase is primarily written in Go, and `client-go` is the primary library for interaction, you need to be comfortable with Go interfaces, concurrency primitives like goroutines and channels, and proper error handling.
+
+Beyond these technical requirements, we will be building controllers that interact with a highly available, eventually consistent system. Therefore, you should also have a baseline understanding of distributed systems fundamentals.
+
+You should understand eventual consistency—specifically, how the control plane moves a cluster from a desired state to an actual state. You should also be familiar with handling concurrency and race conditions, which is critical when writing controllers that may be deployed in high-availability modes. Additionally, you should understand API semantics, including RESTful interactions, HTTP status codes, and the difference between synchronous and asynchronous processing.
+
+It is important to keep in mind why these prerequisites matter. In this course, we are moving away from simply using the cluster to actively orchestrating it. When you build a custom operator, your code effectively becomes part of the Kubernetes control plane. If your controller logic is not designed with distributed systems principles, such as idempotency and proper error handling, you risk causing system-wide instability.
+
+If you feel your knowledge in these areas is limited, we suggest reviewing the book *Designing Distributed Systems* by Brendan Burns, or consulting the official Kubernetes documentation on Reference Architecture. Once you are comfortable with these foundations, you will be well-prepared to move forward with this learning path.

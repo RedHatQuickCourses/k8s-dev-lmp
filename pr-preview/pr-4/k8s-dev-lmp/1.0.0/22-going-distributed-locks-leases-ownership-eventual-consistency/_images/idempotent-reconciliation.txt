@@ -1,0 +1,35 @@
+A controller that cannot be safely re-run on the same input is a controller waiting to break. To build robust systems, we need to focus on structure, return semantics, and cache-awareness. Let’s start by looking at the structure of a reliable Reconcile method.
+
+A well-structured Reconcile method follows a predictable flow that separates concerns, making your logic much easier to reason about. 
+
+First, fetch the resource from the informer cache. If the resource is not found, it means it has been deleted, so you should return early. 
+
+Second, check for deletion. If the metadata deletion timestamp is set, run your finalizer logic to clean up external resources, remove the finalizer, and then return. 
+
+Third, initialize the resource. This is where you ensure a finalizer is present, set any default values, and initialize status conditions. 
+
+Fourth, perform the core reconciliation. This involves creating, updating, or deleting any owned child resources to match the desired state declared in the spec. 
+
+Finally, update the status. Patch the status to reflect the outcome of your operations. It is best practice to compare the current state against a deep copy taken before reconciliation to avoid unnecessary writes to the API.
+
+Moving on to design, the core principle here is idempotency. Every call to Reconcile should produce the same outcome for the same input state, regardless of how many times it runs or what specific event triggered it. 
+
+To achieve this, keep these three rules in mind. First, do not depend on the triggering event. The reconciler only receives a name and namespace, not the event type. Always treat every invocation as an instruction to make reality match the spec. Second, avoid unnecessary API calls. You can compare the status observed generation against the metadata generation. If they match and no external drift is possible, you can skip reconciliation entirely. Third, make external calls conditional. If your controller provisions cloud resources, always check if the resource already exists in the desired state before calling the provider API. A successful reconcile of an up-to-date object should be fast and make zero external calls.
+
+Next, let’s discuss Reconcile return values, which control how the system handles requeueing. 
+
+If you return an empty result and nil, it indicates success, and the object is not requeued unless a new event arrives. 
+
+If you return an error, the object is automatically requeued using a rate-limited exponential backoff. 
+
+If you return a result with the Requeue property set to true, it triggers an explicit requeue. Use this sparingly, typically only when an operation is in progress but hasn't failed yet. 
+
+Finally, you can return a result with a RequeueAfter duration. This is useful for periodic reconciliation, such as polling external state that doesn't generate its own Kubernetes events. 
+
+An important caution here: returning an error is the standard, preferred way to request a retry. Do not use a manual Requeue as a substitute for proper error handling.
+
+Finally, let's cover the Expectations pattern. Because controller-runtime serves reads from a local informer cache, there is a small window after a successful write where the cache hasn't yet observed the change. This can lead to bugs where the controller creates duplicate resources because it sees a stale, empty state.
+
+The solution is the expectations pattern, which tracks expected writes in memory. Before creating a child resource, the controller checks if its expectations are satisfied. If not, it waits for the cache to catch up. After performing a creation, it records that expectation. This pattern is used by the core ReplicaSet and Job controllers and is essential for any controller that manages a dynamic number of child resources.
+
+For further reading, you can visit the official Kubernetes documentation on writing controllers, the blog post on Advanced Server-Side Apply, and the resource on common pitfalls in writing Kubernetes controllers.

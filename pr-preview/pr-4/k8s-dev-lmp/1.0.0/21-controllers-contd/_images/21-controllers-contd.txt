@@ -1,0 +1,11 @@
+Welcome to this module, where we move beyond the raw client-go informer and workqueue machinery we explored previously, to focus on the higher-level abstractions used in most production controllers.
+
+We begin with the foundational terminology that underpins every Kubernetes API interaction: Groups, Versions, Kinds, and Resources. Understanding these concepts is essential for working effectively with the Kubernetes API.
+
+From there, we will explore controller-runtime and Kubebuilder. These tools allow us to replace complex, boilerplate informer setups with a simplified and powerful single Reconcile method.
+
+Next, we will cover critical API design conventions. This includes the distinction between spec and status, how to effectively implement condition reporting, and the observedGeneration pattern, which is vital for preventing stale status information.
+
+We will also look at validation and linting. These processes ensure that your Custom Resource Definition schemas follow upstream Kubernetes conventions long before they reach the review stage.
+
+Finally, we will compare the different methods for modifying objects in Kubernetes. We will examine the differences between an Update, the three specific Patch types, and Server-Side Apply, and I will explain when each approach is most appropriate for your controllers and CI/CD systems.
