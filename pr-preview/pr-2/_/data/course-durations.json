@@ -1,5 +1,5 @@
 {
-  "totalSeconds": 6984,
+  "totalSeconds": 7019,
   "pageCount": 59,
   "pages": [
     {
@@ -255,7 +255,7 @@
     {
       "module": "exercises",
       "page": "3-develop-a-custom-validating-webhook-for-container-registry-enforcement.adoc",
-      "seconds": 227
+      "seconds": 262
     },
     {
       "module": "recommended-reading",
