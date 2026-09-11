@@ -1,5 +1,5 @@
 {
-  "totalSeconds": 7065,
+  "totalSeconds": 7070,
   "pageCount": 59,
   "pages": [
     {
@@ -245,7 +245,7 @@
     {
       "module": "exercises",
       "page": "1-build-a-controller-using-client-go-from-scratch.adoc",
-      "seconds": 82
+      "seconds": 83
     },
     {
       "module": "exercises",
@@ -255,7 +255,7 @@
     {
       "module": "exercises",
       "page": "3-develop-a-custom-validating-webhook-for-container-registry-enforcement.adoc",
-      "seconds": 262
+      "seconds": 263
     },
     {
       "module": "recommended-reading",
@@ -270,12 +270,12 @@
     {
       "module": "recommended-reading",
       "page": "kubernetes-operators-dobies-wood.adoc",
-      "seconds": 150
+      "seconds": 152
     },
     {
       "module": "recommended-reading",
       "page": "cncf-operator-whitepaper.adoc",
-      "seconds": 141
+      "seconds": 142
     },
     {
       "module": "suggested-reading",
