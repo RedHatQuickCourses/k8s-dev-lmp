@@ -100,6 +100,6 @@ The underlying reconciler code, RBAC markers, and CRD generation are the same.
 
 == References
 
-* https://book.kubebuilder.io/cronjob-tutorial/controller-overview.html[What's in a Controller?]
+* https://book.kubebuilder.io/cronjob-tutorial/controller-overview.html[What's in a Controller?, window=_blank]
 * https://book.kubebuilder.io/cronjob-tutorial/controller-implementation.html[Implementing a Controller]
-* https://sdk.operatorframework.io/docs/faqs/[Operator SDK FAQ]
+* https://sdk.operatorframework.io/docs/faqs/[Operator SDK FAQ, window=_blank]

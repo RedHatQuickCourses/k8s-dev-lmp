@@ -72,5 +72,5 @@ Kubernetes leader election via Leases does *not* provide fencing token guarantee
 
 == References
 
-* https://martin.kleppmann.com/2016/02/08/how-to-do-distributed-locking.html[How to Do Distributed Locking]
-* https://kubernetes.io/docs/concepts/architecture/leases[Leases]
+* https://martin.kleppmann.com/2016/02/08/how-to-do-distributed-locking.html[How to Do Distributed Locking, window=_blank]
+* https://kubernetes.io/docs/concepts/architecture/leases[Leases, window=_blank]

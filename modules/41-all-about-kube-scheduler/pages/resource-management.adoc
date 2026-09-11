@@ -112,4 +112,4 @@ Together, LimitRange and ResourceQuota let platform teams give development teams
 
 == References
 
-* https://kubernetes.io/docs/concepts/configuration/manage-resources-containers/[Resource Management for Pods and Containers]
+* https://kubernetes.io/docs/concepts/configuration/manage-resources-containers/[Resource Management for Pods and Containers, window=_blank]

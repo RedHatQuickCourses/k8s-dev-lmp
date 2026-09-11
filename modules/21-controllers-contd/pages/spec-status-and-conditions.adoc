@@ -110,4 +110,4 @@ This ensures correctness even after controller restarts.
 
 == References
 
-* https://github.com/kubernetes/community/blob/master/contributors/devel/sig-architecture/api-conventions.md[API Conventions]
+* https://github.com/kubernetes/community/blob/master/contributors/devel/sig-architecture/api-conventions.md[API Conventions, window=_blank]

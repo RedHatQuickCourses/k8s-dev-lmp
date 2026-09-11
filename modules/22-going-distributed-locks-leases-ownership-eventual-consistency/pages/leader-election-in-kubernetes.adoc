@@ -110,5 +110,5 @@ For a hands-on exercise implementing leader election with Lease objects, see xre
 
 == References
 
-* https://sklar.rocks/kubernetes-leader-election/[Kubernetes-Powered Leader Election in Go]
-* https://pkg.go.dev/k8s.io/client-go/tools/leaderelection[leaderelection package reference]
+* https://sklar.rocks/kubernetes-leader-election/[Kubernetes-Powered Leader Election in Go, window=_blank]
+* https://pkg.go.dev/k8s.io/client-go/tools/leaderelection[leaderelection package reference, window=_blank]

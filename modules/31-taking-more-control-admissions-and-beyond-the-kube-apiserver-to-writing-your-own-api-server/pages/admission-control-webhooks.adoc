@@ -83,5 +83,5 @@ Ready to build one yourself? See xref:exercises:3-develop-a-custom-validating-we
 
 == References
 
-* https://kubernetes.io/docs/reference/access-authn-authz/admission-controllers[Admission Controllers Reference]
-* https://github.com/openshift/generic-admission-server[generic-admission-server]
+* https://kubernetes.io/docs/reference/access-authn-authz/admission-controllers[Admission Controllers Reference, window=_blank]
+* https://github.com/openshift/generic-admission-server[generic-admission-server, window=_blank]

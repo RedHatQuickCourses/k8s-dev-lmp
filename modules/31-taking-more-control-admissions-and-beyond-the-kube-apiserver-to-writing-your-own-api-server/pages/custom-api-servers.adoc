@@ -44,7 +44,7 @@ Authentication, authorization, and audit logging are handled by the kube-apiserv
 The `k8s.io/apiserver` library provides the generic framework for building a Kubernetes-compatible API server.
 It handles TLS termination, authentication (delegated to the main API server via `TokenReview`), authorization (via `SubjectAccessReview`), admission control, OpenAPI schema generation, and the storage interface.
 
-The https://github.com/kubernetes/sample-apiserver[kubernetes/sample-apiserver] repository is the reference implementation.
+The https://github.com/kubernetes/sample-apiserver[kubernetes/sample-apiserver, window=_blank] repository is the reference implementation.
 The typical workflow is:
 
 . Define your API types in `pkg/apis/<group>/types.go`.
@@ -52,7 +52,7 @@ The typical workflow is:
 . Implement a storage backend that satisfies the `rest.Storage` interface.
 . Wire everything together in a server binary that calls `GenericAPIServer.InstallAPIGroup()`.
 
-The OpenShift https://github.com/openshift/generic-admission-server[generic-admission-server] library builds on this same foundation, providing a streamlined path for admission webhooks deployed as aggregated API servers.
+The OpenShift https://github.com/openshift/generic-admission-server[generic-admission-server, window=_blank] library builds on this same foundation, providing a streamlined path for admission webhooks deployed as aggregated API servers.
 
 == Case Study: OLM Package Server
 
@@ -79,7 +79,7 @@ Choose this path only when the technical requirements genuinely demand it.
 
 == References
 
-* https://kubernetes.io/docs/concepts/extend-kubernetes/api-extension/custom-resources/#choosing-a-method-for-adding-custom-resources[Choosing a Method for Adding Custom Resources]
-* https://kubernetes.io/docs/concepts/extend-kubernetes/api-extension/apiserver-aggregation/[API Aggregation Layer]
-* https://github.com/kubernetes/sample-apiserver[sample-apiserver]
-* https://github.com/openshift/operator-framework-olm/tree/main/cmd/package-server-manager[package-server-manager]
+* https://kubernetes.io/docs/concepts/extend-kubernetes/api-extension/custom-resources/#choosing-a-method-for-adding-custom-resources[Choosing a Method for Adding Custom Resources, window=_blank]
+* https://kubernetes.io/docs/concepts/extend-kubernetes/api-extension/apiserver-aggregation/[API Aggregation Layer, window=_blank]
+* https://github.com/kubernetes/sample-apiserver[sample-apiserver, window=_blank]
+* https://github.com/openshift/operator-framework-olm/tree/main/cmd/package-server-manager[package-server-manager, window=_blank]
