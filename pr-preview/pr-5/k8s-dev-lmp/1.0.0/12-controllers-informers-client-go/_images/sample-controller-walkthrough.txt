@@ -1,0 +1,40 @@
+The sample-controller is the official Kubernetes example operator. It serves as a practical guide for building a controller from scratch using client-go. Specifically, it demonstrates how to manage a custom resource called "Foo," which in turn creates and manages Kubernetes Deployments.
+
+### The Foo Custom Resource
+The Foo resource is defined by a specification that includes a deployment name and a desired replica count. The controller’s job is to ensure that a corresponding Deployment exists and that it matches the requested number of replicas.
+
+After defining the necessary types in the project’s types-dot-go file, the controller uses the code-generator tool to automatically produce typed clients, informers, listers, and the required DeepCopy methods.
+
+### Program Entrypoint
+The main-dot-go file is the starting point for the controller. It sets up the necessary infrastructure by initializing two separate clients: one for the built-in apps-v1 API group, which manages Deployments, and one for the custom sample-controller-v1alpha1 API group, which manages the Foo resources.
+
+For each client, a SharedInformerFactory is initialized to handle data synchronization. Once these factories are started to begin populating local caches, the controller is launched with two worker goroutines to process requests.
+
+### Event Handler Registration
+The controller registers event handlers on both the Foo and Deployment informers. When a Foo resource is added or updated, the controller simply enqueues that specific Foo for processing. 
+
+For Deployments, the logic is slightly different. When a change occurs, the controller checks whether the Deployment is owned by a Foo resource. If it is, the controller identifies the owner and enqueues that Foo. It accomplishes this using a helper function that extracts the owner reference and verifies its kind. 
+
+A useful tip to remember here: there is no specific delete handler for the Foo resource itself. This is because Kubernetes garbage collection automatically handles the cleanup of owned Deployments once the parent Foo is deleted, so no additional logic is required on our part.
+
+### The Work Loop
+The core of the controller’s activity happens in the Run method, which launches worker goroutines that repeatedly call the process-next-work-item function. This function interacts with a workqueue to manage tasks safely.
+
+It performs four key actions:
+First, it calls Get to dequeue a key and mark it as being processed, ensuring no other worker handles it simultaneously.
+Second, it uses Done to release the processing lock once the work is complete.
+Third, it calls Forget on success to reset the rate-limiting backoff counter.
+Finally, if a task fails, it uses Add-Rate-Limited to requeue the item with an exponential backoff.
+
+### The Sync Handler
+The sync-handler function contains the actual reconciliation logic. It follows a consistent, step-by-step sequence:
+First, it parses the key into a namespace and name. 
+Next, it retrieves the Foo object from the local cache. 
+Then, it checks for the existence of the corresponding Deployment. If it doesn't exist, the controller creates it. 
+It then verifies that the Deployment is properly controlled by the Foo resource; if it is controlled by something else, it issues a warning. 
+After that, it reconciles the number of replicas, updating the Deployment if the actual count does not match the desired state. 
+Finally, it updates the Foo status to reflect the current state of the Deployment.
+
+This pattern—fetching from the cache, comparing the desired state with the actual state, taking action if they differ, and updating the status—is the standard reconciliation loop used by almost every client-go controller. 
+
+For a hands-on opportunity to apply these concepts, please consult the documentation for our building a controller exercise. You can also refer to the additional learning resources linked in the reference section for a deeper dive into writing Kubernetes operators.

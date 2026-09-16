@@ -1,0 +1,25 @@
+In Kubernetes, modifying API objects effectively requires choosing the right mechanism based on your role, the type of resource, and how many actors are writing to it. Let's explore these mechanisms, starting with standard updates.
+
+When you perform an update using an HTTP PUT request, you are replacing the entire object. This process requires a client to get the current object, modify it, and then put the full object back. Kubernetes manages this using optimistic concurrency. The system checks the resource version field on every PUT; if the resource was modified since the initial get, the server rejects the write with a 409 conflict error. While this is the simplest approach for single-owner resources, it can be inefficient in systems with many concurrent actors, as multiple retries might be necessary.
+
+If you don't want to replace the full object, you can use patches to send only the specific changes. Kubernetes supports three types of patches. 
+
+First, there is JSON Patch, which defines a sequence of discrete operations like add, remove, or replace. Use this when you need precise, surgical changes to specific paths. 
+
+Second is JSON Merge Patch. This merges a partial object into the existing one. Keep in mind that while this is great for simple field updates, it does not support list merging—lists are replaced entirely. 
+
+Third is the Strategic Merge Patch. This is a Kubernetes-specific format that uses special merge keys to handle lists intelligently. For instance, when updating a pod specification, the container's list is merged based on the name field rather than just being replaced. This is the default for client-side kubectl apply and is preferred for built-in types. Please note that strategic merge patches are not supported for custom resources; for those, you should use JSON Merge Patch or Server-Side Apply.
+
+Now, let's discuss Server-Side Apply, or SSA. This approach moves the merge algorithm from the client to the API server and introduces field ownership tracking. 
+
+In this model, each actor, known as a field manager, sends a fully specified intent of the fields they care about. The API server then records who owns each field in the object’s managed fields metadata. If two managers try to set the same field to different values, the server returns a conflict. A major benefit here is that no-op applies—where the object already matches your intent—do not trigger unnecessary updates or watch events.
+
+When working with controllers, there are two common patterns for using Server-Side Apply. The first is the Reconstructive pattern. In this approach, you build the desired state from scratch during every reconcile and apply it, letting the server compute the difference. This is the recommended approach for new controllers because it is less error-prone. 
+
+The second is the Extract-Modify-Apply pattern. This is intended for existing controllers migrating from the old get-modify-put workflow. You retrieve the current configuration for your field manager, modify it, and re-apply it, which prevents you from accidentally claiming ownership of fields you don't intend to manage.
+
+A crucial consideration with Server-Side Apply is how you handle conflicts. Controllers should typically use forced conflicts, as they are the sole authority for their fields and cannot easily handle user-facing errors. However, CI/CD systems should not force conflicts. They should surface these errors to humans to prevent automated deployments from accidentally overwriting important manual changes, such as hotfixes.
+
+To wrap things up, here is a quick guide on which method to choose. If you have a single-owner resource, a traditional update or full-object patch is usually simpler. For resources managed by multiple controllers, Server-Side Apply is the best choice to prevent conflicts. For CI/CD deployments, use Server-Side Apply with conflict detection to catch configuration drift. And if you are migrating from client-side kubectl apply, you can use server-side apply as a drop-in replacement.
+
+Remember, Server-Side Apply is specifically recommended for scenarios where multiple actors write to the same object. For everything else, stick to traditional updates to keep your implementation as simple as possible.

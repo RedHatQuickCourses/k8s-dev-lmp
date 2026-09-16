@@ -1,0 +1,23 @@
+In this lesson, we are going to explore Dynamic Resource Allocation in Kubernetes, often referred to as DRA.
+
+To understand why DRA is necessary, let’s first look at the problem it solves. Traditional Kubernetes scheduling treats resources as fungible quantities. For example, the scheduler views 500 millicores of CPU on one node as identical to 500 millicores on another. This model works well for standard compute but breaks down when you need specialized hardware like GPUs, FPGAs, or high-performance network interfaces. These resources are non-fungible; they differ in their specific capabilities and availability. While the older Device Plugin framework handled simple pass-through allocation, it lacked the ability to express complex device attributes or share devices effectively. Dynamic Resource Allocation replaces that model with a robust, claim-based approach.
+
+DRA introduces three core API resources to manage this:
+
+First is the DeviceClass. This defines a category of devices available in your cluster. Created by administrators or drivers, it tells the scheduler what kind of hardware exists and how to select it.
+
+Second is the ResourceClaim. This is a request for access to one or more devices. It references a DeviceClass and allows you to use CEL selectors to filter for specific hardware attributes, such as VRAM size or driver version. The scheduler then coordinates with the DRA driver to find a node that has the matching device and allocates it to the claim.
+
+Third is the ResourceClaimTemplate. This is used to generate a per-pod ResourceClaim automatically. It functions much like a VolumeClaimTemplate in a StatefulSet, ensuring each pod gets its own claim, which is then cleaned up when the pod terminates.
+
+In addition to these, there is a fourth resource called a ResourceSlice. These are created by the device driver on each node to advertise what hardware is available, providing the scheduler with the information it needs to make informed matching decisions.
+
+Now, let’s look at how the scheduling process works with DRA. When a pod references a ResourceClaim, the scheduling cycle adds an extra coordination step. First, the scheduler identifies nodes that might satisfy the claim based on published ResourceSlices. Second, for each candidate node, the scheduler asks the DRA driver if the claim can actually be allocated there. Only nodes where the allocation succeeds are considered feasible. Finally, the pod is scored and bound to the node, and the specific device information is recorded in the status of the ResourceClaim. This design allows DRA to extend the scheduler’s filter stage with device-aware logic without modifying the core scheduler.
+
+One of the most powerful features of DRA is the ability to prioritize alternatives. A ResourceClaim can include a prioritized list of sub-requests using the `firstAvailable` field. The scheduler will evaluate these in order and pick the first one that can be satisfied. For instance, you could configure a request that prefers a large GPU with 80 gigabytes of VRAM, but falls back to two smaller 24-gigabyte GPUs if the large one isn’t available.
+
+Another significant improvement over the old Device Plugin model is device sharing. DRA supports sharing a single device across multiple containers or even multiple pods. If two containers in the same pod reference the same ResourceClaim, they both gain access to the allocated hardware. Similarly, separate pods can share a device if they reference the same named ResourceClaim within the same namespace.
+
+It is important to remember that DRA does not replace CPU and memory requests. A pod that requires a GPU still needs CPU and memory to run its base code. In practice, you will set both traditional resource requests and ResourceClaims. The scheduler uses the CPU and memory requests to ensure the node has enough general compute capacity, and it uses the ResourceClaim to ensure the node has the correct specialized hardware. A node must satisfy both constraints to be considered feasible for the pod.
+
+Before we conclude, keep in mind that Dynamic Resource Allocation is a rapidly evolving area of Kubernetes. Some features, such as workload-level claims and device taints, may still be in alpha or beta phases. Always consult the official Kubernetes documentation for the latest information on API stability and required feature gates.

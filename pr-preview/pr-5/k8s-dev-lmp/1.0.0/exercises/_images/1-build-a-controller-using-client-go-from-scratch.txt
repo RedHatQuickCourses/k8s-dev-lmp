@@ -1,0 +1,17 @@
+In this exercise, you will build a Kubernetes controller from scratch using client-go. By the end of this session, you will have a working program that watches for pod events, processes them through a workqueue, and logs their state. This implementation puts into practice the complete data flow pipeline we have discussed previously regarding controller and informer architecture.
+
+To get started, ensure you have a running Golang development environment, such as Go version 1.22 or higher, or a Go-capable IDE like VS Code or GoLand. You will also need access to a running OpenShift cluster and a properly configured kubeconfig file.
+
+First, let's set up your project. Create a new directory for your controller lab, initialize your Go module, and pull in the necessary dependencies, which include the client-go and apimachinery libraries. You can perform these steps by running the following commands in your terminal: `mkdir k8s-controller-lab`, then `cd k8s-controller-lab`, followed by `go mod init k8s-controller-lab`, `go get k8s.io/client-go@latest`, and finally `go get k8s.io/apimachinery@latest`.
+
+Next, we need to connect to your cluster. We use the standard kubeconfig lookup to build a REST configuration and create a typed clientset. Your main function should initialize the kubeconfig path and use `clientcmd.BuildConfigFromFlags` to establish the connection, followed by `kubernetes.NewForConfig`. If an error occurs during this process, the program should panic.
+
+Moving on to setting up the informer, we create a `SharedInformerFactory` and register event handlers that enqueue object keys. Remember that we enqueue keys rather than processing items directly in the handler to maintain efficiency and reliability. You will define a `workqueue` using `NewNamedRateLimitingQueue` and add functions for when pods are added, updated, or deleted. 
+
+It is important to remember that you must always call `cache.WaitForCacheSync` before processing items. Starting your reconcile loop before the cache is warmed up can lead to missed resources, so ensure your factory starts and the cache syncs before proceeding.
+
+Now, let's implement the worker loop. You will create a function that dequeues keys and processes them. If processing fails, use `queue.AddRateLimited(key)` to requeue the item with exponential backoff. If processing is successful, remember to call `queue.Forget(key)` to reset the backoff counter. Inside this worker, you will use a lister to fetch the pod and then log its namespace, name, and status phase. Run this worker in a goroutine and block until the stop channel closes.
+
+For your challenge, I would like you to extend this logic. Add a condition that checks if a pod has labels. If it does not, log a warning message stating that the pod is missing required labels. Once you have done that, try running two instances of your controller simultaneously and observe the behavior. This experiment will help motivate the need for leader election, which we will cover in the next exercise.
+
+For further reading, you can refer to the Operator SDK Go tutorial or the official Kubernetes documentation on controller structures.
