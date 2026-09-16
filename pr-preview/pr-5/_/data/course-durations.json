@@ -1,6 +1,6 @@
 {
-  "totalSeconds": 6323,
-  "pageCount": 54,
+  "totalSeconds": 6026,
+  "pageCount": 52,
   "pages": [
     {
       "module": "ROOT",
@@ -20,22 +20,12 @@
     {
       "module": "who-is-this-for-pre-requisites",
       "page": "who-is-this-for-pre-requisites.adoc",
-      "seconds": 68
+      "seconds": 25
     },
     {
       "module": "who-is-this-for-pre-requisites",
-      "page": "target-audience-engineers-sys-admins-and-developers-with-container-experience.adoc",
-      "seconds": 92
-    },
-    {
-      "module": "who-is-this-for-pre-requisites",
-      "page": "recommended-prerequisites-basic-distributed-systems-knowledge.adoc",
-      "seconds": 117
-    },
-    {
-      "module": "who-is-this-for-pre-requisites",
-      "page": "ideal-baseline-ckad-certification-or-red-hat-do-180-and-do-280-tracks.adoc",
-      "seconds": 92
+      "page": "technical-prerequisites.adoc",
+      "seconds": 47
     },
     {
       "module": "familiarizing-with-koobrnehteez",

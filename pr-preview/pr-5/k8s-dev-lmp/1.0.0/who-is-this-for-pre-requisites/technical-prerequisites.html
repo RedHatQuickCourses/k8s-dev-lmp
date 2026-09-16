@@ -3,8 +3,8 @@
   <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width,initial-scale=1">
-    <title>Preparing for the Kubernetes Developer Learning Path :: Kubernetes Developer Learning Path</title>
-    <link rel="prev" href="recommended-prerequisites-basic-distributed-systems-knowledge.html">
+    <title>Technical Prerequisites :: Kubernetes Developer Learning Path</title>
+    <link rel="prev" href="who-is-this-for-pre-requisites.html">
     <link rel="next" href="../familiarizing-with-koobrnehteez/familiarizing-with-koobrnehteez.html">
     <meta name="generator" content="Antora 3.2.0-alpha.12">
     <link rel="stylesheet" href="../../../_/css/site.css">
@@ -66,16 +66,10 @@
 <ul class="nav-list">
   <li class="nav-item" data-depth="1">
     <button class="nav-item-toggle"></button>
-    <a class="nav-link" href="who-is-this-for-pre-requisites.html">Who Is This For? Prerequisites</a>
+    <a class="nav-link" href="who-is-this-for-pre-requisites.html">Who Is This For?</a>
 <ul class="nav-list">
-  <li class="nav-item" data-depth="2">
-    <a class="nav-link" href="target-audience-engineers-sys-admins-and-developers-with-container-experience.html">Target Audience and Prerequisites</a>
-  </li>
-  <li class="nav-item" data-depth="2">
-    <a class="nav-link" href="recommended-prerequisites-basic-distributed-systems-knowledge.html">Prerequisites: Preparing for the Kubernetes Developer Learning Path</a>
-  </li>
   <li class="nav-item is-current-page" data-depth="2">
-    <a class="nav-link" href="ideal-baseline-ckad-certification-or-red-hat-do-180-and-do-280-tracks.html">Preparing for the Kubernetes Developer Learning Path</a>
+    <a class="nav-link" href="technical-prerequisites.html">Technical Prerequisites</a>
   </li>
 </ul>
   </li>
@@ -333,8 +327,8 @@
 <nav class="breadcrumbs" aria-label="breadcrumbs">
   <ul>
     <li><a href="../index.html">Kubernetes Developer Learning Path</a></li>
-    <li><a href="who-is-this-for-pre-requisites.html">Who Is This For? Prerequisites</a></li>
-    <li><a href="ideal-baseline-ckad-certification-or-red-hat-do-180-and-do-280-tracks.html">Preparing for the Kubernetes Developer Learning Path</a></li>
+    <li><a href="who-is-this-for-pre-requisites.html">Who Is This For?</a></li>
+    <li><a href="technical-prerequisites.html">Technical Prerequisites</a></li>
   </ul>
 </nav>
 </div>
@@ -342,34 +336,68 @@
 <aside class="toc sidebar" data-title="Contents" data-levels="2">
   <div class="toc-menu"></div>
 </aside>
-<article class="doc" data-audio-src="ideal-baseline-ckad-certification-or-red-hat-do-180-and-do-280-tracks.wav" data-transcript-src="ideal-baseline-ckad-certification-or-red-hat-do-180-and-do-280-tracks.txt">
-<h1 class="page">Preparing for the Kubernetes Developer Learning Path</h1>
+<article class="doc">
+<h1 class="page">Technical Prerequisites</h1>
 <div id="preamble">
 <div class="sectionbody">
 <div class="paragraph">
-<p>To succeed in this curriculum, you must possess a solid foundation in container orchestration. This learning path is designed for engineers, system administrators, and developers who are ready to transition from <strong>using</strong> Kubernetes to <strong>extending</strong> it.</p>
+<p>This course focuses on the internal mechanics of Kubernetes extensibility—custom controllers, admission webhooks, and distributed state management. To get the most out of it, you should have a solid foundation in container orchestration and be comfortable with the competencies below.</p>
 </div>
 </div>
 </div>
 <div class="sect1">
-<h2 id="_the_ideal_baseline"><a class="anchor" href="#_the_ideal_baseline"></a>The Ideal Baseline</h2>
+<h2 id="_recommended_competencies"><a class="anchor" href="#_recommended_competencies"></a>Recommended Competencies</h2>
 <div class="sectionbody">
-<div class="paragraph">
-<p>We expect participants to have a working understanding of the Kubernetes ecosystem. Our curriculum assumes you are comfortable with declarative configuration and the standard resource lifecycle. You should be prepared to meet one of the following benchmarks:</p>
-</div>
 <div class="ulist">
 <ul>
 <li>
-<p><strong>CKAD (Certified Kubernetes Application Developer):</strong> This certification confirms your ability to design, build, and deploy cloud-native applications. If you hold this certification, you already have the necessary skills in handling Pods, Deployments, Services, and ConfigMaps—the fundamental building blocks we will manipulate via custom controllers.</p>
+<p><strong>Container Fundamentals:</strong> Images, container lifecycles, and basic networking (e.g. <code>podman</code> or <code>docker</code> workflows).</p>
 </li>
 <li>
-<p><strong>Red Hat DO-180 (Introduction to Containers, Kubernetes, and Red Hat OpenShift):</strong> This track provides the essential vocabulary for containerized environments, image management, and basic orchestration.</p>
+<p><strong>Kubernetes Basics:</strong> Standard resources (Deployments, Services, ConfigMaps), the <code>kubectl</code> CLI, and basic RBAC (Roles, RoleBindings).</p>
 </li>
 <li>
-<p><strong>Red Hat DO-280 (Red Hat OpenShift Administration II: Operating a Production Kubernetes Cluster):</strong> This track dives deeper into the operational aspects of the platform, providing the necessary context regarding how clusters are secured, networked, and maintained—all of which are critical when writing controllers that interact with the cluster&#8217;s control plane.</p>
+<p><strong>Distributed Systems:</strong> A working knowledge of eventual consistency, concurrency and race conditions, and asynchronous, event-driven processing.</p>
+</li>
+<li>
+<p><strong>Programming:</strong> Because we interact with <code>client-go</code> and implement controllers, proficiency in <strong>Go (Golang)</strong>—interfaces, goroutines/channels, and error handling—is highly recommended.</p>
 </li>
 </ul>
 </div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_ideal_baseline"><a class="anchor" href="#_ideal_baseline"></a>Ideal Baseline</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>We recommend that participants meet one of the following benchmarks:</p>
+</div>
+<table class="tableblock frame-all grid-all stretch">
+<colgroup>
+<col style="width: 25%;">
+<col style="width: 75%;">
+</colgroup>
+<thead>
+<tr>
+<th class="tableblock halign-left valign-top">Benchmark</th>
+<th class="tableblock halign-left valign-top">Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><strong>CKAD Certification</strong></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Hands-on proficiency in designing, building, and deploying cloud-native applications on Kubernetes.</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><strong>Red Hat DO-180</strong></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Introduction to Containers, Kubernetes, and Red Hat OpenShift.</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><strong>Red Hat DO-280</strong></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Red Hat OpenShift Administration: managing enterprise-grade Kubernetes clusters.</p></td>
+</tr>
+</tbody>
+</table>
 <div class="admonitionblock note">
 <table>
 <tr>
@@ -378,25 +406,11 @@
 </td>
 <td class="content">
 <div class="paragraph">
-<p>If you do not hold these specific credentials, ensure you have equivalent practical experience. You should be familiar with:
-*   The <code>kubectl</code> command-line interface and basic API interaction.
-*   YAML-based manifest management.
-*   The fundamental concepts of distributed systems (e.g., eventual consistency, API-centric communication).</p>
+<p>If you do not hold these credentials, equivalent practical experience is fine. You should be comfortable with the <code>kubectl</code> CLI, YAML manifest management, and the fundamental concepts of distributed systems.</p>
 </div>
 </td>
 </tr>
 </table>
-</div>
-</div>
-</div>
-<div class="sect1">
-<h2 id="_why_these_prerequisites_matter"><a class="anchor" href="#_why_these_prerequisites_matter"></a>Why these prerequisites matter</h2>
-<div class="sectionbody">
-<div class="paragraph">
-<p>The content we will cover—ranging from <code>client-go</code> informers to Custom Resource Definitions (CRDs) and admission webhooks—builds directly upon the core Kubernetes resource model.</p>
-</div>
-<div class="paragraph">
-<p>If you are unfamiliar with how the <code>kube-apiserver</code> processes a request or how a deployment maintains its state through reconciliation, the jump into <code>client-go</code> architecture and controller reconciliation patterns will be significantly more difficult. By starting with the proficiency level defined by the <strong>CKAD</strong> or <strong>DO-180/DO-280</strong> tracks, you ensure that you can focus on the <strong>extension</strong> mechanisms of Kubernetes rather than struggling with basic application deployment patterns.</p>
 </div>
 <div class="admonitionblock tip">
 <table>
@@ -406,7 +420,7 @@
 </td>
 <td class="content">
 <div class="paragraph">
-<p>If you feel your knowledge in these areas is rusty, revisit the official Kubernetes documentation on <strong>Declarative Management</strong> and the <strong>Kubernetes API</strong> before beginning the hands-on labs in this learning path.</p>
+<p>If your knowledge in these areas feels rusty, revisit the official Kubernetes documentation on <a href="https://kubernetes.io/docs/concepts/architecture/" target="_blank" rel="noopener">Cluster Architecture</a> and, if needed, work through the <a href="https://go.dev/doc/tutorial/" target="_blank" rel="noopener">Go Tutorial</a> before starting the <code>client-go</code> lab exercises.</p>
 </div>
 </td>
 </tr>
@@ -415,7 +429,7 @@
 </div>
 </div>
 <nav class="pagination">
-  <span class="prev"><a href="recommended-prerequisites-basic-distributed-systems-knowledge.html">Prerequisites: Preparing for the Kubernetes Developer Learning Path</a></span>
+  <span class="prev"><a href="who-is-this-for-pre-requisites.html">Who Is This For?</a></span>
   <span class="next"><a href="../familiarizing-with-koobrnehteez/familiarizing-with-koobrnehteez.html">Familiarizing with Kubernetes</a></span>
 </nav>
 </article>
@@ -428,7 +442,6 @@
 <script async src="../../../_/js/vendor/highlight.js"></script>
 <script defer src="../../../_/js/vendor/tabs.js"></script>
 <script defer src="../../../_/js/vendor/reading-time.js"></script>
-<script defer src="../../../_/js/vendor/audio-transcript.js"></script>
 <script src="../../../_/js/vendor/lunr.js"></script>
 <script src="../../../_/js/search-ui.js" id="search-ui-script" data-site-root-path="../../.." data-snippet-length="100" data-stylesheet="../../../_/css/search.css"></script>
 <script async src="../../../search-index.js"></script>
