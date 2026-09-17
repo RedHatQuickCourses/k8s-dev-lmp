@@ -1,5 +1,5 @@
 {
-  "totalSeconds": 15569,
+  "totalSeconds": 15576,
   "pageCount": 53,
   "pages": [
     {
@@ -245,7 +245,7 @@
     {
       "module": "exercises",
       "page": "1-2-implement-optimistic-locking-and-leader-election-via-lease.adoc",
-      "seconds": 2544
+      "seconds": 2551
     },
     {
       "module": "exercises",
