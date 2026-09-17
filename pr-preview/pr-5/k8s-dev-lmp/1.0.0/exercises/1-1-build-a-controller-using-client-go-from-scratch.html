@@ -546,28 +546,15 @@ func reconcile(pod *corev1.Pod) {
 </td>
 <td class="content">
 <div class="paragraph">
-<p>Always call <code>cache.WaitForCacheSync</code> before processing items&#8201;&#8212;&#8201;see comment <code>// 5.</code> in the code above.
+<p>Always call <code>cache.WaitForCacheSync</code> before processing items (step 5 above).
 Starting your reconcile loop before the cache is warm leads to missed resources.</p>
-</div>
-<div class="paragraph">
-<p>A few more things to notice while reading the code:</p>
-</div>
-<div class="ulist">
-<ul>
-<li>
-<p>We enqueue <strong>keys</strong> in the event handlers (comment <code>// 4.</code>) rather than processing objects directly.</p>
-</li>
-<li>
-<p>A failed item is requeued with <code>queue.AddRateLimited</code> (exponential backoff), while a successful one is cleared with <code>queue.Forget</code>.</p>
-</li>
-</ul>
-</div>
-<div class="paragraph">
-<p>Review <a href="../12-controllers-informers-client-go/informers-listers-workqueues.html" class="xref page">Informers, Listers, and Workqueues</a> for why these patterns matter.</p>
 </div>
 </td>
 </tr>
 </table>
+</div>
+<div class="paragraph">
+<p>Review <a href="../12-controllers-informers-client-go/informers-listers-workqueues.html" class="xref page">Informers, Listers, and Workqueues</a> for why we enqueue <strong>keys</strong> in the event handlers rather than processing objects directly, and why a failed item is requeued with <code>queue.AddRateLimited</code> (exponential backoff) while a successful one is cleared with <code>queue.Forget</code>.</p>
 </div>
 </div>
 </div>
@@ -641,13 +628,13 @@ pod "demo" deleted</code></pre>
 <div class="ulist">
 <ul>
 <li>
-<p><strong>Detect missing labels.</strong> In <code>reconcile</code>, if <code>pod.Labels</code> is empty, also log a warning such as <code>Pod default/demo is missing required labels!</code>.</p>
+<p><strong>Detect missing labels.</strong> In <code>reconcile</code>, check whether <code>pod.Labels</code> is empty and, if so, log a warning such as <code>Pod default/demo is missing required labels!</code>.</p>
 </li>
 <li>
-<p><strong>Observe the need for leader election.</strong> Run two copies of the controller at once (<code>go run main.go</code> in two terminals) and notice that <strong>both</strong> reconcile every Pod&#8201;&#8212;&#8201;duplicated work. This is exactly the problem you solve in <a href="1-2-implement-optimistic-locking-and-leader-election-via-lease.html" class="xref page">Exercise 1.2</a> by ensuring only one instance is active at a time.</p>
+<p><strong>Watch your own Custom Resource.</strong> Define a CRD, then swap the Pod informer and lister for ones generated for your resource, reconciling its <code>.status</code> instead of Pod phase. This will help moving away from built-in types to building a real operator.</p>
 </li>
 <li>
-<p>Write your own Custom Resource and implement a client-go controller to process status updates.</p>
+<p><strong>Observe the need for leader election.</strong> Run two copies of the controller at once (<code>go run main.go</code> in two terminals) and notice that <strong>both</strong> reconcile every Pod&#8201;&#8212;&#8201;duplicated work. This is exactly the problem you solve next in <a href="1-2-implement-optimistic-locking-and-leader-election-via-lease.html" class="xref page">Exercise 1.2</a> by ensuring only one instance is active at a time.</p>
 </li>
 </ul>
 </div>

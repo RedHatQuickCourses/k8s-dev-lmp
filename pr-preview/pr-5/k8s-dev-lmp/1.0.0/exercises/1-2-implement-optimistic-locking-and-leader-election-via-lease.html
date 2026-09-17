@@ -679,13 +679,16 @@ spec:
 <div class="paragraph">
 <p>Press kbd:[Ctrl+C] in the remaining terminal to stop the second instance when you are done.</p>
 </div>
-</div>
-</div>
-<div class="sect1">
-<h2 id="_step_5_rbac_for_in_cluster_deployment"><a class="anchor" href="#_step_5_rbac_for_in_cluster_deployment"></a>Step 5: RBAC for In-Cluster Deployment</h2>
-<div class="sectionbody">
+<div class="admonitionblock tip">
+<table>
+<tr>
+<td class="icon">
+<i class="fa icon-tip" title="Tip"></i>
+</td>
+<td class="content">
 <div class="paragraph">
-<p>When you run the controller locally with your kubeconfig (as on the bastion), it already has permission to manage the Lease.
+<p><strong>RBAC for in-cluster deployment.</strong>
+When you run the controller locally with your kubeconfig (as on the bastion), it already has permission to manage the Lease.
 When you later deploy it as a Pod, its ServiceAccount needs an explicit Role.
 Apply this so the controller can operate on Leases in the <code>default</code> namespace:</p>
 </div>
@@ -711,16 +714,26 @@ rules:
 role.rbac.authorization.k8s.io/leader-election created</code></pre>
 </div>
 </div>
+</td>
+</tr>
+</table>
 </div>
-</div>
-<div class="sect1">
-<h2 id="_a_note_on_fencing"><a class="anchor" href="#_a_note_on_fencing"></a>A Note on Fencing</h2>
-<div class="sectionbody">
+<div class="admonitionblock tip">
+<table>
+<tr>
+<td class="icon">
+<i class="fa icon-tip" title="Tip"></i>
+</td>
+<td class="content">
 <div class="paragraph">
 <p>The <code>leaderelection</code> package does not guarantee single-leader semantics under all conditions.
 If a leader pauses long enough for its Lease to expire, a new leader is elected&#8201;&#8212;&#8201;but the old leader may resume and briefly believe it is still leading.
 Kubernetes mitigates this through optimistic concurrency: updates with a stale <code>resourceVersion</code> are rejected.
 For a deeper discussion, see <a href="../22-going-distributed-locks-leases-ownership-eventual-consistency/distributed-locking-theory.html" class="xref page">Distributed Locking Theory</a>.</p>
+</div>
+</td>
+</tr>
+</table>
 </div>
 </div>
 </div>

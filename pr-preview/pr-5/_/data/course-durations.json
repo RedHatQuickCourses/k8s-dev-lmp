@@ -1,5 +1,5 @@
 {
-  "totalSeconds": 15563,
+  "totalSeconds": 15569,
   "pageCount": 53,
   "pages": [
     {
@@ -240,12 +240,12 @@
     {
       "module": "exercises",
       "page": "1-1-build-a-controller-using-client-go-from-scratch.adoc",
-      "seconds": 2929
+      "seconds": 2938
     },
     {
       "module": "exercises",
       "page": "1-2-implement-optimistic-locking-and-leader-election-via-lease.adoc",
-      "seconds": 2547
+      "seconds": 2544
     },
     {
       "module": "exercises",
