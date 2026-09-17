@@ -237,7 +237,7 @@ $ *python3 -c "import webhook, json; webhook.APPROVED_REGISTRIES=['quay.io','gcr
 == Step 2: Generate TLS Certificates
 
 The API server only talks to webhooks over HTTPS, and it must trust the certificate.
-Instead of installing cert-manager, generate a self-signed certificate whose subject alternative name (SAN) matches the webhook's in-cluster Service DNS name.
+Generate a self-signed certificate whose subject alternative name (SAN) matches the webhook's in-cluster Service DNS name.
 
 Save this as `generate-certs.sh`:
 
