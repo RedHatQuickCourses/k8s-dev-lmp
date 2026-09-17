@@ -15,7 +15,7 @@ By the end you will run two copies of the controller in two terminals and watch 
 * You have completed xref:1-1-build-a-controller-using-client-go-from-scratch.adoc[Exercise 1.1] and still have your `~/k8s-controller-lab` project with a working `main.go`.
 * Your Kind cluster from xref:setup.adoc[Setup] is still running (`kubectl get nodes` shows `dev-control-plane` as `Ready`).
 
-TIP: Work on a copy if you want to keep Exercise 1.1 intact: `cp -r ~/k8s-controller-lab ~/leader-election-lab && cd ~/leader-election-lab`. The client libraries are already pinned to `v0.32.3` in the copied `go.mod`, so no new `go get` is needed.
+TIP: Work on a copy if you want to keep Exercise 1.1 intact: `cp -r ~/k8s-controller-lab ~/leader-election-lab && cd ~/leader-election-lab`. The client libraries are already pinned to `v0.32.x` in the copied `go.mod`, so no new `go get` is needed.
 
 == What Changes
 
