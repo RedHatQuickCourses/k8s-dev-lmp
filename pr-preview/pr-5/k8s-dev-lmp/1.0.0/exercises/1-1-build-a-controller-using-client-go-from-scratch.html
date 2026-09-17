@@ -546,15 +546,28 @@ func reconcile(pod *corev1.Pod) {
 </td>
 <td class="content">
 <div class="paragraph">
-<p>Always call <code>cache.WaitForCacheSync</code> before processing items (step 5 above).
+<p>Always call <code>cache.WaitForCacheSync</code> before processing items&#8201;&#8212;&#8201;see comment <code>// 5.</code> in the code above.
 Starting your reconcile loop before the cache is warm leads to missed resources.</p>
+</div>
+<div class="paragraph">
+<p>A few more things to notice while reading the code:</p>
+</div>
+<div class="ulist">
+<ul>
+<li>
+<p>We enqueue <strong>keys</strong> in the event handlers (comment <code>// 4.</code>) rather than processing objects directly.</p>
+</li>
+<li>
+<p>A failed item is requeued with <code>queue.AddRateLimited</code> (exponential backoff), while a successful one is cleared with <code>queue.Forget</code>.</p>
+</li>
+</ul>
+</div>
+<div class="paragraph">
+<p>Review <a href="../12-controllers-informers-client-go/informers-listers-workqueues.html" class="xref page">Informers, Listers, and Workqueues</a> for why these patterns matter.</p>
 </div>
 </td>
 </tr>
 </table>
-</div>
-<div class="paragraph">
-<p>Review <a href="../12-controllers-informers-client-go/informers-listers-workqueues.html" class="xref page">Informers, Listers, and Workqueues</a> for why we enqueue <strong>keys</strong> in the event handlers rather than processing objects directly, and why a failed item is requeued with <code>queue.AddRateLimited</code> (exponential backoff) while a successful one is cleared with <code>queue.Forget</code>.</p>
 </div>
 </div>
 </div>

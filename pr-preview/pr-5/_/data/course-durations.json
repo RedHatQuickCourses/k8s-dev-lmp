@@ -235,7 +235,7 @@
     {
       "module": "exercises",
       "page": "setup.adoc",
-      "seconds": 1303
+      "seconds": 1302
     },
     {
       "module": "exercises",
@@ -250,7 +250,7 @@
     {
       "module": "exercises",
       "page": "2-develop-a-custom-validating-webhook-for-container-registry-enforcement.adoc",
-      "seconds": 3166
+      "seconds": 3167
     },
     {
       "module": "recommended-reading",

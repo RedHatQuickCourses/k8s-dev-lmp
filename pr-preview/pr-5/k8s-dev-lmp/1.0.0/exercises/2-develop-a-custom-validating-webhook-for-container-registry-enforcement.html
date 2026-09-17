@@ -370,9 +370,6 @@ Python 3.12.9</code></pre>
 </div>
 </div>
 </li>
-<li>
-<p><code>KIND_EXPERIMENTAL_PROVIDER=podman</code> is set (from Setup). If you opened a fresh terminal without the <code>~/.bashrc</code> entry, run <code>export KIND_EXPERIMENTAL_PROVIDER=podman</code> before the <code>kind load</code> step.</p>
-</li>
 </ul>
 </div>
 <div class="admonitionblock note">
@@ -872,10 +869,10 @@ Webhook listening on :8443</code></pre>
 <div class="ulist">
 <ul>
 <li>
-<p>Also inspect <code>initContainers</code> and <code>ephemeralContainers</code>, not just <code>containers</code>.</p>
+<p>Also inspect <code>initContainers</code> and <code>ephemeralContainers</code>, not just <code>containers</code> from the <code>Pod.spec</code>.</p>
 </li>
 <li>
-<p>Extend the webhook rules and image parsing to cover workloads such as Deployments and Jobs, whose Pod template lives under <code>spec.template.spec</code>.</p>
+<p>Extend the webhook rules and image parsing to cover other workloads such as Deployments and Jobs, whose Pod template lives under <code>spec.template.spec</code>.</p>
 </li>
 </ul>
 </div>
