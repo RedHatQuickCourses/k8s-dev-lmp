@@ -34,12 +34,12 @@ Pin them to a known-good version so your build matches the code in this exercise
 [source,console,subs="verbatim,quotes"]
 ----
 $ *go get k8s.io/client-go@v0.32*
-go: added k8s.io/client-go v0.32.3
+go: added k8s.io/client-go v0.32.13
 $ *go get k8s.io/apimachinery@v0.32*
-go: added k8s.io/apimachinery v0.32.3
+go: added k8s.io/apimachinery v0.32.13
 ----
 
-NOTE: The pinned `client-go` v0.32.x line (Kubernetes 1.32) builds with the Go version shipped by `go-toolset`, so no additional Go toolchain is required. Pinning also keeps your build matching the code in this exercise.
+NOTE: The pinned `client-go` v0.32.x line (Kubernetes 1.32) is aligned with the Go version shipped by `go-toolset`.
 
 == Step 3: Write the Controller
 
