@@ -1,5 +1,5 @@
 {
-  "totalSeconds": 15506,
+  "totalSeconds": 15505,
   "pageCount": 53,
   "pages": [
     {
@@ -235,7 +235,7 @@
     {
       "module": "exercises",
       "page": "setup.adoc",
-      "seconds": 1302
+      "seconds": 1301
     },
     {
       "module": "exercises",
