@@ -1,0 +1,236 @@
+= Exercise 1.1: Build a Controller Using client-go
+:page-audio-src: 1-1-build-a-controller-using-client-go-from-scratch.wav
+:page-transcript-src: 1-1-build-a-controller-using-client-go-from-scratch.txt
+:navtitle: Exercise 1.1: Build a Controller
+:page-lab-minutes: 45
+
+In this exercise you will build a Kubernetes controller from scratch using client-go.
+By the end you will have a complete, working program that watches for Pod events, processes them through a workqueue, and logs their state -- implementing the full data flow pipeline described in xref:12-controllers-informers-client-go:client-go-architecture.adoc[].
+
+Every step below includes the exact command to run and the output you should expect, so you can follow along on the bastion top to bottom.
+
+== Prerequisites
+
+* You have completed xref:setup.adoc[Setup]: the Go toolchain and `kubectl` are installed, and your Kind cluster is running. Confirm with `kubectl get nodes` -- the `dev-control-plane` node should be `Ready`.
+* You are logged in to the lab bastion VM -- see xref:LABENV:index.adoc[Lab Environment].
+
+== Step 1: Create the Project
+
+Create a working directory and initialize a Go module:
+
+[source,console,subs="verbatim,quotes"]
+----
+$ *cd ~*
+$ *mkdir k8s-controller-lab && cd k8s-controller-lab*
+$ *go mod init k8s-controller-lab*
+go: creating new go.mod: module k8s-controller-lab
+----
+
+== Step 2: Add the Kubernetes Client Libraries
+
+Pull in the client-go and apimachinery libraries.
+Pin them to a known-good version so your build matches the code in this exercise:
+
+[source,console,subs="verbatim,quotes"]
+----
+$ *go get k8s.io/client-go@v0.32.3*
+go: added k8s.io/client-go v0.32.3
+$ *go get k8s.io/apimachinery@v0.32.3*
+go: added k8s.io/apimachinery v0.32.3
+----
+
+NOTE: The pinned `client-go` v0.32.x line (Kubernetes 1.32) builds with the Go version shipped by `go-toolset`, so no additional Go toolchain is required. Pinning also keeps your build matching the code in this exercise.
+
+== Step 3: Write the Controller
+
+Create a file named `main.go` with the full program below.
+This is the complete controller -- it builds a clientset, wires up a Pod informer and a rate-limiting workqueue, warms the cache, and runs a worker loop that reconciles each Pod:
+
+[source,go]
+----
+package main
+
+import (
+	"flag"
+	"fmt"
+	"path/filepath"
+	"time"
+
+	corev1 "k8s.io/api/core/v1"
+	"k8s.io/client-go/informers"
+	"k8s.io/client-go/kubernetes"
+	corelisters "k8s.io/client-go/listers/core/v1"
+	"k8s.io/client-go/tools/cache"
+	"k8s.io/client-go/tools/clientcmd"
+	"k8s.io/client-go/util/homedir"
+	"k8s.io/client-go/util/workqueue"
+)
+
+func main() {
+	// 1. Locate the kubeconfig and build a REST config.
+	var kubeconfig *string
+	if home := homedir.HomeDir(); home != "" {
+		kubeconfig = flag.String("kubeconfig",
+			filepath.Join(home, ".kube", "config"), "path to kubeconfig")
+	} else {
+		kubeconfig = flag.String("kubeconfig", "", "path to kubeconfig")
+	}
+	flag.Parse()
+
+	config, err := clientcmd.BuildConfigFromFlags("", *kubeconfig)
+	if err != nil {
+		panic(err)
+	}
+
+	// 2. Create a typed clientset from the config.
+	clientset, err := kubernetes.NewForConfig(config)
+	if err != nil {
+		panic(err)
+	}
+
+	// 3. Build a shared informer factory and a rate-limiting workqueue.
+	factory := informers.NewSharedInformerFactory(clientset, 10*time.Minute)
+	podInformer := factory.Core().V1().Pods().Informer()
+	podLister := factory.Core().V1().Pods().Lister()
+
+	queue := workqueue.NewTypedRateLimitingQueue(
+		workqueue.DefaultTypedControllerRateLimiter[string]())
+
+	// 4. Register event handlers that enqueue object keys.
+	podInformer.AddEventHandler(cache.ResourceEventHandlerFuncs{
+		AddFunc: func(obj interface{}) {
+			if key, err := cache.MetaNamespaceKeyFunc(obj); err == nil {
+				queue.Add(key)
+			}
+		},
+		UpdateFunc: func(oldObj, newObj interface{}) {
+			if key, err := cache.MetaNamespaceKeyFunc(newObj); err == nil {
+				queue.Add(key)
+			}
+		},
+		DeleteFunc: func(obj interface{}) {
+			if key, err := cache.DeletionHandlingMetaNamespaceKeyFunc(obj); err == nil {
+				queue.Add(key)
+			}
+		},
+	})
+
+	// 5. Start the informer and wait for the cache to warm up.
+	stopCh := make(chan struct{})
+	defer close(stopCh)
+	factory.Start(stopCh)
+	if !cache.WaitForCacheSync(stopCh, podInformer.HasSynced) {
+		panic("failed to sync informer cache")
+	}
+	fmt.Println("Cache synced. Watching for Pod events... (press Ctrl+C to stop)")
+
+	// 6. Run the worker loop.
+	for processNextItem(queue, podLister) {
+	}
+}
+
+// processNextItem dequeues one key, reconciles it, and manages requeue/backoff.
+func processNextItem(
+	queue workqueue.TypedRateLimitingInterface[string],
+	lister corelisters.PodLister,
+) bool {
+	key, shutdown := queue.Get()
+	if shutdown {
+		return false
+	}
+	defer queue.Done(key)
+
+	namespace, name, err := cache.SplitMetaNamespaceKey(key)
+	if err != nil {
+		queue.Forget(key)
+		return true
+	}
+
+	pod, err := lister.Pods(namespace).Get(name)
+	if err != nil {
+		// Pod may have been deleted, or the cache is briefly stale: requeue.
+		queue.AddRateLimited(key)
+		return true
+	}
+
+	reconcile(pod)
+	queue.Forget(key)
+	return true
+}
+
+// reconcile is where your controller logic lives.
+func reconcile(pod *corev1.Pod) {
+	fmt.Printf("Reconciling Pod %s/%s (phase: %s)\n",
+		pod.Namespace, pod.Name, pod.Status.Phase)
+}
+----
+
+[IMPORTANT]
+====
+Always call `cache.WaitForCacheSync` before processing items (step 5 above).
+Starting your reconcile loop before the cache is warm leads to missed resources.
+====
+
+Review xref:12-controllers-informers-client-go:informers-listers-workqueues.adoc[] for why we enqueue *keys* in the event handlers rather than processing objects directly, and why a failed item is requeued with `queue.AddRateLimited` (exponential backoff) while a successful one is cleared with `queue.Forget`.
+
+== Step 4: Resolve Dependencies and Build
+
+Let Go download the transitive dependencies and tidy the module, then build:
+
+[source,console,subs="verbatim,quotes"]
+----
+$ *go mod tidy*
+$ *go build ./...*
+----
+
+Both commands should complete without errors. `go build` produces no output on success.
+
+== Step 5: Run the Controller
+
+Run the program. It connects to the cluster using your kubeconfig (`~/.kube/config`, written by Kind in Setup), syncs the cache, and prints a reconcile line for every existing Pod, then keeps watching for changes:
+
+[source,console,subs="verbatim,quotes"]
+----
+$ *go run main.go*
+Cache synced. Watching for Pod events... (press Ctrl+C to stop)
+Reconciling Pod kube-system/coredns-668d6bf9bc-abcde (phase: Running)
+Reconciling Pod kube-system/kube-apiserver-dev-control-plane (phase: Running)
+Reconciling Pod kube-system/kindnet-x2k9p (phase: Running)
+----
+
+While the controller is running, open a second terminal on the bastion and create a Pod to watch the reconcile loop fire:
+
+[source,console,subs="verbatim,quotes"]
+----
+$ *kubectl run demo --image=registry.k8s.io/pause:3.9*
+pod/demo created
+----
+
+Back in the first terminal you should see new reconcile lines for the `demo` Pod as it moves through its phases:
+
+[source,console,subs="verbatim,quotes"]
+----
+Reconciling Pod default/demo (phase: Pending)
+Reconciling Pod default/demo (phase: Running)
+----
+
+Press kbd:[Ctrl+C] to stop the controller. Clean up the demo Pod when you are done:
+
+[source,console,subs="verbatim,quotes"]
+----
+$ *kubectl delete pod demo*
+pod "demo" deleted
+----
+
+== Going further
+
+The controller is complete and working. To deepen your understanding, try these optional extensions:
+
+* *Detect missing labels.* In `reconcile`, if `pod.Labels` is empty, also log a warning such as `Pod default/demo is missing required labels!`.
+* *Observe the need for leader election.* Run two copies of the controller at once (`go run main.go` in two terminals) and notice that *both* reconcile every Pod -- duplicated work. This is exactly the problem you solve in xref:1-2-implement-optimistic-locking-and-leader-election-via-lease.adoc[Exercise 1.2] by ensuring only one instance is active at a time.
+* Write your own Custom Resource and implement a client-go controller to process status updates.
+
+== References
+
+* https://sdk.operatorframework.io/docs/building-operators/golang/tutorial/[Operator SDK Go Tutorial, window=_blank]
+* https://github.com/kubernetes/community/blob/master/contributors/devel/sig-api-machinery/controllers.md#rough-structure[Controller Rough Structure, window=_blank]
