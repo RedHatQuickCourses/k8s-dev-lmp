@@ -254,36 +254,15 @@ spec:
 
 Press kbd:[Ctrl+C] in the remaining terminal to stop the second instance when you are done.
 
-== Step 5: RBAC for In-Cluster Deployment
-
-When you run the controller locally with your kubeconfig (as on the bastion), it already has permission to manage the Lease.
-When you later deploy it as a Pod, its ServiceAccount needs an explicit Role.
-Apply this so the controller can operate on Leases in the `default` namespace:
-
-[source,yaml]
-----
-apiVersion: rbac.authorization.k8s.io/v1
-kind: Role
-metadata:
-  name: leader-election
-  namespace: default
-rules:
-- apiGroups: ["coordination.k8s.io"]
-  resources: ["leases"]
-  verbs: ["get", "create", "update"]
-----
-
-Save it as `rbac.yaml` and apply it:
-
-[source,console,subs="verbatim,quotes"]
-----
-$ *kubectl apply -f rbac.yaml*
-role.rbac.authorization.k8s.io/leader-election created
-----
-
-== A Note on Fencing
-
+[TIP]
+====
 The `leaderelection` package does not guarantee single-leader semantics under all conditions.
 If a leader pauses long enough for its Lease to expire, a new leader is elected -- but the old leader may resume and briefly believe it is still leading.
 Kubernetes mitigates this through optimistic concurrency: updates with a stale `resourceVersion` are rejected.
 For a deeper discussion, see xref:22-going-distributed-locks-leases-ownership-eventual-consistency:distributed-locking-theory.adoc[Distributed Locking Theory].
+====
+
+== References
+
+* https://sklar.rocks/kubernetes-leader-election/[How to add Kubernetes-powered leader election to your Go apps, window=_blank]
+* https://pkg.go.dev/k8s.io/client-go/tools/leaderelection[client-go leaderelection package, window=_blank]

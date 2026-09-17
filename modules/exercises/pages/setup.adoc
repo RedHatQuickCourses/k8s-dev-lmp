@@ -32,7 +32,7 @@ $ *sudo dnf install -y go-toolset*
 Complete!
 ----
 
-Verify the installation. You should see a `go1.25.x` version (the exact patch level may differ with the RHEL release on your VM):
+Verify the installation. You should see a `go1.25.x` version (the exact version may differ with the RHEL release on your VM):
 
 [source,console,subs="verbatim,quotes"]
 ----

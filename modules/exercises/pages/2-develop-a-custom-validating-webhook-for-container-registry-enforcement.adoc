@@ -20,7 +20,6 @@ You will write that endpoint in plain Python -- no client-go, no Kubernetes SDK 
 $ *python3 --version*
 Python 3.12.9
 ----
-* `KIND_EXPERIMENTAL_PROVIDER=podman` is set (from Setup). If you opened a fresh terminal without the `~/.bashrc` entry, run `export KIND_EXPERIMENTAL_PROVIDER=podman` before the `kind load` step.
 
 [NOTE]
 ====
@@ -447,8 +446,8 @@ Webhook listening on :8443
 
 The webhook enforces the container image registry policy end to end. To harden it, try these optional extensions:
 
-* Also inspect `initContainers` and `ephemeralContainers`, not just `containers`.
-* Extend the webhook rules and image parsing to cover workloads such as Deployments and Jobs, whose Pod template lives under `spec.template.spec`.
+* Also inspect `initContainers` and `ephemeralContainers`, not just `containers` from the `Pod.spec`.
+* Extend the webhook rules and image parsing to cover other workloads such as Deployments and Jobs, whose Pod template lives under `spec.template.spec`.
 
 == Tips
 

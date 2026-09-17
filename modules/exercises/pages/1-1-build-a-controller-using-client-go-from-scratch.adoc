@@ -33,9 +33,9 @@ Pin them to a known-good version so your build matches the code in this exercise
 
 [source,console,subs="verbatim,quotes"]
 ----
-$ *go get k8s.io/client-go@v0.32.3*
+$ *go get k8s.io/client-go@v0.32*
 go: added k8s.io/client-go v0.32.3
-$ *go get k8s.io/apimachinery@v0.32.3*
+$ *go get k8s.io/apimachinery@v0.32*
 go: added k8s.io/apimachinery v0.32.3
 ----
 
@@ -226,9 +226,9 @@ pod "demo" deleted
 
 The controller is complete and working. To deepen your understanding, try these optional extensions:
 
-* *Detect missing labels.* In `reconcile`, if `pod.Labels` is empty, also log a warning such as `Pod default/demo is missing required labels!`.
-* *Observe the need for leader election.* Run two copies of the controller at once (`go run main.go` in two terminals) and notice that *both* reconcile every Pod -- duplicated work. This is exactly the problem you solve in xref:1-2-implement-optimistic-locking-and-leader-election-via-lease.adoc[Exercise 1.2] by ensuring only one instance is active at a time.
-* Write your own Custom Resource and implement a client-go controller to process status updates.
+* *Detect missing labels.* In `reconcile`, check whether `pod.Labels` is empty and, if so, log a warning such as `Pod default/demo is missing required labels!`.
+* *Watch your own Custom Resource.* Define a CRD, then swap the Pod informer and lister for ones generated for your resource, reconciling its `.status` instead of Pod phase. This will help moving away from built-in types to building a real operator.
+* *Observe the need for leader election.* Run two copies of the controller at once (`go run main.go` in two terminals) and notice that *both* reconcile every Pod -- duplicated work. This is exactly the problem you solve next in xref:1-2-implement-optimistic-locking-and-leader-election-via-lease.adoc[Exercise 1.2] by ensuring only one instance is active at a time.
 
 == References
 
