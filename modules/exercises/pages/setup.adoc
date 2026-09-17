@@ -178,7 +178,7 @@ CoreDNS is running at https://127.0.0.1:PORT/api/v1/namespaces/kube-system/servi
 To further debug and diagnose cluster problems, use 'kubectl cluster-info dump'.
 ----
 
-Your environment is ready. Continue with xref:1-1-build-a-controller-using-client-go-from-scratch.adoc[Exercise 1.1].
+Your environment is ready.
 
 [NOTE]
 ====
