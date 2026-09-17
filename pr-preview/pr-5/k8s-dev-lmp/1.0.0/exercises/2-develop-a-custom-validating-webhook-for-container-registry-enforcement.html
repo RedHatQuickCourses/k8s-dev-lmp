@@ -381,7 +381,7 @@ Python 3.12.9</code></pre>
 <td class="content">
 <div class="paragraph">
 <p>A valid TLS certificate is required for the HTTPS server running the webhook.
-A small shell script (provided in Step 3) generates the certificate the API server needs to trust your webhook.</p>
+A small shell script (provided in Step 2) generates the certificate the API server needs to trust your webhook.</p>
 </div>
 </td>
 </tr>
@@ -458,7 +458,16 @@ The webhook is always reached over HTTPS, so the API server needs to trust your 
 <h2 id="_step_1_write_the_webhook_server"><a class="anchor" href="#_step_1_write_the_webhook_server"></a>Step 1: Write the Webhook Server</h2>
 <div class="sectionbody">
 <div class="paragraph">
-<p>Create a file named <code>webhook.py</code> with the complete server below.
+<p>Create a working directory to hold every file you build in this exercise:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-console hljs" data-lang="console">$ <strong>cd ~</strong>
+$ <strong>mkdir k8s-webhook-lab &amp;&amp; cd k8s-webhook-lab</strong></code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>Inside it, create a file named <code>webhook.py</code> with the complete server below.
 It uses the Python standard library only (no dependencies): <code>handle_admission()</code> implements the registry policy, <code>review_response()</code> builds the exact JSON the API server expects, and <code>main()</code> reads the approved registries from a flag and wraps the socket in TLS.</p>
 </div>
 <div class="listingblock">
@@ -568,7 +577,36 @@ if __name__ == "__main__":
 </div>
 </div>
 <div class="paragraph">
-<p>Before deploying, sanity-check the decision logic locally&#8201;&#8212;&#8201;save the sample request from earlier as <code>sample.json</code>, then confirm it denies the <code>nginx</code> image and allows a <code>quay.io</code> image:</p>
+<p>Before deploying, sanity-check the decision logic locally.
+Save the sample <code>AdmissionReview</code> request shown earlier as <code>sample.json</code>:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-console hljs" data-lang="console">$ <strong>cat &gt; sample.json &lt;&lt;'EOF'</strong>
+{
+  "apiVersion": "admission.k8s.io/v1",
+  "kind": "AdmissionReview",
+  "request": {
+    "uid": "705ab4f5-6393-11e8-b7cc-42010a800002",
+    "kind": { "group": "", "version": "v1", "kind": "Pod" },
+    "operation": "CREATE",
+    "object": {
+      "apiVersion": "v1",
+      "kind": "Pod",
+      "metadata": { "name": "test", "namespace": "default" },
+      "spec": {
+        "containers": [
+          { "name": "app", "image": "docker.io/library/nginx:latest" }
+        ]
+      }
+    }
+  }
+}
+<strong>EOF</strong></code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>Now run the policy against it and confirm it denies the <code>nginx</code> image (swap the image in <code>sample.json</code> for a <code>quay.io</code> reference to see it allowed):</p>
 </div>
 <div class="listingblock">
 <div class="content">
@@ -630,20 +668,18 @@ openssl x509 -req -in "$CERT_DIR/tls.csr" -CA "$CERT_DIR/ca.crt" -CAkey "$CERT_D
   -CAcreateserial -out "$CERT_DIR/tls.crt" -days 3650 \
   -extensions v3_req -extfile "$CERT_DIR/csr.conf"
 
-echo "CA bundle (base64) for the webhook config:"
-base64 &lt; "$CERT_DIR/ca.crt" | tr -d '\n'; echo</code></pre>
+echo "Certificates written to $CERT_DIR/"</code></pre>
 </div>
 </div>
 <div class="paragraph">
-<p>Run it. The script prints a base64-encoded CA bundle at the end&#8201;&#8212;&#8201;copy that value, you will paste it into the webhook configuration in Step 5:</p>
+<p>Run it. The certificates land in the <code>certs/</code> directory&#8201;&#8212;&#8201;<code>certs/tls.crt</code> and <code>certs/tls.key</code> for the webhook server, and <code>certs/ca.crt</code>, which Step 5 feeds to the webhook configuration:</p>
 </div>
 <div class="listingblock">
 <div class="content">
 <pre class="highlightjs highlight"><code class="language-console hljs" data-lang="console">$ <strong>bash generate-certs.sh</strong>
 Certificate request self-signature ok
 subject=CN=image-webhook.image-webhook.svc
-CA bundle (base64) for the webhook config:
-LS0tLS1CRUdJTiBDRVJUSUZJQ0FURS0tLS0tCk1JSURDekND...(truncated)...LS0tLS1FTkQgQ0VSVElGSUNBVEUtLS0tLQo=</code></pre>
+Certificates written to certs/</code></pre>
 </div>
 </div>
 <div class="paragraph">
@@ -663,15 +699,17 @@ secret/image-webhook-tls created</code></pre>
 <h2 id="_step_3_build_the_image_and_load_it_into_kind"><a class="anchor" href="#_step_3_build_the_image_and_load_it_into_kind"></a>Step 3: Build the Image and Load It into Kind</h2>
 <div class="sectionbody">
 <div class="paragraph">
-<p>Package the webhook in a container image. Create this <code>Dockerfile</code>.
+<p>Package the webhook in a container image. Save this <code>Dockerfile</code> next to <code>webhook.py</code>.
 It uses a Red Hat Universal Base Image (UBI) Python image, which the VM can pull without hitting Docker Hub rate limits:</p>
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="highlightjs highlight"><code class="language-dockerfile hljs" data-lang="dockerfile">FROM registry.access.redhat.com/ubi9/python-311
+<pre class="highlightjs highlight"><code class="language-console hljs" data-lang="console">$ <strong>cat &gt; Dockerfile &lt;&lt;'EOF'</strong>
+FROM registry.access.redhat.com/ubi9/python-311
 WORKDIR /app
 COPY webhook.py .
-ENTRYPOINT ["python", "webhook.py"]</code></pre>
+ENTRYPOINT ["python", "webhook.py"]
+<strong>EOF</strong></code></pre>
 </div>
 </div>
 <div class="paragraph">
@@ -705,11 +743,13 @@ Image: "" with ID "sha256:..." not yet present on node "dev-control-plane", load
 <div class="sectionbody">
 <div class="paragraph">
 <p>Deploy the webhook, wiring in the approved registries and mounting the TLS Secret.
-Save this as <code>deploy.yaml</code>. It references the image you loaded into Kind in Step 3, with <code>imagePullPolicy: IfNotPresent</code> so the kubelet uses that local image instead of trying to pull it from a registry:</p>
+Apply the Deployment and Service straight from a heredoc.
+It references the image you loaded into Kind in Step 3, with <code>imagePullPolicy: IfNotPresent</code> so the kubelet uses that local image instead of trying to pull it from a registry:</p>
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="highlightjs highlight"><code class="language-yaml hljs" data-lang="yaml">apiVersion: apps/v1
+<pre class="highlightjs highlight"><code class="language-console hljs" data-lang="console">$ <strong>kubectl apply -f - &lt;&lt;EOF</strong>
+apiVersion: apps/v1
 kind: Deployment
 metadata:
   name: image-webhook
@@ -717,10 +757,12 @@ metadata:
 spec:
   replicas: 1
   selector:
-    matchLabels: { app: image-webhook }
+    matchLabels:
+      app: image-webhook
   template:
     metadata:
-      labels: { app: image-webhook }
+      labels:
+        app: image-webhook
     spec:
       containers:
         - name: webhook
@@ -747,21 +789,22 @@ metadata:
   name: image-webhook
   namespace: image-webhook
 spec:
-  selector: { app: image-webhook }
+  selector:
+    app: image-webhook
   ports:
     - port: 443
-      targetPort: 8443</code></pre>
+      targetPort: 8443
+<strong>EOF</strong>
+deployment.apps/image-webhook created
+service/image-webhook created</code></pre>
 </div>
 </div>
 <div class="paragraph">
-<p>Apply it and wait for the Pod to become ready:</p>
+<p>Wait for the Pod to become ready:</p>
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="highlightjs highlight"><code class="language-console hljs" data-lang="console">$ <strong>kubectl apply -f deploy.yaml</strong>
-deployment.apps/image-webhook created
-service/image-webhook created
-$ <strong>kubectl rollout status deploy/image-webhook -n image-webhook</strong>
+<pre class="highlightjs highlight"><code class="language-console hljs" data-lang="console">$ <strong>kubectl rollout status deploy/image-webhook -n image-webhook</strong>
 deployment "image-webhook" successfully rolled out</code></pre>
 </div>
 </div>
@@ -772,11 +815,13 @@ deployment "image-webhook" successfully rolled out</code></pre>
 <div class="sectionbody">
 <div class="paragraph">
 <p>Create a <code>ValidatingWebhookConfiguration</code> that tells the API server to send Pod CREATE and UPDATE requests to your Service.
-Save this as <code>webhook-config.yaml</code> and replace <code>CA_BUNDLE_BASE64</code> with the value printed by <code>generate-certs.sh</code> in Step 2:</p>
+The <code>caBundle</code> must hold the base64-encoded CA certificate so the API server trusts your webhook&#8201;&#8212;&#8201;rather than copy-pasting it, let the shell inject it from <code>certs/ca.crt</code> with a <code>$(&#8230;&#8203;)</code> command substitution.
+Because the heredoc below is unquoted (<code>&lt;&lt;EOF</code>, not <code>&lt;&lt;'EOF'</code>), the shell expands <code>$(base64 &#8230;&#8203;)</code> before applying the manifest:</p>
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="highlightjs highlight"><code class="language-yaml hljs" data-lang="yaml">apiVersion: admissionregistration.k8s.io/v1
+<pre class="highlightjs highlight"><code class="language-console hljs" data-lang="console">$ <strong>kubectl apply -f - &lt;&lt;EOF</strong>
+apiVersion: admissionregistration.k8s.io/v1
 kind: ValidatingWebhookConfiguration
 metadata:
   name: image-registry-webhook
@@ -791,7 +836,7 @@ webhooks:
         namespace: image-webhook
         path: /validate
         port: 443
-      caBundle: CA_BUNDLE_BASE64   # base64 CA cert from generate-certs.sh
+      caBundle: <strong>$(base64 -w0 certs/ca.crt)</strong>
     rules:
       - apiGroups: [""]
         apiVersions: ["v1"]
@@ -801,12 +846,8 @@ webhooks:
       matchExpressions:
         - key: kubernetes.io/metadata.name
           operator: NotIn
-          values: ["kube-system", "image-webhook"]</code></pre>
-</div>
-</div>
-<div class="listingblock">
-<div class="content">
-<pre class="highlightjs highlight"><code class="language-console hljs" data-lang="console">$ <strong>kubectl apply -f webhook-config.yaml</strong>
+          values: ["kube-system", "image-webhook"]
+<strong>EOF</strong>
 validatingwebhookconfiguration.admissionregistration.k8s.io/image-registry-webhook created</code></pre>
 </div>
 </div>
