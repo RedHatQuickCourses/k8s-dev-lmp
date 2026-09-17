@@ -3,9 +3,9 @@
   <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width,initial-scale=1">
-    <title>Recommended Reading :: Kubernetes Developer Learning Path</title>
-    <link rel="prev" href="../exercises/2-develop-a-custom-validating-webhook-for-container-registry-enforcement.html">
-    <link rel="next" href="../suggested-reading/suggested-reading.html">
+    <title>Setup: Toolchain and Kubernetes Cluster :: Kubernetes Developer Learning Path</title>
+    <link rel="prev" href="exercises.html">
+    <link rel="next" href="1-1-build-a-controller-using-client-go-from-scratch.html">
     <meta name="generator" content="Antora 3.2.0-alpha.12">
     <link rel="stylesheet" href="../../../_/css/site.css">
     <link rel="stylesheet" href="../../../_/css/vendor/tabs.css">
@@ -262,19 +262,19 @@
 <ul class="nav-list">
   <li class="nav-item" data-depth="1">
     <button class="nav-item-toggle"></button>
-    <a class="nav-link" href="../exercises/exercises.html">Exercises</a>
+    <a class="nav-link" href="exercises.html">Exercises</a>
 <ul class="nav-list">
-  <li class="nav-item" data-depth="2">
-    <a class="nav-link" href="../exercises/setup.html">Setup</a>
+  <li class="nav-item is-current-page" data-depth="2">
+    <a class="nav-link" href="setup.html">Setup</a>
   </li>
   <li class="nav-item" data-depth="2">
-    <a class="nav-link" href="../exercises/1-1-build-a-controller-using-client-go-from-scratch.html">Exercise 1.1: Build a Controller</a>
+    <a class="nav-link" href="1-1-build-a-controller-using-client-go-from-scratch.html">Exercise 1.1: Build a Controller</a>
   </li>
   <li class="nav-item" data-depth="2">
-    <a class="nav-link" href="../exercises/1-2-implement-optimistic-locking-and-leader-election-via-lease.html">Exercise 1.2: Leader Election</a>
+    <a class="nav-link" href="1-2-implement-optimistic-locking-and-leader-election-via-lease.html">Exercise 1.2: Leader Election</a>
   </li>
   <li class="nav-item" data-depth="2">
-    <a class="nav-link" href="../exercises/2-develop-a-custom-validating-webhook-for-container-registry-enforcement.html">Exercise 2: Validating Webhook</a>
+    <a class="nav-link" href="2-develop-a-custom-validating-webhook-for-container-registry-enforcement.html">Exercise 2: Validating Webhook</a>
   </li>
 </ul>
   </li>
@@ -282,8 +282,8 @@
   </li>
   <li class="nav-item" data-depth="0">
 <ul class="nav-list">
-  <li class="nav-item is-current-page" data-depth="1">
-    <a class="nav-link" href="recommended-reading.html">Recommended Reading</a>
+  <li class="nav-item" data-depth="1">
+    <a class="nav-link" href="../recommended-reading/recommended-reading.html">Recommended Reading</a>
   </li>
 </ul>
   </li>
@@ -330,7 +330,8 @@
 <nav class="breadcrumbs" aria-label="breadcrumbs">
   <ul>
     <li><a href="../index.html">Kubernetes Developer Learning Path</a></li>
-    <li><a href="recommended-reading.html">Recommended Reading</a></li>
+    <li><a href="exercises.html">Exercises</a></li>
+    <li><a href="setup.html">Setup</a></li>
   </ul>
 </nav>
 </div>
@@ -338,58 +339,269 @@
 <aside class="toc sidebar" data-title="Contents" data-levels="2">
   <div class="toc-menu"></div>
 </aside>
-<article class="doc" data-audio-src="recommended-reading.wav" data-transcript-src="recommended-reading.txt">
-<h1 class="page">Recommended Reading</h1>
+<article class="doc" data-audio-src="setup.wav" data-transcript-src="setup.txt" data-lab-minutes="20">
+<h1 class="page">Setup: Toolchain and Kubernetes Cluster</h1>
 <div id="preamble">
 <div class="sectionbody">
 <div class="paragraph">
-<p>The following resources are strongly recommended as companions to this course.
-Each book or paper aligns with specific modules and will deepen your understanding of the topics covered.</p>
+<p>Before starting the exercises, install the toolchain on your bastion VM and bring up a single-node Kubernetes cluster with Kind.
+You do this <strong>once</strong>; all three exercises reuse the same cluster.</p>
+</div>
+<div class="paragraph">
+<p>Every step below shows the exact command to run and the output you should expect, so you can follow along top to bottom.</p>
 </div>
 </div>
 </div>
 <div class="sect1">
-<h2 id="_programming_kubernetes"><a class="anchor" href="#_programming_kubernetes"></a>Programming Kubernetes</h2>
+<h2 id="_prerequisites"><a class="anchor" href="#_prerequisites"></a>Prerequisites</h2>
 <div class="sectionbody">
-<div class="paragraph">
-<p><strong>Michael Hausenblas and Stefan Schimanski</strong> (O&#8217;Reilly, 2019)</p>
+<div class="ulist">
+<ul>
+<li>
+<p>You have requested a RHEL VM and can log in over SSH&#8201;&#8212;&#8201;see <a href="../LABENV/index.html" class="xref page">Lab Environment</a>.</p>
+</li>
+<li>
+<p>The <code>lab-user</code> account has passwordless <code>sudo</code> (used to install packages).</p>
+</li>
+<li>
+<p><code>podman</code> is already installed on the RHEL VM. Kind uses it as its container provider. Confirm it is present:</p>
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-console hljs" data-lang="console">$ <strong>podman --version</strong>
+podman version 5.4.0</code></pre>
 </div>
-<div class="paragraph">
-<p>This book is the definitive guide to client-go internals, custom resources, and the API machinery that powers Kubernetes extensibility.
-It serves as an excellent companion to <a href="../11-kubernetes-resource-model/11-kubernetes-resource-model.html" class="xref page">1.1 — Kubernetes Resource Model</a> and <a href="../12-controllers-informers-client-go/12-controllers-informers-client-go.html" class="xref page">1.2 — Controllers, Informers, and client-go</a>, where you will explore the Kubernetes resource model and controller foundations.
-Readers will gain a thorough understanding of how the API server processes requests and how to build robust clients and controllers.</p>
+</div>
+</li>
+</ul>
 </div>
 </div>
 </div>
 <div class="sect1">
-<h2 id="_kubernetes_operators"><a class="anchor" href="#_kubernetes_operators"></a>Kubernetes Operators</h2>
+<h2 id="_step_1_install_the_go_toolchain"><a class="anchor" href="#_step_1_install_the_go_toolchain"></a>Step 1: Install the Go Toolchain</h2>
 <div class="sectionbody">
 <div class="paragraph">
-<p><strong>Jason Dobies and Joshua Wood</strong> (O&#8217;Reilly, 2020)</p>
+<p>Install Go from the RHEL <code>go-toolset</code> package:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-console hljs" data-lang="console">$ <strong>sudo dnf install -y go-toolset</strong>
+...
+Complete!</code></pre>
+</div>
 </div>
 <div class="paragraph">
-<p>This book covers the operator pattern end-to-end, from the Operator SDK to lifecycle management of complex applications on Kubernetes.
-It pairs well with <a href="../21-controllers-contd/21-controllers-contd.html" class="xref page">2.1 — Controllers with controller-runtime</a> and <a href="../31-taking-more-control-admissions-and-beyond-the-kube-apiserver-to-writing-your-own-api-server/31-taking-more-control-admissions-and-beyond-the-kube-apiserver-to-writing-your-own-api-server.html" class="xref page">3.1 — Taking More Control: Admissions and Beyond the kube-apiserver to Writing Your Own API Server</a>, where you will write controllers with controller-runtime and extend the API server.
-It provides practical guidance on packaging, deploying, and upgrading operators in production.</p>
+<p>Verify the installation. You should see a <code>go1.25.x</code> version (the exact patch level may differ with the RHEL release on your VM):</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-console hljs" data-lang="console">$ <strong>go version</strong>
+go version go1.25.5 (Red Hat 1.25.5-1.el10_1) linux/amd64</code></pre>
+</div>
 </div>
 </div>
 </div>
 <div class="sect1">
-<h2 id="_cncf_operator_white_paper"><a class="anchor" href="#_cncf_operator_white_paper"></a>CNCF Operator White Paper</h2>
+<h2 id="_step_2_install_kubectl"><a class="anchor" href="#_step_2_install_kubectl"></a>Step 2: Install kubectl</h2>
 <div class="sectionbody">
 <div class="paragraph">
-<p><a href="https://tag-app-delivery.cncf.io/whitepapers/operator/" target="_blank" rel="noopener">CNCF TAG App Delivery&#8201;&#8212;&#8201;Operator White Paper</a></p>
+<p><code>kubectl</code> is the command-line client for Kubernetes. Add the official Kubernetes package repository, then install it with <code>dnf</code>.</p>
 </div>
 <div class="paragraph">
-<p>This industry reference defines the operator capability model and provides a comprehensive comparison of operator frameworks.
-It is the ideal companion to <a href="../42-ubiquitous-topics/42-ubiquitous-topics.html" class="xref page">4.2 — Ubiquitous Topics</a>, where you will survey the operator landscape and alternative control plane architectures.
-The white paper offers a vendor-neutral perspective on when and how to build operators.</p>
+<p>Create the repository file (this is a single command&#8201;&#8212;&#8201;copy the whole block):</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-console hljs" data-lang="console">$ <strong>sudo tee /etc/yum.repos.d/kubernetes.repo &gt; /dev/null &lt;&lt;'EOF'</strong>
+<strong>[kubernetes]</strong>
+<strong>name=Kubernetes</strong>
+<strong>baseurl=https://pkgs.k8s.io/core:/stable:/v1.32/rpm/</strong>
+<strong>enabled=1</strong>
+<strong>gpgcheck=1</strong>
+<strong>gpgkey=https://pkgs.k8s.io/core:/stable:/v1.32/rpm/repodata/repomd.xml.key</strong>
+<strong>EOF</strong></code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>Install <code>kubectl</code>:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-console hljs" data-lang="console">$ <strong>sudo dnf install -y kubectl</strong>
+...
+Complete!</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>Verify it (the server-version warning is expected&#8201;&#8212;&#8201;there is no cluster yet):</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-console hljs" data-lang="console">$ <strong>kubectl version --client</strong>
+Client Version: v1.32.13
+Kustomize Version: v5.5.0</code></pre>
+</div>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_step_3_install_kind"><a class="anchor" href="#_step_3_install_kind"></a>Step 3: Install Kind</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>Kind (Kubernetes in Docker) runs a full Kubernetes cluster inside containers.
+Download the binary and install it to <code>/usr/local/bin</code>:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-console hljs" data-lang="console">$ <strong>curl -fsSLo kind https://kind.sigs.k8s.io/dl/v0.33.0/kind-linux-amd64</strong>
+$ <strong>chmod +x kind</strong>
+$ <strong>sudo mv kind /usr/local/bin/kind</strong></code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>Verify it:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-console hljs" data-lang="console">$ <strong>kind version</strong>
+kind v0.33.0 go1.26.7 linux/amd64</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>Kind can use Docker or podman as its container provider. On this RHEL VM you use rootless podman, so tell Kind to use it:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-console hljs" data-lang="console">$ <strong>export KIND_EXPERIMENTAL_PROVIDER=podman</strong></code></pre>
+</div>
+</div>
+<div class="admonitionblock tip">
+<table>
+<tr>
+<td class="icon">
+<i class="fa icon-tip" title="Tip"></i>
+</td>
+<td class="content">
+<div class="paragraph">
+<p>Add that <code>export</code> line to your <code>~/.bashrc</code> so it is set in every new shell (you open extra terminals in <a href="1-2-implement-optimistic-locking-and-leader-election-via-lease.html" class="xref page">Exercise 1.2</a> and <a href="2-develop-a-custom-validating-webhook-for-container-registry-enforcement.html" class="xref page">Exercise 2</a>):</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-console hljs" data-lang="console">$ <strong>echo 'export KIND_EXPERIMENTAL_PROVIDER=podman' &gt;&gt; ~/.bashrc</strong></code></pre>
+</div>
+</div>
+</td>
+</tr>
+</table>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_step_4_create_the_cluster"><a class="anchor" href="#_step_4_create_the_cluster"></a>Step 4: Create the Cluster</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>RHEL 10 uses <code>nftables</code> as its firewall backend. Configure Kind&#8217;s <code>kube-proxy</code> to use its native <strong>nftables</strong> mode so that in-cluster Service networking (ClusterIP) works reliably on this host&#8201;&#8212;&#8201;the admission webhook in <a href="2-develop-a-custom-validating-webhook-for-container-registry-enforcement.html" class="xref page">Exercise 2</a> is reached through a Service, so this matters.</p>
+</div>
+<div class="paragraph">
+<p>Create a Kind configuration file:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-console hljs" data-lang="console">$ <strong>cat &gt; ~/kind-config.yaml &lt;&lt;'EOF'</strong>
+<strong>kind: Cluster</strong>
+<strong>apiVersion: kind.x-k8s.io/v1alpha4</strong>
+<strong>networking:</strong>
+*  kubeProxyMode: nftables*
+<strong>EOF</strong></code></pre>
+</div>
+</div>
+<div class="admonitionblock note">
+<table>
+<tr>
+<td class="icon">
+<i class="fa icon-note" title="Note"></i>
+</td>
+<td class="content">
+<div class="paragraph">
+<p>Without <code>kubeProxyMode: nftables</code>, <code>kube-proxy</code> on this RHEL host fails to program the iptables rules that back ClusterIP Services (the required legacy <code>iptables</code> kernel extensions are not available), and calls to Services&#8201;&#8212;&#8201;including the API server reaching your webhook&#8201;&#8212;&#8201;time out.</p>
+</div>
+</td>
+</tr>
+</table>
+</div>
+<div class="paragraph">
+<p>Create a single-node cluster named <code>dev</code>, pinned to Kubernetes 1.32 so the whole stack matches the pinned client libraries you use in the exercises:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-console hljs" data-lang="console">$ <strong>kind create cluster --name dev --image kindest/node:v1.32.0 --config ~/kind-config.yaml</strong>
+Creating cluster "dev" ...
+ ✓ Ensuring node image (kindest/node:v1.32.0) 🖼
+ ✓ Preparing nodes 📦
+ ✓ Writing configuration 📜
+ ✓ Starting control-plane 🕹️
+ ✓ Installing CNI 🔌
+ ✓ Installing StorageClass 💾
+Set kubectl context to "kind-dev"
+You can now use your cluster with:
+
+kubectl cluster-info --context kind-dev
+
+Thanks for using kind! 😊</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>Kind writes the credentials to <code>~/.kube/config</code> and sets your current context to <code>kind-dev</code>.</p>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_step_5_verify_cluster_access"><a class="anchor" href="#_step_5_verify_cluster_access"></a>Step 5: Verify Cluster Access</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>Confirm the node is <code>Ready</code> and running Kubernetes v1.32.0:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-console hljs" data-lang="console">$ <strong>kubectl get nodes</strong>
+NAME                 STATUS   ROLES           AGE   VERSION
+dev-control-plane    Ready    control-plane   60s   v1.32.0</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>Check the cluster endpoints:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-console hljs" data-lang="console">$ <strong>kubectl cluster-info --context kind-dev</strong>
+Kubernetes control plane is running at https://127.0.0.1:PORT
+CoreDNS is running at https://127.0.0.1:PORT/api/v1/namespaces/kube-system/services/kube-dns:dns/proxy
+
+To further debug and diagnose cluster problems, use 'kubectl cluster-info dump'.</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>Your environment is ready. Continue with <a href="1-1-build-a-controller-using-client-go-from-scratch.html" class="xref page">Exercise 1.1</a>.</p>
+</div>
+<div class="admonitionblock note">
+<table>
+<tr>
+<td class="icon">
+<i class="fa icon-note" title="Note"></i>
+</td>
+<td class="content">
+<div class="paragraph">
+<p>The cluster keeps running in the background for the rest of the exercises.
+If you ever want to remove it and start over, run <code>kind delete cluster --name dev</code> and repeat Step 4 (recreating with the same <code>--config ~/kind-config.yaml</code>).</p>
+</div>
+</td>
+</tr>
+</table>
 </div>
 </div>
 </div>
 <nav class="pagination">
-  <span class="prev"><a href="../exercises/2-develop-a-custom-validating-webhook-for-container-registry-enforcement.html">Exercise 2: Validating Webhook</a></span>
-  <span class="next"><a href="../suggested-reading/suggested-reading.html">Suggested Reading</a></span>
+  <span class="prev"><a href="exercises.html">Exercises</a></span>
+  <span class="next"><a href="1-1-build-a-controller-using-client-go-from-scratch.html">Exercise 1.1: Build a Controller</a></span>
 </nav>
 </article>
   </div>

@@ -1,6 +1,6 @@
 {
-  "totalSeconds": 6026,
-  "pageCount": 52,
+  "totalSeconds": 15563,
+  "pageCount": 53,
   "pages": [
     {
       "module": "ROOT",
@@ -10,7 +10,7 @@
     {
       "module": "LABENV",
       "page": "index.adoc",
-      "seconds": 47
+      "seconds": 56
     },
     {
       "module": "overview",
@@ -230,22 +230,27 @@
     {
       "module": "exercises",
       "page": "exercises.adoc",
-      "seconds": 23
+      "seconds": 34
     },
     {
       "module": "exercises",
-      "page": "1-build-a-controller-using-client-go-from-scratch.adoc",
-      "seconds": 83
+      "page": "setup.adoc",
+      "seconds": 1303
     },
     {
       "module": "exercises",
-      "page": "2-implement-optimistic-locking-and-leader-election-via-lease.adoc",
-      "seconds": 82
+      "page": "1-1-build-a-controller-using-client-go-from-scratch.adoc",
+      "seconds": 2929
     },
     {
       "module": "exercises",
-      "page": "3-develop-a-custom-validating-webhook-for-container-registry-enforcement.adoc",
-      "seconds": 263
+      "page": "1-2-implement-optimistic-locking-and-leader-election-via-lease.adoc",
+      "seconds": 2547
+    },
+    {
+      "module": "exercises",
+      "page": "2-develop-a-custom-validating-webhook-for-container-registry-enforcement.adoc",
+      "seconds": 3166
     },
     {
       "module": "recommended-reading",

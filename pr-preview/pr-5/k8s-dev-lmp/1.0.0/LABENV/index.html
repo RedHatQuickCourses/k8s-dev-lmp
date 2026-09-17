@@ -265,13 +265,16 @@
     <a class="nav-link" href="../exercises/exercises.html">Exercises</a>
 <ul class="nav-list">
   <li class="nav-item" data-depth="2">
-    <a class="nav-link" href="../exercises/1-build-a-controller-using-client-go-from-scratch.html">Exercise 1: Build a Controller</a>
+    <a class="nav-link" href="../exercises/setup.html">Setup</a>
   </li>
   <li class="nav-item" data-depth="2">
-    <a class="nav-link" href="../exercises/2-implement-optimistic-locking-and-leader-election-via-lease.html">Exercise 2: Leader Election</a>
+    <a class="nav-link" href="../exercises/1-1-build-a-controller-using-client-go-from-scratch.html">Exercise 1.1: Build a Controller</a>
   </li>
   <li class="nav-item" data-depth="2">
-    <a class="nav-link" href="../exercises/3-develop-a-custom-validating-webhook-for-container-registry-enforcement.html">Exercise 3: Validating Webhook</a>
+    <a class="nav-link" href="../exercises/1-2-implement-optimistic-locking-and-leader-election-via-lease.html">Exercise 1.2: Leader Election</a>
+  </li>
+  <li class="nav-item" data-depth="2">
+    <a class="nav-link" href="../exercises/2-develop-a-custom-validating-webhook-for-container-registry-enforcement.html">Exercise 2: Validating Webhook</a>
   </li>
 </ul>
   </li>
@@ -340,70 +343,75 @@
 <div id="preamble">
 <div class="sectionbody">
 <div class="paragraph">
-<p>For the hands-on exercises in this learning path you will need access to a running OpenShift cluster. You can request a self-service demo cluster from the Red Hat Demo Platform.</p>
+<p>The hands-on exercises in this learning path run on a <strong>bastion virtual machine</strong> running Red Hat Enterprise Linux (RHEL).
+You do everything&#8201;&#8212;&#8201;editing files, installing tools, building code, and running <code>kubectl</code>&#8201;&#8212;&#8201;while logged in to this VM, so you do not need to install anything on your own laptop.</p>
+</div>
+<div class="paragraph">
+<p>The VM starts as a plain RHEL host. In <a href="../exercises/setup.html" class="xref page">Setup</a> you install the toolchain (Go, <code>kubectl</code>, and Kind) and create a single-node Kubernetes cluster with Kind that runs on the VM itself. There is no separate cluster to provision.</p>
 </div>
 </div>
 </div>
 <div class="sect1">
-<h2 id="_requesting_a_demo_cluster"><a class="anchor" href="#_requesting_a_demo_cluster"></a>Requesting a Demo Cluster</h2>
+<h2 id="_requesting_the_rhel_vm"><a class="anchor" href="#_requesting_the_rhel_vm"></a>Requesting the RHEL VM</h2>
 <div class="sectionbody">
+<div class="paragraph">
+<p>Order a RHEL VM from the Red Hat Demo Platform catalog:</p>
+</div>
 <div class="olist arabic">
 <ol class="arabic">
 <li>
-<p>Open the catalog item: <a href="https://catalog.demo.redhat.com/catalog/babylon-catalog-prod?item=babylon-catalog-prod/published.ocp4-cluster.prod" target="_blank" rel="noopener">Red Hat OpenShift Container Platform Cluster (Multi-Cloud)</a></p>
+<p>Open the <a href="https://catalog.demo.redhat.com/catalog/babylon-catalog-prod?item=babylon-catalog-prod%2Fsandboxes-gpte.rhel10-base.prod" target="_blank" rel="noopener">RHEL VM sandbox catalog item</a>.</p>
 </li>
 <li>
-<p>Click <strong>Order</strong> to open the order form and complete the required fields:</p>
-<div class="openblock">
-<div class="content">
-<div class="ulist">
-<ul>
-<li>
-<p><strong>Activity</strong> — select the option that matches your context (e.g. <strong>Practice / Enablement</strong>).</p>
+<p>Click <strong>Order</strong>, accept the defaults, and submit the request.</p>
 </li>
 <li>
-<p><strong>Purpose</strong> — choose the appropriate purpose from the dropdown.</p>
-</li>
-<li>
-<p><strong>Salesforce IDs</strong> — provide an Opportunity, Campaign or Project ID if required by your activity, otherwise acknowledge that you will supply it within 48 hours.</p>
-</li>
-<li>
-<p><strong>Cloud Provider</strong> — <strong>CNV</strong> is preferred.</p>
-</li>
-<li>
-<p><strong>OpenShift Version</strong> — any version of OpenShift is fine.</p>
-</li>
-<li>
-<p><strong>cluster size</strong> — select a size suited to your needs.</p>
-</li>
-<li>
-<p><strong>Create users on cluster?</strong> — set as needed.</p>
-</li>
-</ul>
-</div>
-</div>
-</div>
-</li>
-<li>
-<p>Submit the order and wait for the cluster to be provisioned.</p>
+<p>Wait for the provisioning email (or the <strong>Services</strong> page in the catalog) to report the VM is <strong>ready</strong>. This usually takes a few minutes.</p>
 </li>
 </ol>
+</div>
+<div class="paragraph">
+<p>When provisioning completes, the catalog shows the connection details for your VM, including an <strong>SSH command</strong> similar to the one below.</p>
 </div>
 </div>
 </div>
 <div class="sect1">
-<h2 id="_accessing_your_cluster"><a class="anchor" href="#_accessing_your_cluster"></a>Accessing Your Cluster</h2>
+<h2 id="_logging_in_to_the_bastion"><a class="anchor" href="#_logging_in_to_the_bastion"></a>Logging In to the Bastion</h2>
 <div class="sectionbody">
 <div class="paragraph">
-<p>Once the cluster is ready, the dashboard provides a <strong>KUBECONFIG</strong> for your cluster. Download it and link it into your local path so that <code>oc</code> / <code>kubectl</code> use it by default, for example:</p>
+<p>Copy the SSH command from your provisioning details and run it from your local terminal.
+It looks similar to this (your host name and credentials will differ):</p>
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="highlightjs highlight"><code class="language-bash hljs" data-lang="bash">export KUBECONFIG=~/path/to/downloaded/kubeconfig</code></pre>
+<pre class="highlightjs highlight"><code class="language-console hljs" data-lang="console">$ <strong>ssh lab-user@rhel.example.opentlc.com</strong></code></pre>
+</div>
+</div>
+<div class="admonitionblock note">
+<table>
+<tr>
+<td class="icon">
+<i class="fa icon-note" title="Note"></i>
+</td>
+<td class="content">
+The catalog details page shows the exact host name and the password (or key) to use. Use the values from <strong>your</strong> provisioning details, not the example above.
+</td>
+</tr>
+</table>
+</div>
+<div class="paragraph">
+<p>Once connected, your shell prompt looks similar to this:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-console hljs" data-lang="console">[lab-user@rhel ~]$</code></pre>
 </div>
 </div>
 <div class="paragraph">
-<p>You are now ready to begin the hands-on exercises.</p>
+<p>The <code>lab-user</code> account has passwordless <code>sudo</code>, which you use in Setup to install packages.</p>
+</div>
+<div class="paragraph">
+<p>You are now ready to continue with <a href="../exercises/setup.html" class="xref page">Setup</a>, where you install the toolchain and create your Kubernetes cluster.</p>
 </div>
 </div>
 </div>

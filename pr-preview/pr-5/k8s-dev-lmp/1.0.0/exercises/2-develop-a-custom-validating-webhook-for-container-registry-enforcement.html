@@ -3,8 +3,8 @@
   <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width,initial-scale=1">
-    <title>Exercise 3: Validating Webhook for Registry Enforcement :: Kubernetes Developer Learning Path</title>
-    <link rel="prev" href="2-implement-optimistic-locking-and-leader-election-via-lease.html">
+    <title>Exercise 2: Validating Webhook for Registry Enforcement :: Kubernetes Developer Learning Path</title>
+    <link rel="prev" href="1-2-implement-optimistic-locking-and-leader-election-via-lease.html">
     <link rel="next" href="../recommended-reading/recommended-reading.html">
     <meta name="generator" content="Antora 3.2.0-alpha.12">
     <link rel="stylesheet" href="../../../_/css/site.css">
@@ -265,13 +265,16 @@
     <a class="nav-link" href="exercises.html">Exercises</a>
 <ul class="nav-list">
   <li class="nav-item" data-depth="2">
-    <a class="nav-link" href="1-build-a-controller-using-client-go-from-scratch.html">Exercise 1: Build a Controller</a>
+    <a class="nav-link" href="setup.html">Setup</a>
   </li>
   <li class="nav-item" data-depth="2">
-    <a class="nav-link" href="2-implement-optimistic-locking-and-leader-election-via-lease.html">Exercise 2: Leader Election</a>
+    <a class="nav-link" href="1-1-build-a-controller-using-client-go-from-scratch.html">Exercise 1.1: Build a Controller</a>
+  </li>
+  <li class="nav-item" data-depth="2">
+    <a class="nav-link" href="1-2-implement-optimistic-locking-and-leader-election-via-lease.html">Exercise 1.2: Leader Election</a>
   </li>
   <li class="nav-item is-current-page" data-depth="2">
-    <a class="nav-link" href="3-develop-a-custom-validating-webhook-for-container-registry-enforcement.html">Exercise 3: Validating Webhook</a>
+    <a class="nav-link" href="2-develop-a-custom-validating-webhook-for-container-registry-enforcement.html">Exercise 2: Validating Webhook</a>
   </li>
 </ul>
   </li>
@@ -328,7 +331,7 @@
   <ul>
     <li><a href="../index.html">Kubernetes Developer Learning Path</a></li>
     <li><a href="exercises.html">Exercises</a></li>
-    <li><a href="3-develop-a-custom-validating-webhook-for-container-registry-enforcement.html">Exercise 3: Validating Webhook</a></li>
+    <li><a href="2-develop-a-custom-validating-webhook-for-container-registry-enforcement.html">Exercise 2: Validating Webhook</a></li>
   </ul>
 </nav>
 </div>
@@ -336,8 +339,8 @@
 <aside class="toc sidebar" data-title="Contents" data-levels="2">
   <div class="toc-menu"></div>
 </aside>
-<article class="doc" data-audio-src="3-develop-a-custom-validating-webhook-for-container-registry-enforcement.wav" data-transcript-src="3-develop-a-custom-validating-webhook-for-container-registry-enforcement.txt">
-<h1 class="page">Exercise 3: Validating Webhook for Registry Enforcement</h1>
+<article class="doc" data-audio-src="2-develop-a-custom-validating-webhook-for-container-registry-enforcement.wav" data-transcript-src="2-develop-a-custom-validating-webhook-for-container-registry-enforcement.txt" data-lab-minutes="50">
+<h1 class="page">Exercise 2: Validating Webhook for Registry Enforcement</h1>
 <div id="preamble">
 <div class="sectionbody">
 <div class="paragraph">
@@ -345,8 +348,8 @@
 This applies the concepts from <a href="../31-taking-more-control-admissions-and-beyond-the-kube-apiserver-to-writing-your-own-api-server/admission-control-webhooks.html" class="xref page">Admission Control Webhooks</a>.</p>
 </div>
 <div class="paragraph">
-<p>The good news is that a webhook is just an HTTPS server with a single endpoint. The API server sends it a JSON request, and it replies with a JSON response saying "allow" or "deny".
-You will write that endpoint in plain Python using any framework of your choice, no client-go, no Kubernetes SDK are required.</p>
+<p>A webhook is just an HTTPS server with a single endpoint. The API server sends it a JSON request, and it replies with a JSON response saying "allow" or "deny".
+You will write that endpoint in plain Python&#8201;&#8212;&#8201;no client-go, no Kubernetes SDK required&#8201;&#8212;&#8201;and every step below shows the exact command and the output you should expect on the bastion.</p>
 </div>
 </div>
 </div>
@@ -356,16 +359,19 @@ You will write that endpoint in plain Python using any framework of your choice,
 <div class="ulist">
 <ul>
 <li>
-<p>A running Python 3 environment (Python 3.10+) or a Python-capable IDE (e.g. VS Code with the Python extension, or PyCharm)</p>
+<p>You have completed <a href="setup.html" class="xref page">Setup</a> and your Kind cluster is running (<code>kubectl get nodes</code> shows <code>dev-control-plane</code> as <code>Ready</code>).</p>
 </li>
 <li>
-<p>Docker or Podman installed and available on your machine</p>
+<p><code>python3</code>, <code>podman</code>, and <code>openssl</code> are preinstalled on the RHEL VM. Confirm the Python version:</p>
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-console hljs" data-lang="console">$ <strong>python3 --version</strong>
+Python 3.12.9</code></pre>
+</div>
+</div>
 </li>
 <li>
-<p>Access to a running OpenShift cluster&#8201;&#8212;&#8201;see <a href="../LABENV/index.html" class="xref page">Lab Environment</a> to request one</p>
-</li>
-<li>
-<p><code>kubectl</code> (or <code>oc</code>) and <code>openssl</code> available on your machine</p>
+<p><code>KIND_EXPERIMENTAL_PROVIDER=podman</code> is set (from Setup). If you opened a fresh terminal without the <code>~/.bashrc</code> entry, run <code>export KIND_EXPERIMENTAL_PROVIDER=podman</code> before the <code>kind load</code> step.</p>
 </li>
 </ul>
 </div>
@@ -377,7 +383,8 @@ You will write that endpoint in plain Python using any framework of your choice,
 </td>
 <td class="content">
 <div class="paragraph">
-<p>A valid TLS certificate is required to be used in the HTTPS webserver running the webhook, a small shell script (provided in Step 3) generates the TLS certificate that the webhook needs for apiserver&#8217;s communication.</p>
+<p>A valid TLS certificate is required for the HTTPS server running the webhook.
+A small shell script (provided in Step 3) generates the certificate the API server needs to trust your webhook.</p>
 </div>
 </td>
 </tr>
@@ -417,7 +424,7 @@ Your job is to read the Pod out of that document, decide, and POST back an <code
 </div>
 </div>
 <div class="listingblock">
-<div class="title">Response your webhook must return (deny example)</div>
+<div class="title">Response your webhook returns (deny example)</div>
 <div class="content">
 <pre class="highlightjs highlight"><code class="language-json hljs" data-lang="json">{
   "apiVersion": "admission.k8s.io/v1",
@@ -427,23 +434,8 @@ Your job is to read the Pod out of that document, decide, and POST back an <code
     "allowed": false,
     "status": {
       "code": 403,
-      "message": "image docker.io/library/nginx:latest is not from an approved registry"
+      "message": "the following image(s) are not from an approved registry (quay.io, gcr.io): docker.io/library/nginx:latest"
     }
-  }
-}</code></pre>
-</div>
-</div>
-<div class="paragraph">
-<p>To allow the request instead, return the same shape with <code>"allowed": true</code> and no <code>status</code> needed:</p>
-</div>
-<div class="listingblock">
-<div class="content">
-<pre class="highlightjs highlight"><code class="language-json hljs" data-lang="json">{
-  "apiVersion": "admission.k8s.io/v1",
-  "kind": "AdmissionReview",
-  "response": {
-    "uid": "705ab4f5-6393-11e8-b7cc-42010a800002",
-    "allowed": true
   }
 }</code></pre>
 </div>
@@ -457,7 +449,7 @@ Your job is to read the Pod out of that document, decide, and POST back an <code
 <td class="content">
 <div class="paragraph">
 <p>The <code>uid</code> in your response <strong>must</strong> match the <code>uid</code> from the request, or the API server rejects the answer.
-The webhook is always reached over HTTPS, so the API server needs to trust your server&#8217;s certificate&#8201;&#8212;&#8201;that is what Step 3 sets up.</p>
+The webhook is always reached over HTTPS, so the API server needs to trust your server&#8217;s certificate&#8201;&#8212;&#8201;that is what Step 2 sets up.</p>
 </div>
 </td>
 </tr>
@@ -466,25 +458,16 @@ The webhook is always reached over HTTPS, so the API server needs to trust your 
 </div>
 </div>
 <div class="sect1">
-<h2 id="_step_1_scaffold_the_webhook_server"><a class="anchor" href="#_step_1_scaffold_the_webhook_server"></a>Step 1: Scaffold the Webhook Server</h2>
+<h2 id="_step_1_write_the_webhook_server"><a class="anchor" href="#_step_1_write_the_webhook_server"></a>Step 1: Write the Webhook Server</h2>
 <div class="sectionbody">
 <div class="paragraph">
-<p>Create a file named <code>webhook.py</code>.
-You need one HTTPS endpoint that accepts <code>POST /validate</code>, reads the <code>AdmissionReview</code> request, and returns an <code>AdmissionReview</code> response in the shape shown above.</p>
-</div>
-<div class="paragraph">
-<p>Use whatever HTTP framework you like&#8201;&#8212;&#8201;the standard-library <code>http.server</code>, Flask, FastAPI, or anything else.
-The only hard requirements are that it serves <strong>HTTPS</strong> (the API server never calls a webhook over plain HTTP) and that it POSTs back a response echoing the request <code>uid</code>.</p>
-</div>
-<div class="paragraph">
-<p>The scaffold below uses the standard library so it has zero dependencies.
-Notice the two helpers are done for you&#8201;&#8212;&#8201;<code>review_response()</code> builds the exact JSON the API server expects, and <code>main()</code> reads the approved registries from a flag and wraps the socket in TLS.
-The one function left blank, <code>handle_admission()</code>, is the actual policy&#8201;&#8212;&#8201;you will fill it in under <a href="#_challenge">Challenge</a>.</p>
+<p>Create a file named <code>webhook.py</code> with the complete server below.
+It uses the Python standard library only (no dependencies): <code>handle_admission()</code> implements the registry policy, <code>review_response()</code> builds the exact JSON the API server expects, and <code>main()</code> reads the approved registries from a flag and wraps the socket in TLS.</p>
 </div>
 <div class="listingblock">
 <div class="content">
 <pre class="highlightjs highlight"><code class="language-python hljs" data-lang="python">#!/usr/bin/env python3
-"""Validating admission webhook — scaffold. Implement handle_admission() (see Challenge)."""
+"""Validating admission webhook that enforces approved container registries."""
 
 import argparse
 import json
@@ -506,15 +489,49 @@ def review_response(uid: str, allowed: bool, message: str = "") -&gt; dict:
     return response
 
 
+def registry_of(image: str) -&gt; str:
+    """Return the registry host for an image reference.
+
+    Image references are not uniform, so we normalise them:
+      quay.io/org/app:v1          -&gt; quay.io
+      my-registry.com:5000/app    -&gt; my-registry.com:5000
+      docker.io/library/nginx     -&gt; docker.io
+      library/nginx               -&gt; docker.io (implicit)
+      nginx:latest                -&gt; docker.io (implicit)
+    """
+    # Drop any @sha256:... digest first.
+    ref = image.split("@", 1)[0]
+    # With no "/", the whole ref is a repository on Docker Hub and any ":" is a
+    # tag (e.g. nginx:latest), never a registry host.
+    if "/" not in ref:
+        return "docker.io"
+    first = ref.split("/", 1)[0]
+    # The first path segment is the registry host only if it looks like one:
+    # it carries a dot or a port colon, or is localhost.
+    if "." in first or ":" in first or first == "localhost":
+        return first
+    return "docker.io"
+
+
 def handle_admission(admission_review: dict) -&gt; dict:
-    """Decide whether to allow the request. THIS IS YOUR JOB — see the Challenge."""
+    """Allow the request only if every container image is from an approved registry."""
     request = admission_review["request"]
     uid = request["uid"]
     pod_spec = request.get("object", {}).get("spec", {})
 
-    # TODO (Challenge): inspect pod_spec["containers"], decide allow vs. deny,
-    # and return review_response(uid, allowed, message).
-    raise NotImplementedError("Implement the registry validation — see the Challenge section")
+    offending = []
+    for container in pod_spec.get("containers", []):
+        image = container.get("image", "")
+        if registry_of(image) not in APPROVED_REGISTRIES:
+            offending.append(image)
+
+    if offending:
+        message = (
+            "the following image(s) are not from an approved registry "
+            f"({', '.join(APPROVED_REGISTRIES)}): {', '.join(offending)}"
+        )
+        return review_response(uid, False, message)
+    return review_response(uid, True)
 
 
 class WebhookHandler(BaseHTTPRequestHandler):
@@ -531,7 +548,7 @@ class WebhookHandler(BaseHTTPRequestHandler):
 def main():
     parser = argparse.ArgumentParser(description="Image registry validating webhook")
     parser.add_argument("--approved-registries", required=True,
-                        help="Comma-separated approved registries, e.g. docker.io,quay.io")
+                        help="Comma-separated approved registries, e.g. quay.io,gcr.io")
     parser.add_argument("--tls-cert", required=True, help="Path to TLS certificate")
     parser.add_argument("--tls-key", required=True, help="Path to TLS private key")
     parser.add_argument("--port", type=int, default=8443)
@@ -553,21 +570,14 @@ if __name__ == "__main__":
     main()</code></pre>
 </div>
 </div>
-<div class="admonitionblock tip">
-<table>
-<tr>
-<td class="icon">
-<i class="fa icon-tip" title="Tip"></i>
-</td>
-<td class="content">
 <div class="paragraph">
-<p>Prefer a framework like Flask or FastAPI? Go for it.
-Map a <code>POST /validate</code> route to a handler that parses the JSON body, calls your <code>handle_admission()</code>, and returns its dict as JSON.
-Just make sure the server terminates TLS with the certificate from Step 2 (both Flask&#8217;s built-in server and Uvicorn accept a cert/key pair).</p>
+<p>Before deploying, sanity-check the decision logic locally&#8201;&#8212;&#8201;save the sample request from earlier as <code>sample.json</code>, then confirm it denies the <code>nginx</code> image and allows a <code>quay.io</code> image:</p>
 </div>
-</td>
-</tr>
-</table>
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-console hljs" data-lang="console">$ <strong>python3 -c "import webhook, json; webhook.APPROVED_REGISTRIES=['quay.io','gcr.io']; print(webhook.handle_admission(json.load(open('sample.json')))['response'])"</strong>
+{'uid': '705ab4f5-6393-11e8-b7cc-42010a800002', 'allowed': False, 'status': {'code': 403, 'message': "the following image(s) are not from an approved registry (quay.io, gcr.io): docker.io/library/nginx:latest"}}</code></pre>
+</div>
 </div>
 </div>
 </div>
@@ -579,7 +589,7 @@ Just make sure the server terminates TLS with the certificate from Step 2 (both 
 Instead of installing cert-manager, generate a self-signed certificate whose subject alternative name (SAN) matches the webhook&#8217;s in-cluster Service DNS name.</p>
 </div>
 <div class="paragraph">
-<p>Save this as <code>generate-certs.sh</code> and run it (<code>bash generate-certs.sh</code>):</p>
+<p>Save this as <code>generate-certs.sh</code>:</p>
 </div>
 <div class="listingblock">
 <div class="content">
@@ -628,46 +638,77 @@ base64 &lt; "$CERT_DIR/ca.crt" | tr -d '\n'; echo</code></pre>
 </div>
 </div>
 <div class="paragraph">
-<p>The script prints a base64-encoded CA bundle at the end.
-Copy it&#8201;&#8212;&#8201;you will paste it into the webhook configuration in Step 4.</p>
-</div>
-<div class="paragraph">
-<p>Store the server certificate and key in a Secret the webhook Pod can mount:</p>
+<p>Run it. The script prints a base64-encoded CA bundle at the end&#8201;&#8212;&#8201;copy that value, you will paste it into the webhook configuration in Step 5:</p>
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="highlightjs highlight"><code class="language-bash hljs" data-lang="bash">kubectl create namespace image-webhook
-kubectl create secret tls image-webhook-tls \
-  --cert=certs/tls.crt --key=certs/tls.key -n image-webhook</code></pre>
+<pre class="highlightjs highlight"><code class="language-console hljs" data-lang="console">$ <strong>bash generate-certs.sh</strong>
+Certificate request self-signature ok
+subject=CN=image-webhook.image-webhook.svc
+CA bundle (base64) for the webhook config:
+LS0tLS1CRUdJTiBDRVJUSUZJQ0FURS0tLS0tCk1JSURDekND...(truncated)...LS0tLS1FTkQgQ0VSVElGSUNBVEUtLS0tLQo=</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>Create the namespace and store the server certificate and key in a Secret the webhook Pod can mount:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-console hljs" data-lang="console">$ <strong>kubectl create namespace image-webhook</strong>
+namespace/image-webhook created
+$ <strong>kubectl create secret tls image-webhook-tls --cert=certs/tls.crt --key=certs/tls.key -n image-webhook</strong>
+secret/image-webhook-tls created</code></pre>
 </div>
 </div>
 </div>
 </div>
 <div class="sect1">
-<h2 id="_step_3_build_push_and_deploy"><a class="anchor" href="#_step_3_build_push_and_deploy"></a>Step 3: Build, Push, and Deploy</h2>
+<h2 id="_step_3_build_the_image_and_load_it_into_kind"><a class="anchor" href="#_step_3_build_the_image_and_load_it_into_kind"></a>Step 3: Build the Image and Load It into Kind</h2>
 <div class="sectionbody">
 <div class="paragraph">
-<p>Package the webhook in a container image. Create this <code>Dockerfile</code>:</p>
+<p>Package the webhook in a container image. Create this <code>Dockerfile</code>.
+It uses a Red Hat Universal Base Image (UBI) Python image, which the VM can pull without hitting Docker Hub rate limits:</p>
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="highlightjs highlight"><code class="language-dockerfile hljs" data-lang="dockerfile">FROM python:3.12-slim
+<pre class="highlightjs highlight"><code class="language-dockerfile hljs" data-lang="dockerfile">FROM registry.access.redhat.com/ubi9/python-311
 WORKDIR /app
 COPY webhook.py .
 ENTRYPOINT ["python", "webhook.py"]</code></pre>
 </div>
 </div>
 <div class="paragraph">
-<p>Build and push it with Docker or Podman (substitute a registry your cluster can pull from):</p>
+<p>Build the image with <code>podman</code>:</p>
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="highlightjs highlight"><code class="language-bash hljs" data-lang="bash">docker build -t &lt;your-registry&gt;/image-webhook:latest .
-docker push  &lt;your-registry&gt;/image-webhook:latest</code></pre>
+<pre class="highlightjs highlight"><code class="language-console hljs" data-lang="console">$ <strong>podman build -t image-webhook:latest .</strong>
+...
+Successfully tagged localhost/image-webhook:latest</code></pre>
 </div>
 </div>
 <div class="paragraph">
-<p>Deploy the webhook, wiring in the approved registries and mounting the TLS Secret:</p>
+<p>Your Kind cluster runs in its own containers and cannot see images in your local podman store, and there is no external registry in this lab.
+Instead, export the image to a tar archive and load it directly into the Kind node:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-console hljs" data-lang="console">$ <strong>podman save image-webhook:latest -o image-webhook.tar</strong>
+$ <strong>kind load image-archive image-webhook.tar --name dev</strong>
+Image: "" with ID "sha256:..." not yet present on node "dev-control-plane", loading...</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>Inside the cluster the image is named <code>localhost/image-webhook:latest</code>&#8201;&#8212;&#8201;that is the name you reference in the Deployment in Step 4.</p>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_step_4_deploy_the_webhook"><a class="anchor" href="#_step_4_deploy_the_webhook"></a>Step 4: Deploy the Webhook</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>Deploy the webhook, wiring in the approved registries and mounting the TLS Secret.
+Save this as <code>deploy.yaml</code>. It references the image you loaded into Kind in Step 3, with <code>imagePullPolicy: IfNotPresent</code> so the kubelet uses that local image instead of trying to pull it from a registry:</p>
 </div>
 <div class="listingblock">
 <div class="content">
@@ -686,7 +727,8 @@ spec:
     spec:
       containers:
         - name: webhook
-          image: &lt;your-registry&gt;/image-webhook:latest   # image from the step above
+          image: localhost/image-webhook:latest   # image loaded into Kind in Step 3
+          imagePullPolicy: IfNotPresent
           args:
             - "--approved-registries=quay.io,gcr.io"
             - "--tls-cert=/tls/tls.crt"
@@ -714,14 +756,26 @@ spec:
       targetPort: 8443</code></pre>
 </div>
 </div>
+<div class="paragraph">
+<p>Apply it and wait for the Pod to become ready:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-console hljs" data-lang="console">$ <strong>kubectl apply -f deploy.yaml</strong>
+deployment.apps/image-webhook created
+service/image-webhook created
+$ <strong>kubectl rollout status deploy/image-webhook -n image-webhook</strong>
+deployment "image-webhook" successfully rolled out</code></pre>
+</div>
+</div>
 </div>
 </div>
 <div class="sect1">
-<h2 id="_step_4_register_the_webhook"><a class="anchor" href="#_step_4_register_the_webhook"></a>Step 4: Register the Webhook</h2>
+<h2 id="_step_5_register_the_webhook"><a class="anchor" href="#_step_5_register_the_webhook"></a>Step 5: Register the Webhook</h2>
 <div class="sectionbody">
 <div class="paragraph">
 <p>Create a <code>ValidatingWebhookConfiguration</code> that tells the API server to send Pod CREATE and UPDATE requests to your Service.
-Replace <code>CA_BUNDLE_BASE64</code> with the value printed by <code>generate-certs.sh</code> in Step 2:</p>
+Save this as <code>webhook-config.yaml</code> and replace <code>CA_BUNDLE_BASE64</code> with the value printed by <code>generate-certs.sh</code> in Step 2:</p>
 </div>
 <div class="listingblock">
 <div class="content">
@@ -753,6 +807,12 @@ webhooks:
           values: ["kube-system", "image-webhook"]</code></pre>
 </div>
 </div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-console hljs" data-lang="console">$ <strong>kubectl apply -f webhook-config.yaml</strong>
+validatingwebhookconfiguration.admissionregistration.k8s.io/image-registry-webhook created</code></pre>
+</div>
+</div>
 <div class="admonitionblock warning">
 <table>
 <tr>
@@ -771,108 +831,53 @@ The <code>namespaceSelector</code> exempts <code>kube-system</code> and the webh
 </div>
 </div>
 <div class="sect1">
-<h2 id="_step_5_test"><a class="anchor" href="#_step_5_test"></a>Step 5: Test</h2>
+<h2 id="_step_6_test"><a class="anchor" href="#_step_6_test"></a>Step 6: Test</h2>
 <div class="sectionbody">
 <div class="paragraph">
 <p>Try an unauthorized image&#8201;&#8212;&#8201;it should be denied:</p>
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="highlightjs highlight"><code class="language-bash hljs" data-lang="bash">kubectl run test --image=docker.io/library/nginx:latest
-# Expected: Error from server: admission webhook
-#   "image-registry.webhook.example.com" denied the request:
-#   image "docker.io/library/nginx:latest" is not from an approved registry</code></pre>
+<pre class="highlightjs highlight"><code class="language-console hljs" data-lang="console">$ <strong>kubectl run test --image=docker.io/library/nginx:latest</strong>
+Error from server: admission webhook "image-registry.webhook.example.com" denied the request: the following image(s) are not from an approved registry (quay.io, gcr.io): docker.io/library/nginx:latest</code></pre>
 </div>
 </div>
 <div class="paragraph">
-<p>Now try an authorized image (<code>quay.io</code> is in the allow-list above)&#8201;&#8212;&#8201;it should succeed:</p>
+<p>Now try an authorized image (<code>quay.io</code> is in the allow-list)&#8201;&#8212;&#8201;it should succeed:</p>
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="highlightjs highlight"><code class="language-bash hljs" data-lang="bash">kubectl run test --image=quay.io/myorg/myapp:latest
-# Expected: pod/test created</code></pre>
+<pre class="highlightjs highlight"><code class="language-console hljs" data-lang="console">$ <strong>kubectl run test --image=quay.io/myorg/myapp:latest</strong>
+pod/test created</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>Watch the webhook decisions in its logs:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-console hljs" data-lang="console">$ <strong>kubectl logs -n image-webhook deploy/image-webhook</strong>
+Approved registries: ['quay.io', 'gcr.io']
+Webhook listening on :8443</code></pre>
 </div>
 </div>
 </div>
 </div>
 <div class="sect1">
-<h2 id="_challenge"><a class="anchor" href="#_challenge"></a>Challenge</h2>
+<h2 id="_going_further"><a class="anchor" href="#_going_further"></a>Going further</h2>
 <div class="sectionbody">
 <div class="paragraph">
-<p>The scaffold in Step 1 does everything <strong>except</strong> decide.
-Implement <code>handle_admission()</code> so it enforces the registry policy:</p>
+<p>The webhook enforces the container image registry policy end to end. To harden it, try these optional extensions:</p>
 </div>
-<div class="olist arabic">
-<ol class="arabic">
-<li>
-<p>Walk every container in <code>pod_spec["containers"]</code> and read its <code>image</code>.</p>
-</li>
-<li>
-<p>Work out the registry host for each image. This needs a little parsing, because image references are not uniform:</p>
-<table class="tableblock frame-all grid-all stretch">
-<colgroup>
-<col style="width: 50%;">
-<col style="width: 50%;">
-</colgroup>
-<thead>
-<tr>
-<th class="tableblock halign-left valign-top">Image reference</th>
-<th class="tableblock halign-left valign-top">Registry</th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td class="tableblock halign-left valign-top"><p class="tableblock"><code>quay.io/org/app:v1</code></p></td>
-<td class="tableblock halign-left valign-top"><p class="tableblock"><code>quay.io</code></p></td>
-</tr>
-<tr>
-<td class="tableblock halign-left valign-top"><p class="tableblock"><code>my-registry.com:5000/app</code></p></td>
-<td class="tableblock halign-left valign-top"><p class="tableblock"><code>my-registry.com:5000</code></p></td>
-</tr>
-<tr>
-<td class="tableblock halign-left valign-top"><p class="tableblock"><code>docker.io/library/nginx</code></p></td>
-<td class="tableblock halign-left valign-top"><p class="tableblock"><code>docker.io</code></p></td>
-</tr>
-<tr>
-<td class="tableblock halign-left valign-top"><p class="tableblock"><code>library/nginx</code></p></td>
-<td class="tableblock halign-left valign-top"><p class="tableblock"><code>docker.io</code> (implicit)</p></td>
-</tr>
-<tr>
-<td class="tableblock halign-left valign-top"><p class="tableblock"><code>nginx:latest</code></p></td>
-<td class="tableblock halign-left valign-top"><p class="tableblock"><code>docker.io</code> (implicit)</p></td>
-</tr>
-</tbody>
-</table>
-<div class="paragraph">
-<p>Hint: split off any <code>@sha256:&#8230;&#8203;</code> digest and <code>:tag</code>, then split on <code>/</code>. If the first segment contains a <code>.</code> or <code>:</code>, or equals <code>localhost</code>, treat it as the registry host; otherwise the image lives on <code>docker.io</code>.</p>
-</div>
-</li>
-<li>
-<p>Compare each registry against the <code>APPROVED_REGISTRIES</code> list that <code>main()</code> populated from the <code>--approved-registries</code> flag.</p>
-</li>
-<li>
-<p>If <strong>every</strong> image is approved, return <code>review_response(uid, True)</code>. Otherwise return <code>review_response(uid, False, message)</code> with a message that names the offending image(s)&#8201;&#8212;&#8201;that text is what the user sees on <code>kubectl</code> errors, so make it clear.</p>
-</li>
-</ol>
-</div>
-<div class="paragraph">
-<p>Verify your logic locally before deploying: save the sample request JSON from earlier to <code>sample.json</code> and call <code>handle_admission(json.load(open("sample.json")))</code> from a Python shell&#8201;&#8212;&#8201;it should deny the <code>nginx</code> image and allow a <code>quay.io</code> image.</p>
-</div>
-<div class="sect2">
-<h3 id="_going_further"><a class="anchor" href="#_going_further"></a>Going further</h3>
 <div class="ulist">
 <ul>
 <li>
 <p>Also inspect <code>initContainers</code> and <code>ephemeralContainers</code>, not just <code>containers</code>.</p>
 </li>
 <li>
-<p>Extend the webhook rules and parsing to cover workloads such as Deployments and Jobs, whose Pod template lives under <code>spec.template.spec</code>.</p>
-</li>
-<li>
-<p>Support digest-pinned images (<code>registry/app@sha256:&#8230;&#8203;</code>) and per-namespace allow-lists.</p>
+<p>Extend the webhook rules and image parsing to cover workloads such as Deployments and Jobs, whose Pod template lives under <code>spec.template.spec</code>.</p>
 </li>
 </ul>
-</div>
 </div>
 </div>
 </div>
@@ -885,10 +890,7 @@ Implement <code>handle_admission()</code> so it enforces the registry policy:</p
 <p>Use <code>kubectl run --dry-run=server</code> during development to trigger the webhook without creating actual Pods.</p>
 </li>
 <li>
-<p>Watch the webhook logs (<code>kubectl logs -n image-webhook deploy/image-webhook</code>) to see each <code>AdmissionReview</code> decision&#8201;&#8212;&#8201;the request object contains the full Pod spec.</p>
-</li>
-<li>
-<p>If every request fails with a TLS error, the <code>caBundle</code> in Step 4 probably does not match the certificate from Step 2, or the Service DNS name does not match a SAN.</p>
+<p>If every request fails with a TLS error, the <code>caBundle</code> in Step 5 probably does not match the certificate from Step 2, or the Service DNS name does not match a SAN.</p>
 </li>
 <li>
 <p>For a declarative alternative to hand-coded webhooks, see <a href="../31-taking-more-control-admissions-and-beyond-the-kube-apiserver-to-writing-your-own-api-server/policy-engines-and-gatekeeper.html" class="xref page">Policy Engines and Gatekeeper</a>.</p>
@@ -906,16 +908,14 @@ Implement <code>handle_admission()</code> so it enforces the registry policy:</p
 <p><a href="https://kubernetes.io/docs/reference/access-authn-authz/extensible-admission-controllers/" target="_blank" rel="noopener">Dynamic Admission Control</a></p>
 </li>
 <li>
-<p><a href="https://kubernetes.io/docs/reference/access-authn-authz/admission-controllers/#webhook-request-and-response" target="_blank" rel="noopener">Webhook Request and Response Format</a>
-&lt;/content&gt;
-&lt;/invoke&gt;</p>
+<p><a href="https://kubernetes.io/docs/reference/access-authn-authz/admission-controllers/#webhook-request-and-response" target="_blank" rel="noopener">Webhook Request and Response Format</a></p>
 </li>
 </ul>
 </div>
 </div>
 </div>
 <nav class="pagination">
-  <span class="prev"><a href="2-implement-optimistic-locking-and-leader-election-via-lease.html">Exercise 2: Leader Election</a></span>
+  <span class="prev"><a href="1-2-implement-optimistic-locking-and-leader-election-via-lease.html">Exercise 1.2: Leader Election</a></span>
   <span class="next"><a href="../recommended-reading/recommended-reading.html">Recommended Reading</a></span>
 </nav>
 </article>
