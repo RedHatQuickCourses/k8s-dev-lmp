@@ -393,9 +393,9 @@ Pin them to a known-good version so your build matches the code in this exercise
 <div class="listingblock">
 <div class="content">
 <pre class="highlightjs highlight"><code class="language-console hljs" data-lang="console">$ <strong>go get k8s.io/client-go@v0.32</strong>
-go: added k8s.io/client-go v0.32.3
+go: added k8s.io/client-go v0.32.13
 $ <strong>go get k8s.io/apimachinery@v0.32</strong>
-go: added k8s.io/apimachinery v0.32.3</code></pre>
+go: added k8s.io/apimachinery v0.32.13</code></pre>
 </div>
 </div>
 <div class="admonitionblock note">
@@ -405,7 +405,7 @@ go: added k8s.io/apimachinery v0.32.3</code></pre>
 <i class="fa icon-note" title="Note"></i>
 </td>
 <td class="content">
-The pinned <code>client-go</code> v0.32.x line (Kubernetes 1.32) builds with the Go version shipped by <code>go-toolset</code>, so no additional Go toolchain is required. Pinning also keeps your build matching the code in this exercise.
+The pinned <code>client-go</code> v0.32.x line (Kubernetes 1.32) is aligned with the Go version shipped by <code>go-toolset</code>.
 </td>
 </tr>
 </table>

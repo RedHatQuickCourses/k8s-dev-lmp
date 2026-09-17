@@ -1,5 +1,5 @@
 {
-  "totalSeconds": 15576,
+  "totalSeconds": 15571,
   "pageCount": 53,
   "pages": [
     {
@@ -240,7 +240,7 @@
     {
       "module": "exercises",
       "page": "1-1-build-a-controller-using-client-go-from-scratch.adoc",
-      "seconds": 2938
+      "seconds": 2933
     },
     {
       "module": "exercises",
