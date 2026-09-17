@@ -309,7 +309,6 @@ secret/image-webhook-tls created
 == Step 3: Build the Image and Load It into Kind
 
 Package the webhook in a container image. Save this `Dockerfile` next to `webhook.py`.
-It uses a Red Hat Universal Base Image (UBI) Python image, which the VM can pull without hitting Docker Hub rate limits:
 
 [source,console,subs="verbatim,quotes"]
 ----
