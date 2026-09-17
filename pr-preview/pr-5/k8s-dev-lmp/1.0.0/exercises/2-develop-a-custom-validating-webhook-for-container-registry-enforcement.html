@@ -621,7 +621,7 @@ Save the sample <code>AdmissionReview</code> request shown earlier as <code>samp
 <div class="sectionbody">
 <div class="paragraph">
 <p>The API server only talks to webhooks over HTTPS, and it must trust the certificate.
-Instead of installing cert-manager, generate a self-signed certificate whose subject alternative name (SAN) matches the webhook&#8217;s in-cluster Service DNS name.</p>
+Generate a self-signed certificate whose subject alternative name (SAN) matches the webhook&#8217;s in-cluster Service DNS name.</p>
 </div>
 <div class="paragraph">
 <p>Save this as <code>generate-certs.sh</code>:</p>
