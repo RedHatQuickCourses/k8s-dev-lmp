@@ -1,0 +1,11 @@
+Welcome to this course on the internal mechanics of Kubernetes extensibility. We will be diving deep into custom controllers, admission webhooks, and distributed state management. To ensure you get the most out of this material, you should have a solid foundation in container orchestration and be comfortable with a few key competencies.
+
+First, you should have a good grasp of container fundamentals, including image management, container lifecycles, and basic networking using tools like podman or Docker. You should also be familiar with core Kubernetes resources, such as Deployments, Services, and ConfigMaps, as well as the kubectl command-line interface and the basics of Role-Based Access Control.
+
+Beyond Kubernetes itself, a working knowledge of distributed systems is essential. This includes understanding concepts like eventual consistency, concurrency, race conditions, and asynchronous, event-driven processing. Finally, because we will be working with client-go and implementing custom controllers, proficiency in the Go programming language is highly recommended—specifically regarding interfaces, goroutines, channels, and error handling.
+
+To determine if you are ready to begin, we suggest you benchmark your experience against the following three standards: having earned your CKAD certification, having completed the Red Hat DO-180 course, or having completed the Red Hat DO-280 course on OpenShift administration.
+
+Please keep in mind that if you do not hold these specific credentials, equivalent practical experience is perfectly fine. The most important thing is that you feel comfortable using the kubectl CLI, managing YAML manifests, and applying the fundamental concepts of distributed systems.
+
+If your knowledge in these areas feels a little rusty, we recommend a quick refresher. You can revisit the official Kubernetes documentation on cluster architecture, and if you need a quick boost on your programming skills, we suggest working through the official Go tutorial before you start the client-go lab exercises.

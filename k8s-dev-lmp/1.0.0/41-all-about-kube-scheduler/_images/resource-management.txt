@@ -1,28 +1,37 @@
-When managing Kubernetes workloads, understanding how to define and monitor resource usage is essential. Every container in a Pod can declare two distinct resource values: a request and a limit.
+In this module, we will discuss resource management in Kubernetes, focusing specifically on how to configure requests and limits for your containers.
 
-It is important to understand the difference between these two. A request tells the kube-scheduler how much capacity to reserve. The scheduler adds up the requests of all containers in a Pod and only places it on a node that has enough unallocated resources. Requests are strictly a scheduling-time concept and do not constrain the container once it is running. 
+Every container in a Pod can declare two distinct resource values: a request and a limit. It is important to understand that they serve fundamentally different purposes.
 
-In contrast, limits tell the kubelet and the Linux kernel how much a container is allowed to consume at runtime. A container can burst above its request when spare capacity exists, but it cannot exceed its defined limit. Keep in mind that if you set a limit without a request, Kubernetes automatically copies the limit value into the request.
+Requests tell the Kubernetes scheduler how much capacity to reserve. When you deploy a Pod, the scheduler calculates the sum of the requests for all containers and will only place that Pod on a node that has enough unallocated resources. Keep in mind that requests are a scheduling-time concept; they do not actually constrain the container while it is running.
 
-Let’s look at how CPU and memory are handled specifically. CPU is measured in millicores, represented by the symbol "m." One full core is equal to 1000m, so 0.5 cores would be 500m. CPU limits are enforced through a mechanism called CFS throttling. When a container reaches its CPU limit, the kernel restricts its processing time for the remainder of the scheduling interval. Importantly, the container is not killed; it simply runs more slowly. Because this throttling is invisible to many monitoring tools, a sluggish application with low reported CPU usage is a classic sign that your CPU limit may be set too low.
+Limits, on the other hand, tell the kubelet and the Linux kernel exactly how much a container is allowed to consume at runtime. While a container can burst above its request if spare capacity is available on the node, it can never exceed its limit. If you set a limit without defining a request, Kubernetes will automatically copy the limit value into the request field for you.
 
-Memory, on the other hand, is measured in bytes, typically using suffixes like Mi for mebibytes or Gi for gibibytes. Unlike CPU throttling, memory limits are enforced by the kernel's Out-Of-Memory killer. If a container tries to allocate more memory than its limit allows while the system is under pressure, the kernel will terminate it. An OOM kill is destructive, meaning the container will restart according to its restart policy, and any in-flight work will be lost.
+Let’s look at how these apply to CPU and Memory.
 
-To see this in action, consider a basic Pod configuration. In this example, the Pod requests 250 millicores of CPU and 64 mebibytes of memory. The scheduler uses these values to find a node with enough available space. Once the Pod is running, the kernel enforces the limits of 500 millicores and 128 mebibytes.
+CPU is measured in millicores, represented by the suffix "m". One full core equals 1,000 millicores. So, an expression of 0.5 is equivalent to 500 millicores, or half a core. CPU limits are enforced through a mechanism called CFS throttling. When a container reaches its CPU limit, the kernel restricts its CPU time for the remainder of the scheduling interval. Importantly, the container is not killed; it simply runs more slowly. Because this throttling is often invisible to standard monitoring tools, a sluggish application that shows low CPU usage is a classic sign that your CPU limit might be set too low.
 
-Kubernetes also assigns each Pod a Quality of Service, or QoS class, based on your resource declarations. This class determines the eviction priority if a node runs out of resources. There are three levels:
-First, the "Guaranteed" class occurs when every container has requests equal to its limits for both CPU and memory; these Pods are the last to be evicted.
-Second, the "Burstable" class applies when at least one container has a request or limit, but they are not all equal; these are evicted after BestEffort Pods.
-Finally, "BestEffort" is assigned when no container sets any request or limit; these are the first to be evicted. 
-A useful tip for production workloads is to set requests equal to limits, which gives your pods "Guaranteed" status and protects them from eviction during memory pressure.
+Memory, by contrast, is measured in bytes, and you can use common suffixes like "Mi" for mebibytes and "Gi" for gibibytes. Memory limits are enforced by the kernel's Out-Of-Memory, or OOM, killer. If a container tries to allocate more memory than its limit allows while the system is under pressure, the kernel will terminate it. Unlike CPU throttling, an OOM kill is destructive. The container will restart—depending on your restart policy—and any in-flight work will be lost.
 
-To maintain cluster stability, administrators can use two tools for namespace-level guardrails. 
-A "LimitRange" sets default requests and limits for containers that don't specify them, and it defines minimum and maximum boundaries to prevent unreasonable resource requests. 
-A "ResourceQuota" caps the total amount of CPU, memory, and objects a namespace can consume. If a quota is hit, new Pods will fail to create until resources are freed. 
+To see this in practice, consider a Pod definition that requests 250 millicores of CPU and 64 mebibytes of memory, while setting limits at 500 millicores and 128 mebibytes. In this scenario, the scheduler uses the requests to find a suitable home for the Pod, and once it is running, the kernel enforces the limits to prevent the container from consuming more than its allocated maximums.
 
-When you run into issues, here are a few practical debugging tips:
-If a Pod is stuck in a "Pending" state with a "FailedScheduling" event, it usually means the requests exceed available node capacity. You can verify this by running "kubectl describe node" and comparing the allocatable resources against the allocated ones.
-If you see a container restarting with an "OOMKilled" exit reason, it needs a higher memory limit or an investigation into potential memory leaks.
-And finally, if you notice high CPU throttling metrics in your monitoring system, consider raising your CPU limit or removing it entirely if the node has spare capacity.
+Kubernetes also uses these resource declarations to assign a Quality of Service, or QoS, class to each Pod. This class determines the eviction priority if a node runs out of resources. 
 
-For further details, consult the official Kubernetes documentation on Resource Management for Pods and Containers.
+There are three classes:
+First, there is "Guaranteed," where every container has requests equal to its limits for both CPU and memory. These pods are the last to be evicted.
+Second, there is "Burstable," where at least one container has a request or limit, but they are not all equal. These are evicted after BestEffort pods.
+Third, is "BestEffort," where no requests or limits are defined. These are the first to be evicted if the node needs resources.
+
+A useful tip: setting requests equal to limits for your production workloads gives them "Guaranteed" quality of service, which effectively protects them from eviction during times of memory pressure.
+
+To maintain cluster health, administrators can use two objects to enforce guardrails at the namespace level. 
+A "LimitRange" sets default requests and limits for containers that don't specify them, and can define minimums and maximums to prevent unreasonable resource consumption.
+A "ResourceQuota" caps the total amount of CPU, memory, and objects—like pods and services—a namespace can consume. Once a quota is exhausted, new pods in that namespace will fail to create until resources are freed. Together, these allow teams to have self-service access without the risk of one team monopolizing cluster resources.
+
+Finally, here are a few practical debugging tips. 
+If a pod is stuck in a "Pending" state with a "FailedScheduling" event, it usually means its requests exceed the available capacity on your nodes. You can verify this by running "kubectl describe node" and comparing the allocatable resources against the allocated ones. 
+
+If you see a container restarting with an "OOMKilled" exit reason, it needs a higher memory limit, or you may need to investigate for a potential memory leak. 
+
+And if you notice high values for CPU throttling in your monitoring tools, consider raising your CPU limit, or removing it entirely if your nodes have plenty of spare capacity.
+
+For further reading, please consult the official Kubernetes documentation on resource management for Pods and containers.

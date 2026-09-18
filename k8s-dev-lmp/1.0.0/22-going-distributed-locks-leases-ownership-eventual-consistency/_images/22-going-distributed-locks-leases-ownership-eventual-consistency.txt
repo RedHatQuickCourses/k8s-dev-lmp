@@ -1,13 +1,9 @@
-Welcome to module 2.2, where we explore the complexities of distributed systems.
+In this module, we are going to explore the challenges of working in distributed systems, specifically when multiple controller replicas are managing shared resources. 
 
-When you have multiple controller replicas managing shared resources, you move into the territory of distributed systems. At this stage, race conditions, stale caches, and split-brain scenarios are no longer just theoretical concepts; they become daily operational realities.
+Once you move to a distributed environment, issues like race conditions, stale caches, and split-brain scenarios are no longer just theoretical concepts; they become your daily operational reality. To help you manage these challenges, we will examine four essential layers of defense.
 
-To help you navigate these challenges, this module examines four essential layers of defense.
+First, you will learn how to structure your Reconcile loop to ensure every invocation is idempotent and fully tolerant of potentially stale data. 
 
-First, you will learn how to structure your reconcile loop to ensure that every invocation is idempotent and fully tolerant of stale data.
+Next, we will cover the theory behind distributed locks and discuss why a naive approach to locking is insufficient for maintaining system correctness. 
 
-Next, we will look at the theory behind distributed locks, where you will learn why naive locking strategies are often insufficient for maintaining system correctness.
-
-From there, we will move into implementation, where you will learn how to use Kubernetes-native Lease objects to perform leader election.
-
-Finally, we will explore controller sharding, a powerful strategy for scaling your reconciliation processes beyond the constraints of a single active replica.
+From there, you will learn how to implement Kubernetes-native leader election using Lease objects. Finally, we will explore controller sharding, which is a powerful strategy for scaling your reconciliation processes beyond the limitations of a single active replica.

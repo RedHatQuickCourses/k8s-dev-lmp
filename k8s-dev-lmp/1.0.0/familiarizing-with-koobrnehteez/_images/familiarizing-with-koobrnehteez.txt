@@ -1,5 +1,5 @@
-Welcome to the orientation module of the Kubernetes Developer Learning Path.
+Welcome to the orientation module of the Kubernetes Developer Learning Path. In this module, we will define what Kubernetes is at its core: an API-centric, declarative configuration management and container orchestration system. 
 
-In this module, we will define what Kubernetes really is at its core: an API-centric, declarative configuration management and container orchestration system. We will also introduce the control plane architecture at a high level, covering the essential components that keep a cluster running.
+We will also introduce you to the control plane architecture at a high level, covering the essential components that keep a cluster running. 
 
-For those interested in diving deeper, we will provide a more detailed treatment of the Kubernetes resource model and controller internals in upcoming modules.
+For those looking to dive deeper, we provide a detailed treatment of the Kubernetes resource model in a separate module, as well as an in-depth look at controller internals and the client-go architecture in our subsequent training sections.

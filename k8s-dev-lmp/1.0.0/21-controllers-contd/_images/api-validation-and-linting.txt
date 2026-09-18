@@ -1,29 +1,22 @@
-Well-designed Custom Resource Definition schemas are essential for catching invalid input before it reaches your controller. Kubernetes offers multiple layers of validation, ranging from declarative schema constraints to programmatic admission webhooks.
+Well-designed custom resource definition schemas are essential for catching invalid input before it reaches your controller. Kubernetes provides multiple layers of validation, ranging from declarative schema constraints to programmatic admission webhooks.
 
-Let’s look at the primary validation approaches you can use.
+Let’s look at the primary validation approaches. First, we have OpenAPI v3 schema validation. Every CRD includes an OpenAPI v3 schema that the API server enforces automatically. Kubebuilder generates this schema based on your Go struct definitions and marker comments. It is important to remember that fields lacking proper validation markers will accept any value that matches their Go type, which is rarely the desired outcome.
 
-First, there is OpenAPI v3 schema validation. Every CRD includes an OpenAPI v3 schema that the API server enforces automatically. Kubebuilder generates this schema based on your Go struct definitions and specific marker comments. It is important to note that fields without these validation markers will accept any value that matches their Go type, which is rarely the behavior you want.
+Next, we have Common Expression Language, or CEL, validation rules. CEL allows you to express cross-field validation logic directly within the CRD schema. Kubebuilder supports this using the `+kubebuilder:validation:XValidation` marker. For example, you might define a rule ensuring that a minimum replica count does not exceed a maximum replica count. A significant advantage of CEL rules is that they run directly on the API server, meaning you do not need to deploy a separate webhook.
 
-Next, you can use Common Expression Language, or CEL, validation rules. These allow you to express cross-field validation logic directly within the CRD schema. Kubebuilder supports this through the `kubebuilder:validation:XValidation` marker. For example, you might create a rule to ensure that a minimum replica count does not exceed a maximum replica count. A significant advantage of CEL rules is that they run directly on the API server, so you do not need to deploy a separate webhook.
+For validation logic that cannot be expressed declaratively—such as checking external state or enforcing complex business rules—you can implement validating admission webhooks. These are covered in more detail in our module on admissions control.
 
-For more complex validation logic—such as checking external state or enforcing intricate business rules—you should implement validating admission webhooks. These are covered in more detail in our module on admissions control.
+Moving on, let’s discuss the Kube API Linter, or KAL. This is a Go-based static analysis tool that checks your CRD struct definitions against upstream Kubernetes API conventions. By catching mechanical API review issues automatically, it allows human reviewers to focus their attention on high-level design.
 
-To ensure your CRDs align with industry standards, you should use the Kube API Linter, or KAL. This Go-based static analysis tool checks your CRD struct definitions against upstream Kubernetes API conventions. By catching mechanical API review issues, KAL allows human reviewers to focus their energy on high-level design.
+You have three options for installing and running the Kube API Linter. You can use it as a standalone binary, integrate it into an existing golangci-lint version two workflow using a configuration file, or load it as a shared object plugin for golangci-lint.
 
-You can install KAL in one of three ways: as a standalone binary, as a module integrated into your existing golangci-lint version two workflow, or as a plugin loaded as a shared object by golangci-lint.
+KAL includes several key linters to check for common convention violations. It ensures that required fields are properly annotated, verifies that all status fields are marked as optional, confirms that types with status fields have the status subresource enabled, and checks that condition fields follow standard list and map conventions. For straightforward issues, KAL can even apply fixes automatically by running the command `golangci-lint-kube-api-linter run` followed by your API types path and the `--fix` flag.
 
-KAL includes several key linters to catch common convention violations. It checks that required fields are properly annotated, that all status fields are marked as optional, that types with status fields enable the slash-status subresource, and that condition fields follow standard list and map conventions.
+Kubebuilder also provides a rich set of markers for field-level validation, which translate directly into the OpenAPI schema. These include constraints for numerical minimums and maximums, string length requirements, and enumerated values. You can also use the `+optional` marker to indicate that a field is not required.
 
-Where fixes are straightforward, KAL can even apply them for you automatically by running the command `golangci-lint-kube-api-linter run` followed by the path to your API types and the `--fix` flag.
+When defining your fields, keep these upstream API convention guidelines in mind:
+For string fields, you should almost always check for format and maximum length, and never perform case-insensitive comparisons. For numeric fields, always bound-check both minimum and maximum values. For list fields, set a maximum size and declare the correct list type; if the list has set or map semantics, ensure uniqueness is enforced. Finally, for map fields, always check the maximum size and validate both keys and values.
 
-Kubebuilder also provides a rich set of markers for field-level validation that translate directly into your OpenAPI schema. You can define minimum and maximum values for integers, set length constraints for strings, define allowed values using enums, and mark fields as optional.
-
-When implementing these, keep these API convention guidelines in mind:
-For string fields, almost all should be checked for format and maximum length, and you should never perform case-insensitive comparisons in validation.
-For numeric fields, always perform bound checks on both minimum and maximum values.
-For list fields, set a maximum size and declare list-type tags; if the list has set or map semantics, you should enforce uniqueness.
-Finally, for map fields, be sure to check the maximum size and validate both the keys and the values.
-
-A useful tip: run the Kube API Linter as part of your continuous integration pipeline, alongside other tools like `go vet` and `golangci-lint`. Catching convention violations early will help you avoid costly API redesigns after your CRD is already in production.
+As a final tip, make sure to run the Kube API Linter as part of your CI pipeline alongside standard tools like `go vet` and `golangci-lint`. Catching these convention violations early will help you avoid costly API redesigns after your CRD has already reached production.
 
 For more information, consult the official Kubernetes API conventions documentation and the Kube API Linter project repository.

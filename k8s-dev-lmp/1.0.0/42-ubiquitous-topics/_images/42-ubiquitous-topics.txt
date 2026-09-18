@@ -1,7 +1,7 @@
 Welcome to module 4.2, where we focus on ubiquitous topics. In this final module, we zoom out to look at the broader operator ecosystem and explore alternative Kubernetes form factors.
 
-We will begin by examining the operator capability model and the current framework landscape. Then, we will survey control plane architectures that diverge from the standard self-hosted model.
+We will begin by examining the operator capability model and the current framework landscape. From there, we will survey control plane architectures that diverge from the standard self-hosted model.
 
-Our discussion will cover two main areas. First, we will explore the operator landscape, including the formal definition of operators, the five-level capability model, the major frameworks available, and proven design patterns. 
+Our discussion will cover two main areas. First, we will look at the operator landscape. This includes the formal definition of operators, the five-level capability model, the major frameworks available today, and proven design patterns.
 
-Second, we will look at alternative control planes and form factors. This includes hosted control planes, Kubernetes-like API platforms, and minimal distributions designed specifically for edge and resource-constrained environments.
+Second, we will cover alternative control planes and form factors. This will include hosted control planes, Kubernetes-like API platforms, and minimal distributions that are specifically built for edge computing and resource-constrained environments.

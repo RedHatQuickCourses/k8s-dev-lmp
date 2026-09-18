@@ -1,23 +1,21 @@
-Welcome to this course, which provides a comprehensive overview of Kubernetes architecture and its powerful extensibility mechanisms. We will begin by exploring how the Kubernetes API functions behind the scenes, specifically looking at how cluster requests are authenticated, authorized, and validated by the control plane. The core of this course focuses on platform automation, teaching you how to extend Kubernetes by defining custom resources and writing custom controllers or operators to automatically manage your workloads.
+Welcome to this course on Kubernetes architecture and its powerful extensibility mechanisms. Throughout this training, we will provide a comprehensive overview of how the Kubernetes API functions behind the scenes, specifically exploring how the control plane handles authentication, authorization, and validation for cluster requests. The primary focus of this course is platform automation; you will learn how to extend Kubernetes by defining custom resources and developing custom controllers or operators to manage your workloads automatically.
 
-Let’s take a look at our course roadmap.
+Let’s take a look at the learning roadmap.
 
-We start with an orientation on how the API server, etcd, and controllers work together, as Kubernetes is, at its core, an API-centric, declarative configuration management and container orchestration system.
+To begin, we will orient you with the fundamentals of Kubernetes. As an API-centric, declarative system, it is vital to understand how the API server, etcd, and various controllers work in harmony.
 
-In module 1.1, we cover the Kubernetes Resource Model. This is a walkthrough of the essentials of the kube-apiserver, focusing on the declarative intent of Kubernetes resources and the various plugin layers, including authentication, audit, impersonation, priority and fairness, authorization, admission, and storage.
+In our first module, we explore the Kubernetes resource model. We will walk through the essentials of the kube-apiserver, covering the declarative intent of resources and the various plugin layers, including authentication, audit, impersonation, priority and fairness, authorization, admission, and storage.
 
-Next, in module 1.2, we discuss Controllers, Informers, and client-go. Here, we examine the basic building blocks of operators, including client-go architecture, Informers, listers, workqueues, caches, and error handling.
+Next, we move to the building blocks behind operators, specifically focusing on controllers, informers, and the client-go library. You will learn about the architecture of client-go, as well as the use of informers, listers, workqueues, caches, and essential error-handling patterns.
 
-Module 2.1 moves into writing concrete Kubernetes APIs using controller-runtime. We will cover the reconcile loop, kubebuilder, the differences between specifications and status, conditions, API validation, and various CRUD operations including apply, patch, and update.
+Following that, we will dive into building controllers using controller-runtime. This session covers the reconcile loop, how to use kubebuilder, managing spec versus status, handling conditions, API validation, and performing CRUD operations, including the differences between apply, patch, and update.
 
-In module 2.2, we tackle the challenges of distributed systems. We’ll cover topics such as idempotency, locks, leases, leader election, and controller sharding, featuring a case study on the OpenShift Ingress Controller.
+In the fourth module, we address the challenges of distributed systems. We will examine topics like idempotency, locks, leases, leader election, and controller sharding, using the OpenShift Ingress Controller as a real-world case study.
 
-Moving into module 3.1, we take more control by looking at admission control and writing your own API server. This includes working with validating and mutating webhooks, policy engines, API discovery, aggregated APIs, and custom API servers.
+As we progress, we will take more control by exploring admission control webhooks and even how to write your own API server. This includes validating and mutating webhooks, policy engines, API discovery, aggregated APIs, and custom API servers. 
 
-In module 3.2, we cover additional essential topics, including networking with the Ingress and Gateway APIs, service meshes, authentication and authorization in OpenShift, security, and cluster hardening.
+We will then cover essential supporting topics, including networking with Ingress and the Gateway API, Service Mesh, authentication and authorization in OpenShift, and cluster security hardening.
 
-Module 4.1 is a deep dive into the kube-scheduler. We will explore scheduling, de-scheduling, resource requests and limits, and dynamic resource allocation.
+Finally, we will conclude with a deep dive into the kube-scheduler, including scheduling and de-scheduling, resource requests and limits, and dynamic resource allocation. We will finish the course by looking at the broader operator landscape and alternative control plane architectures, such as HyperShift, kcp, MicroShift, and k3s.
 
-Finally, in module 4.2, we cover the broader landscape of operators and alternative control plane architectures, including HyperShift, kcp, MicroShift, and k3s.
-
-Please proceed through these modules in order to build your foundational knowledge and skills in Kubernetes extensibility.
+Please proceed to the first module when you are ready to begin.

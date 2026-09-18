@@ -1,9 +1,9 @@
-Welcome to this module, where we will explore how the Kubernetes API works behind the scenes. We aren’t just looking at what you can do with the API, but why it is designed the way it is.
+In this module, we will explore how the Kubernetes API works behind the scenes. We'll look not just at what you can do with it, but why it is designed the way it is.
 
-We begin with the Kubernetes Resource Model. This document lays out the fundamental assumptions, principles, and conventions that make the API both composable and extensible. 
+We begin with the Kubernetes Resource Model. This model lays out the core assumptions, principles, and conventions that make the API both composable and extensible. 
 
-From there, we will walk through the kube-apiserver request pipeline. This will help you understand the specific stages every API call passes through before the state is finally persisted to etcd. 
+From there, we will walk through the kube-apiserver request pipeline. This will help you understand the specific stages every API call passes through before the state is officially persisted to etcd. 
 
-Finally, we will examine a three-layer model of declarative configuration management. This framework views Kubernetes as a system with an unusually strict separation between three key components: resource schemas, concrete syntax, and convergence engines.
+Finally, we will examine a three-layer model of declarative configuration management. This model frames Kubernetes as a system with a strict separation between resource schemas, concrete syntax, and convergence engines. 
 
-Taken together, these topics establish the mental model you will rely on throughout the rest of this learning path—from writing controllers in the controllers module, to building admission webhooks in the admissions module.
+Together, these concepts establish the mental model you will rely on throughout the rest of this learning path, from writing controllers in the upcoming controllers module, to building admission webhooks in our final module on admissions.

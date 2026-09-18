@@ -1,11 +1,13 @@
-To complete the hands-on exercises in this learning path, you will need access to a running OpenShift cluster. You can request a self-service demo cluster directly from the Red Hat Demo Platform.
+To get started with the hands-on exercises in this learning path, you will be using a bastion virtual machine running Red Hat Enterprise Linux, or RHEL. This virtual machine is your primary workspace; you will handle all tasks, such as editing files, installing tools, building code, and running kubectl, directly from this environment. Because everything takes place inside the VM, there is no need to install any software on your personal laptop.
 
-To request your demo cluster, begin by opening the Red Hat OpenShift Container Platform Cluster catalog item. You can find the link to this catalog in the course resources. Once you have opened the page, click the "Order" button to access the order form.
+Initially, the VM starts as a plain RHEL host. In the upcoming setup exercises, you will install the necessary toolchain—including Go, kubectl, and Kind—and create a single-node Kubernetes cluster that runs directly on that virtual machine.
 
-From here, you will need to complete several required fields. First, under "Activity," select the option that best matches your context, such as "Practice" or "Enablement." Next, choose the appropriate "Purpose" from the provided dropdown menu. For "Salesforce IDs," provide an Opportunity, Campaign, or Project ID if your activity requires it; otherwise, simply acknowledge that you will supply the information within 48 hours. 
+To begin, you need to request your RHEL virtual machine from the Red Hat Demo Platform. First, visit the RHEL VM sandbox catalog item on the Red Hat Demo Platform website. Click the "Order" button, accept the default settings, and submit your request. Provisioning usually takes a few minutes; you can monitor the status either through the notification email you receive or by checking the "Services" page in the catalog. Once the status shows that the VM is "ready," the catalog will display your specific connection details, including an SSH command.
 
-For the technical specifications, AWS is the preferred cloud provider, but any available provider is acceptable. You may choose any version of OpenShift, select a cluster size that suits your specific needs, and configure the user creation settings as required. Once you have filled out these fields, submit your order and wait for the cluster to be provisioned.
+Once your VM is provisioned, you can log in to the bastion host. Copy the SSH command provided in your provisioning details and run it from your local terminal. It will look something like "ssh lab-user@rhel.example.opentlc.com," though your specific host name and credentials will differ.
 
-After your cluster is ready, you can access it via the dashboard, which provides a KUBECONFIG file for your environment. Download this file and link it into your local path so that your command-line tools—specifically oc or kubectl—use it by default. You can do this by running the command: export KUBECONFIG, followed by the path to your downloaded kubeconfig file.
+It is important to remember to always use the exact host name and credentials provided in your unique provisioning details page, rather than using the generic example shown here. 
 
-Once you have configured your environment, you are ready to begin the hands-on exercises.
+Once you are connected, your shell prompt will appear as "lab-user@rhel." You will notice that your "lab-user" account is configured with passwordless sudo access, which you will use during the setup phase to install your packages. 
+
+You are now ready to move on to the setup exercises, where we will install the toolchain and create your Kubernetes cluster.
