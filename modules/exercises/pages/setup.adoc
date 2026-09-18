@@ -1,0 +1,187 @@
+= Setup: Toolchain and Kubernetes Cluster
+:page-audio-src: setup.wav
+:page-transcript-src: setup.txt
+:navtitle: Setup
+:page-lab-minutes: 20
+
+Before starting the exercises, install the toolchain on your bastion VM and bring up a single-node Kubernetes cluster with Kind.
+You do this *once*; all three exercises reuse the same cluster.
+
+Every step below shows the exact command to run and the output you should expect, so you can follow along top to bottom.
+
+== Prerequisites
+
+* You have requested a RHEL VM and can log in over SSH -- see xref:LABENV:index.adoc[Lab Environment].
+* The `lab-user` account has passwordless `sudo` (used to install packages).
+* `podman` is already installed on the RHEL VM. Kind uses it as its container provider. Confirm it is present:
++
+[source,console,subs="verbatim,quotes"]
+----
+$ *podman --version*
+podman version 5.4.0
+----
+
+== Step 1: Install the Go Toolchain
+
+Install Go from the RHEL `go-toolset` package:
+
+[source,console,subs="verbatim,quotes"]
+----
+$ *sudo dnf install -y go-toolset*
+...
+Complete!
+----
+
+Verify the installation. You should see a `go1.25.x` version (the exact version may differ with the RHEL release on your VM):
+
+[source,console,subs="verbatim,quotes"]
+----
+$ *go version*
+go version go1.25.5 (Red Hat 1.25.5-1.el10_1) linux/amd64
+----
+
+== Step 2: Install kubectl
+
+`kubectl` is the command-line client for Kubernetes. Add the official Kubernetes package repository, then install it with `dnf`.
+
+Create the repository file (this is a single command -- copy the whole block):
+
+[source,console,subs="verbatim,quotes"]
+----
+$ *sudo tee /etc/yum.repos.d/kubernetes.repo > /dev/null <<'EOF'*
+*[kubernetes]*
+*name=Kubernetes*
+*baseurl=https://pkgs.k8s.io/core:/stable:/v1.32/rpm/*
+*enabled=1*
+*gpgcheck=1*
+*gpgkey=https://pkgs.k8s.io/core:/stable:/v1.32/rpm/repodata/repomd.xml.key*
+*EOF*
+----
+
+Install `kubectl`:
+
+[source,console,subs="verbatim,quotes"]
+----
+$ *sudo dnf install -y kubectl*
+...
+Complete!
+----
+
+Verify it (the server-version warning is expected -- there is no cluster yet):
+
+[source,console,subs="verbatim,quotes"]
+----
+$ *kubectl version --client*
+Client Version: v1.32.13
+Kustomize Version: v5.5.0
+----
+
+== Step 3: Install Kind
+
+Kind (Kubernetes in Docker) runs a full Kubernetes cluster inside containers.
+Download the binary and install it to `/usr/local/bin`:
+
+[source,console,subs="verbatim,quotes"]
+----
+$ *curl -fsSLo kind https://kind.sigs.k8s.io/dl/v0.33.0/kind-linux-amd64*
+$ *chmod +x kind*
+$ *sudo mv kind /usr/local/bin/kind*
+----
+
+Verify it:
+
+[source,console,subs="verbatim,quotes"]
+----
+$ *kind version*
+kind v0.33.0 go1.26.7 linux/amd64
+----
+
+Kind can use Docker or podman as its container provider. On this RHEL VM you use rootless podman, so tell Kind to use it:
+
+[source,console,subs="verbatim,quotes"]
+----
+$ *export KIND_EXPERIMENTAL_PROVIDER=podman*
+----
+
+[TIP]
+====
+Add that `export` line to your `~/.bashrc` so it is set in every new shell (you open extra terminals in xref:1-2-implement-optimistic-locking-and-leader-election-via-lease.adoc[Exercise 1.2] and xref:2-develop-a-custom-validating-webhook-for-container-registry-enforcement.adoc[Exercise 2]):
+
+[source,console,subs="verbatim,quotes"]
+----
+$ *echo 'export KIND_EXPERIMENTAL_PROVIDER=podman' >> ~/.bashrc*
+----
+====
+
+== Step 4: Create the Cluster
+
+RHEL 10 uses `nftables` as its firewall backend. Configure Kind's `kube-proxy` to use its native *nftables* mode so that in-cluster Service networking (ClusterIP) works reliably on this host -- the admission webhook in xref:2-develop-a-custom-validating-webhook-for-container-registry-enforcement.adoc[Exercise 2] is reached through a Service, so this matters.
+
+Create a Kind configuration file:
+
+[source,console,subs="verbatim,quotes"]
+----
+$ *cat > ~/kind-config.yaml <<'EOF'*
+kind: Cluster
+apiVersion: kind.x-k8s.io/v1alpha4
+networking:
+  kubeProxyMode: nftables
+EOF
+----
+
+[NOTE]
+====
+Without `kubeProxyMode: nftables`, `kube-proxy` on this RHEL host fails to program the iptables rules that back ClusterIP Services (the required legacy `iptables` kernel extensions are not available), and calls to Services -- including the API server reaching your webhook -- time out.
+====
+
+Create a single-node cluster named `dev`, pinned to Kubernetes 1.32 so the whole stack matches the pinned client libraries you use in the exercises:
+
+[source,console,subs="verbatim,quotes"]
+----
+$ *kind create cluster --name dev --image kindest/node:v1.32.0 --config ~/kind-config.yaml*
+Creating cluster "dev" ...
+ ✓ Ensuring node image (kindest/node:v1.32.0) 🖼
+ ✓ Preparing nodes 📦
+ ✓ Writing configuration 📜
+ ✓ Starting control-plane 🕹️
+ ✓ Installing CNI 🔌
+ ✓ Installing StorageClass 💾
+Set kubectl context to "kind-dev"
+You can now use your cluster with:
+
+kubectl cluster-info --context kind-dev
+
+Thanks for using kind! 😊
+----
+
+Kind writes the credentials to `~/.kube/config` and sets your current context to `kind-dev`.
+
+== Step 5: Verify Cluster Access
+
+Confirm the node is `Ready` and running Kubernetes v1.32.0:
+
+[source,console,subs="verbatim,quotes"]
+----
+$ *kubectl get nodes*
+NAME                 STATUS   ROLES           AGE   VERSION
+dev-control-plane    Ready    control-plane   60s   v1.32.0
+----
+
+Check the cluster endpoints:
+
+[source,console,subs="verbatim,quotes"]
+----
+$ *kubectl cluster-info --context kind-dev*
+Kubernetes control plane is running at https://127.0.0.1:PORT
+CoreDNS is running at https://127.0.0.1:PORT/api/v1/namespaces/kube-system/services/kube-dns:dns/proxy
+
+To further debug and diagnose cluster problems, use 'kubectl cluster-info dump'.
+----
+
+Your environment is ready.
+
+[NOTE]
+====
+The cluster keeps running in the background for the rest of the exercises.
+If you ever want to remove it and start over, run `kind delete cluster --name dev` and repeat Step 4 (recreating with the same `--config ~/kind-config.yaml`).
+====

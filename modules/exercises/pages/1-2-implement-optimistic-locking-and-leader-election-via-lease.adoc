@@ -1,0 +1,268 @@
+= Exercise 1.2: Leader Election via Lease
+:page-audio-src: 1-2-implement-optimistic-locking-and-leader-election-via-lease.wav
+:page-transcript-src: 1-2-implement-optimistic-locking-and-leader-election-via-lease.txt
+:navtitle: Exercise 1.2: Leader Election
+:page-lab-minutes: 40
+
+In this exercise you extend the controller you built in xref:1-1-build-a-controller-using-client-go-from-scratch.adoc[Exercise 1.1] so that only one replica is active at a time.
+You continue editing the *same* `main.go` -- you only add leader election around the reconcile pipeline you already have.
+This builds on the concepts from xref:22-going-distributed-locks-leases-ownership-eventual-consistency:leader-election-in-kubernetes.adoc[] and xref:22-going-distributed-locks-leases-ownership-eventual-consistency:distributed-locking-theory.adoc[].
+
+By the end you will run two copies of the controller in two terminals and watch failover happen live.
+
+== Prerequisites
+
+* You have completed xref:1-1-build-a-controller-using-client-go-from-scratch.adoc[Exercise 1.1] and still have your `~/k8s-controller-lab` project with a working `main.go`.
+* Your Kind cluster from xref:setup.adoc[Setup] is still running (`kubectl get nodes` shows `dev-control-plane` as `Ready`).
+
+TIP: Work on a copy if you want to keep Exercise 1.1 intact: `cp -r ~/k8s-controller-lab ~/leader-election-lab && cd ~/leader-election-lab`. The client libraries are already pinned to `v0.32.x` in the copied `go.mod`, so no new `go get` is needed.
+
+== What Changes
+
+Leader election wraps the controller you already have. You make three edits to `main.go`:
+
+. *Add imports* for the leader-election and lease packages.
+. *Move the reconcile pipeline* out of `main` into a new `runController(ctx, clientset)` function that stops cleanly when its context is cancelled.
+. *Rewrite `main`* to build a `LeaseLock` and hand control to `leaderelection.RunOrDie`, which only calls `runController` on the instance that holds the Lease.
+
+The `processNextItem` and `reconcile` functions are *unchanged* from Exercise 1.1 -- leave them exactly as they are.
+
+== Step 1: Update the Imports
+
+Replace the import block in `main.go` with the one below.
+It adds `context`, `log`, `os`, `time`, `metav1`, and the two `leaderelection` packages; it drops nothing you still use except the direct `chan struct{}` handling, which `context` now replaces:
+
+[source,go]
+----
+import (
+	"context"
+	"flag"
+	"fmt"
+	"log"
+	"os"
+	"path/filepath"
+	"time"
+
+	corev1 "k8s.io/api/core/v1"
+	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+	"k8s.io/client-go/informers"
+	"k8s.io/client-go/kubernetes"
+	corelisters "k8s.io/client-go/listers/core/v1"
+	"k8s.io/client-go/tools/cache"
+	"k8s.io/client-go/tools/clientcmd"
+	"k8s.io/client-go/tools/leaderelection"
+	"k8s.io/client-go/tools/leaderelection/resourcelock"
+	"k8s.io/client-go/util/homedir"
+	"k8s.io/client-go/util/workqueue"
+)
+----
+
+== Step 2: Replace `main` and Add `runController`
+
+Replace your entire `func main()` from Exercise 1.1 with the two functions below.
+
+The new `main` builds the clientset exactly as before, then constructs a `LeaseLock` with a unique identity and hands control to `leaderelection.RunOrDie`.
+The controller only starts inside `OnStartedLeading`, so it runs on the leader alone.
+`runController` is the reconcile pipeline lifted out of your old `main` -- the informer, workqueue, event handlers, and cache sync are identical; the only difference is that it takes a `ctx` and shuts the queue down when that context is cancelled:
+
+[source,go]
+----
+func main() {
+	var kubeconfig *string
+	if home := homedir.HomeDir(); home != "" {
+		kubeconfig = flag.String("kubeconfig",
+			filepath.Join(home, ".kube", "config"), "path to kubeconfig")
+	} else {
+		kubeconfig = flag.String("kubeconfig", "", "path to kubeconfig")
+	}
+	flag.Parse()
+
+	config, err := clientcmd.BuildConfigFromFlags("", *kubeconfig)
+	if err != nil {
+		panic(err)
+	}
+	clientset, err := kubernetes.NewForConfig(config)
+	if err != nil {
+		panic(err)
+	}
+
+	// Each replica needs a unique identity. In a Deployment, use the Pod name
+	// from the downward API; for local testing the process ID works.
+	identity := fmt.Sprintf("%d", os.Getpid())
+
+	lock := &resourcelock.LeaseLock{
+		LeaseMeta: metav1.ObjectMeta{
+			Name:      "my-controller-lock",
+			Namespace: "default",
+		},
+		Client: clientset.CoordinationV1(),
+		LockConfig: resourcelock.ResourceLockConfig{
+			Identity: identity,
+		},
+	}
+
+	ctx, cancel := context.WithCancel(context.Background())
+	defer cancel()
+
+	leaderelection.RunOrDie(ctx, leaderelection.LeaderElectionConfig{
+		Lock:            lock,
+		ReleaseOnCancel: true,
+		LeaseDuration:   15 * time.Second,
+		RenewDeadline:   10 * time.Second,
+		RetryPeriod:     2 * time.Second,
+		Callbacks: leaderelection.LeaderCallbacks{
+			OnStartedLeading: func(ctx context.Context) {
+				log.Printf("[%s] I am the leader! Starting controller...", identity)
+				runController(ctx, clientset)
+			},
+			OnStoppedLeading: func() {
+				log.Printf("[%s] Lost leadership, shutting down", identity)
+				os.Exit(0)
+			},
+			OnNewLeader: func(id string) {
+				if id == identity {
+					return
+				}
+				log.Printf("[%s] Current leader: %s", identity, id)
+			},
+		},
+	})
+}
+
+// runController is the Exercise 1.1 controller, now started only when this
+// replica holds the Lease. It stops when ctx is cancelled.
+func runController(ctx context.Context, clientset kubernetes.Interface) {
+	factory := informers.NewSharedInformerFactory(clientset, 10*time.Minute)
+	podInformer := factory.Core().V1().Pods().Informer()
+	podLister := factory.Core().V1().Pods().Lister()
+
+	queue := workqueue.NewTypedRateLimitingQueue(
+		workqueue.DefaultTypedControllerRateLimiter[string]())
+
+	podInformer.AddEventHandler(cache.ResourceEventHandlerFuncs{
+		AddFunc: func(obj interface{}) {
+			if key, err := cache.MetaNamespaceKeyFunc(obj); err == nil {
+				queue.Add(key)
+			}
+		},
+		UpdateFunc: func(oldObj, newObj interface{}) {
+			if key, err := cache.MetaNamespaceKeyFunc(newObj); err == nil {
+				queue.Add(key)
+			}
+		},
+		DeleteFunc: func(obj interface{}) {
+			if key, err := cache.DeletionHandlingMetaNamespaceKeyFunc(obj); err == nil {
+				queue.Add(key)
+			}
+		},
+	})
+
+	stopCh := ctx.Done()
+	factory.Start(stopCh)
+	if !cache.WaitForCacheSync(stopCh, podInformer.HasSynced) {
+		return
+	}
+
+	go func() {
+		for processNextItem(queue, podLister) {
+		}
+	}()
+
+	<-ctx.Done()
+	queue.ShutDown()
+}
+----
+
+Leave `processNextItem` and `reconcile` exactly as they are from Exercise 1.1.
+
+[TIP]
+====
+The timing parameters matter.
+`LeaseDuration` must be greater than `RenewDeadline`, which must be greater than `RetryPeriod`.
+Setting `LeaseDuration` too short causes flapping during network jitter; too long delays failover.
+====
+
+== Step 3: Build and Run the First Instance
+
+Tidy the module, build, and start the first instance:
+
+[source,console,subs="verbatim,quotes"]
+----
+$ *go mod tidy*
+$ *go build ./...*
+$ *go run main.go*
+[12873] I am the leader! Starting controller...
+Reconciling Pod kube-system/coredns-668d6bf9bc-abcde (phase: Running)
+Reconciling Pod kube-system/kube-apiserver-dev-control-plane (phase: Running)
+----
+
+This instance acquired the Lease (its identity here is the PID `12873`) and started reconciling. Leave it running.
+
+== Step 4: Start a Second Instance and Test Failover
+
+. Open a *second* terminal on the bastion, change into the same directory, and start another instance:
++
+[source,console,subs="verbatim,quotes"]
+----
+$ *cd ~/k8s-controller-lab*
+$ *go run main.go*
+[12902] Current leader: 12873
+----
++
+The second instance sees that `12873` already holds the Lease and waits as a standby -- it does *not* reconcile.
++
+NOTE: The Kind cluster keeps running in the background between terminals because you enabled linger in xref:setup.adoc[Setup]. If `kubectl` reports a connection error in a new terminal, revisit that step.
+. In a *third* terminal, inspect the Lease. The `holderIdentity` shows the current leader:
++
+[source,console,subs="verbatim,quotes"]
+----
+$ *kubectl get lease my-controller-lock -n default -o yaml*
+apiVersion: coordination.k8s.io/v1
+kind: Lease
+metadata:
+  name: my-controller-lock
+  namespace: default
+spec:
+  holderIdentity: "12873"
+  leaseDurationSeconds: 15
+  leaseTransitions: 0
+  renewTime: "2026-09-17T12:00:42.000000Z"
+----
+. Now stop the leader: return to the *first* terminal and press kbd:[Ctrl+C]. Within about 15 seconds (the `LeaseDuration`), the standby instance acquires the Lease and begins reconciling:
++
+[source,console,subs="verbatim,quotes"]
+----
+[12902] I am the leader! Starting controller...
+Reconciling Pod kube-system/coredns-668d6bf9bc-abcde (phase: Running)
+----
+. Confirm the handover from the third terminal -- `holderIdentity` now names the second instance and `leaseTransitions` has incremented:
++
+[source,console,subs="verbatim,quotes"]
+----
+$ *kubectl get lease my-controller-lock -n default -o yaml*
+apiVersion: coordination.k8s.io/v1
+kind: Lease
+metadata:
+  name: my-controller-lock
+  namespace: default
+spec:
+  holderIdentity: "12902"
+  leaseDurationSeconds: 15
+  leaseTransitions: 1
+  renewTime: "2026-09-17T12:01:05.000000Z"
+----
+
+Press kbd:[Ctrl+C] in the remaining terminal to stop the second instance when you are done.
+
+[TIP]
+====
+The `leaderelection` package does not guarantee single-leader semantics under all conditions.
+If a leader pauses long enough for its Lease to expire, a new leader is elected -- but the old leader may resume and briefly believe it is still leading.
+Kubernetes mitigates this through optimistic concurrency: updates with a stale `resourceVersion` are rejected.
+For a deeper discussion, see xref:22-going-distributed-locks-leases-ownership-eventual-consistency:distributed-locking-theory.adoc[Distributed Locking Theory].
+====
+
+== References
+
+* https://sklar.rocks/kubernetes-leader-election/[How to add Kubernetes-powered leader election to your Go apps, window=_blank]
+* https://pkg.go.dev/k8s.io/client-go/tools/leaderelection[client-go leaderelection package, window=_blank]

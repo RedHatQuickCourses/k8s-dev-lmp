@@ -1,37 +1,12 @@
-= Who Is This For? Prerequisites
+= Who Is This For?
 :page-audio-src: who-is-this-for-pre-requisites.wav
 :page-transcript-src: who-is-this-for-pre-requisites.txt
-:navtitle: Who Is This For? Prerequisites
+:navtitle: Who Is This For?
 
-== Target Audience
+This learning path is designed for technical professionals who already possess practical experience with containerized environments and Kubernetes, and who want to move beyond basic usage into platform-level development.
 
-This learning path is designed for engineers, system administrators, and developers who already possess practical experience working with containerized environments and Kubernetes.
-If you have deployed applications on Kubernetes and want to move beyond basic usage into platform-level development, this course is for you.
+This content is curated for:
 
-== Recommended Prerequisites
-
-A foundational understanding of distributed systems principles is strongly recommended before beginning this course.
-Familiarity with concepts such as concurrency, leasing, and synchronization will help you get the most out of the material on controllers, leader election, and eventual consistency.
-
-== Ideal Baseline
-
-The ideal starting point is proficiency equivalent to one of the following:
-
-* *Certified Kubernetes Application Developer (CKAD)* certification
-* Completion of Red Hat *DO-180* (Introduction to Containers, Kubernetes, and Red Hat OpenShift) and *DO-280* (Red Hat OpenShift Administration) training tracks
-
-Either path ensures you have the hands-on Kubernetes experience needed to engage with the advanced topics in this course.
-
-== Self-Assessment Checklist
-
-Before starting, review the checklist below.
-You should be comfortable with most of these items:
-
-* [ ] You can create and manage Deployments, Services, and ConfigMaps
-* [ ] You understand container image building and registries
-* [ ] You are comfortable reading and writing YAML manifests
-* [ ] You have basic familiarity with Go programming
-* [ ] You can use `kubectl` to inspect and debug cluster resources
-* [ ] You understand the difference between a Pod, a ReplicaSet, and a Deployment
-* [ ] You have worked with namespaces and resource quotas
-* [ ] You are familiar with basic RBAC concepts (Roles, RoleBindings)
+* *Software Engineers:* Developers who need to extend Kubernetes functionality by building custom controllers, operators, or specialized API servers.
+* *Systems Administrators (SREs/Platform Engineers):* Professionals responsible for managing, scaling, and hardening complex Kubernetes environments.
+* *Platform Architects:* Those tasked with designing automated workflows or deploying alternative control plane architectures (e.g., HyperShift, kcp).

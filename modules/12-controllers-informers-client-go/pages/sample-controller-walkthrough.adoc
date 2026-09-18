@@ -208,7 +208,7 @@ func (c *Controller) syncHandler(ctx context.Context, objectRef cache.ObjectName
 
 This pattern -- get from cache, compare desired vs. actual, create or update, then update status -- is the standard reconciliation loop that every client-go controller follows.
 
-For a hands-on exercise building a controller from scratch using this same pattern, see xref:exercises:1-build-a-controller-using-client-go-from-scratch.adoc[Exercise 1].
+For a hands-on exercise building a controller from scratch using this same pattern, see xref:exercises:1-1-build-a-controller-using-client-go-from-scratch.adoc[Exercise 1.1].
 
 == References
 

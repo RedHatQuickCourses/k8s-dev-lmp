@@ -2,31 +2,40 @@
 :page-audio-src: index.wav
 :page-transcript-src: index.txt
 
-For the hands-on exercises in this learning path you will need access to a running OpenShift cluster. You can request a self-service demo cluster from the Red Hat Demo Platform.
+The hands-on exercises in this learning path run on a *bastion virtual machine* running Red Hat Enterprise Linux (RHEL).
+You do everything -- editing files, installing tools, building code, and running `kubectl` -- while logged in to this VM, so you do not need to install anything on your own laptop.
 
-== Requesting a Demo Cluster
+The VM starts as a plain RHEL host. In xref:exercises:setup.adoc[Setup] you install the toolchain (Go, `kubectl`, and Kind) and create a single-node Kubernetes cluster with Kind that runs on the VM itself. There is no separate cluster to provision.
 
-. Open the catalog item: https://catalog.demo.redhat.com/catalog/babylon-catalog-prod?item=babylon-catalog-prod/published.ocp4-cluster.prod[Red Hat OpenShift Container Platform Cluster (Multi-Cloud),window=_blank]
-. Click **Order** to open the order form and complete the required fields:
-+
---
-- **Activity** — select the option that matches your context (e.g. *Practice / Enablement*).
-- **Purpose** — choose the appropriate purpose from the dropdown.
-- **Salesforce IDs** — provide an Opportunity, Campaign or Project ID if required by your activity, otherwise acknowledge that you will supply it within 48 hours.
-- **Cloud Provider** — *CNV* is preferred.
-- **OpenShift Version** — any version of OpenShift is fine.
-- **cluster size** — select a size suited to your needs.
-- **Create users on cluster?** — set as needed.
---
-. Submit the order and wait for the cluster to be provisioned.
+== Requesting the RHEL VM
 
-== Accessing Your Cluster
+Order a RHEL VM from the Red Hat Demo Platform catalog:
 
-Once the cluster is ready, the dashboard provides a **KUBECONFIG** for your cluster. Download it and link it into your local path so that `oc` / `kubectl` use it by default, for example:
+. Open the https://catalog.demo.redhat.com/catalog/babylon-catalog-prod?item=babylon-catalog-prod%2Fsandboxes-gpte.rhel10-base.prod[RHEL VM sandbox catalog item, window=_blank].
+. Click *Order*, accept the defaults, and submit the request.
+. Wait for the provisioning email (or the *Services* page in the catalog) to report the VM is *ready*. This usually takes a few minutes.
 
-[source,bash]
+When provisioning completes, the catalog shows the connection details for your VM, including an *SSH command* similar to the one below.
+
+== Logging In to the Bastion
+
+Copy the SSH command from your provisioning details and run it from your local terminal.
+It looks similar to this (your host name and credentials will differ):
+
+[source,console,subs="verbatim,quotes"]
 ----
-export KUBECONFIG=~/path/to/downloaded/kubeconfig
+$ *ssh lab-user@rhel.example.opentlc.com*
 ----
 
-You are now ready to begin the hands-on exercises.
+NOTE: The catalog details page shows the exact host name and the password (or key) to use. Use the values from *your* provisioning details, not the example above.
+
+Once connected, your shell prompt looks similar to this:
+
+[source,console,subs="verbatim,quotes"]
+----
+[lab-user@rhel ~]$
+----
+
+The `lab-user` account has passwordless `sudo`, which you use in Setup to install packages.
+
+You are now ready to continue with xref:exercises:setup.adoc[Setup], where you install the toolchain and create your Kubernetes cluster.

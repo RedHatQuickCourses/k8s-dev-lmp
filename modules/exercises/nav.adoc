@@ -1,4 +1,5 @@
 * xref:exercises.adoc[]
-** xref:1-build-a-controller-using-client-go-from-scratch.adoc[]
-** xref:2-implement-optimistic-locking-and-leader-election-via-lease.adoc[]
-** xref:3-develop-a-custom-validating-webhook-for-container-registry-enforcement.adoc[]
+** xref:setup.adoc[]
+** xref:1-1-build-a-controller-using-client-go-from-scratch.adoc[]
+** xref:1-2-implement-optimistic-locking-and-leader-election-via-lease.adoc[]
+** xref:2-develop-a-custom-validating-webhook-for-container-registry-enforcement.adoc[]

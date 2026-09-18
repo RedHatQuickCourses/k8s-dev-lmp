@@ -105,7 +105,7 @@ The `leaderelection` package provides a `HealthzAdaptor` that integrates with th
 
 [TIP]
 ====
-For a hands-on exercise implementing leader election with Lease objects, see xref:exercises:2-implement-optimistic-locking-and-leader-election-via-lease.adoc[Exercise 2: Implement Optimistic Locking and Leader Election via Lease].
+For a hands-on exercise implementing leader election with Lease objects, see xref:exercises:1-2-implement-optimistic-locking-and-leader-election-via-lease.adoc[Exercise 1.2: Leader Election via Lease].
 ====
 
 == References

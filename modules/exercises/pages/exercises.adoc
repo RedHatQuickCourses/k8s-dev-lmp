@@ -4,11 +4,13 @@
 :navtitle: Exercises
 
 These hands-on labs reinforce the concepts covered in the modules.
-Each exercise builds a small but complete program that you can run against a Kubernetes cluster.
+Each exercise builds a small but complete program that you run on the lab bastion against a local Kubernetes cluster.
 
-All exercises require access to a running OpenShift cluster.
-If you do not already have one, follow xref:LABENV:index.adoc[Lab Environment] to request a demo cluster and configure your `KUBECONFIG`.
+All exercises run on the *bastion virtual machine* provided with the lab.
+You install the toolchain (Go, `kubectl`, Kind) and spin up a single-node Kubernetes cluster with Kind once, in xref:setup.adoc[Setup], then work through the exercises in order.
+Before you start, follow xref:LABENV:index.adoc[Lab Environment] to request the RHEL VM and log in.
 
-* xref:1-build-a-controller-using-client-go-from-scratch.adoc[] -- Wire up the client-go pipeline from scratch
-* xref:2-implement-optimistic-locking-and-leader-election-via-lease.adoc[] -- Add leader election to your controller
-* xref:3-develop-a-custom-validating-webhook-for-container-registry-enforcement.adoc[] -- Build and deploy a validating admission webhook
+* xref:setup.adoc[] -- Install the toolchain and create your Kind cluster
+* xref:1-1-build-a-controller-using-client-go-from-scratch.adoc[] -- Wire up the client-go pipeline from scratch
+* xref:1-2-implement-optimistic-locking-and-leader-election-via-lease.adoc[] -- Add leader election to your controller
+* xref:2-develop-a-custom-validating-webhook-for-container-registry-enforcement.adoc[] -- Build and deploy a validating admission webhook
