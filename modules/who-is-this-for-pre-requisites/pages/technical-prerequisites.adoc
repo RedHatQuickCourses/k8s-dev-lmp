@@ -1,4 +1,6 @@
 = Technical Prerequisites
+:page-audio-src: technical-prerequisites.wav
+:page-transcript-src: technical-prerequisites.txt
 :navtitle: Technical Prerequisites
 
 This course focuses on the internal mechanics of Kubernetes extensibility—custom controllers, admission webhooks, and distributed state management. To get the most out of it, you should have a solid foundation in container orchestration and be comfortable with the competencies below.
