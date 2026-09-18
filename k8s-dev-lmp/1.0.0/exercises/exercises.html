@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width,initial-scale=1">
     <title>Exercises :: Kubernetes Developer Learning Path</title>
     <link rel="prev" href="../42-ubiquitous-topics/alternative-control-planes-and-form-factors.html">
-    <link rel="next" href="1-build-a-controller-using-client-go-from-scratch.html">
+    <link rel="next" href="setup.html">
     <meta name="generator" content="Antora 3.2.0-alpha.12">
     <link rel="stylesheet" href="../../../_/css/site.css">
     <link rel="stylesheet" href="../../../_/css/vendor/tabs.css">
@@ -66,16 +66,10 @@
 <ul class="nav-list">
   <li class="nav-item" data-depth="1">
     <button class="nav-item-toggle"></button>
-    <a class="nav-link" href="../who-is-this-for-pre-requisites/who-is-this-for-pre-requisites.html">Who Is This For? Prerequisites</a>
+    <a class="nav-link" href="../who-is-this-for-pre-requisites/who-is-this-for-pre-requisites.html">Who Is This For?</a>
 <ul class="nav-list">
   <li class="nav-item" data-depth="2">
-    <a class="nav-link" href="../who-is-this-for-pre-requisites/target-audience-engineers-sys-admins-and-developers-with-container-experience.html">Target Audience and Prerequisites</a>
-  </li>
-  <li class="nav-item" data-depth="2">
-    <a class="nav-link" href="../who-is-this-for-pre-requisites/recommended-prerequisites-basic-distributed-systems-knowledge.html">Prerequisites: Preparing for the Kubernetes Developer Learning Path</a>
-  </li>
-  <li class="nav-item" data-depth="2">
-    <a class="nav-link" href="../who-is-this-for-pre-requisites/ideal-baseline-ckad-certification-or-red-hat-do-180-and-do-280-tracks.html">Preparing for the Kubernetes Developer Learning Path</a>
+    <a class="nav-link" href="../who-is-this-for-pre-requisites/technical-prerequisites.html">Technical Prerequisites</a>
   </li>
 </ul>
   </li>
@@ -271,13 +265,16 @@
     <a class="nav-link" href="exercises.html">Exercises</a>
 <ul class="nav-list">
   <li class="nav-item" data-depth="2">
-    <a class="nav-link" href="1-build-a-controller-using-client-go-from-scratch.html">Exercise 1: Build a Controller</a>
+    <a class="nav-link" href="setup.html">Setup</a>
   </li>
   <li class="nav-item" data-depth="2">
-    <a class="nav-link" href="2-implement-optimistic-locking-and-leader-election-via-lease.html">Exercise 2: Leader Election</a>
+    <a class="nav-link" href="1-1-build-a-controller-using-client-go-from-scratch.html">Exercise 1.1: Build a Controller</a>
   </li>
   <li class="nav-item" data-depth="2">
-    <a class="nav-link" href="3-develop-a-custom-validating-webhook-for-container-registry-enforcement.html">Exercise 3: Validating Webhook</a>
+    <a class="nav-link" href="1-2-implement-optimistic-locking-and-leader-election-via-lease.html">Exercise 1.2: Leader Election</a>
+  </li>
+  <li class="nav-item" data-depth="2">
+    <a class="nav-link" href="2-develop-a-custom-validating-webhook-for-container-registry-enforcement.html">Exercise 2: Validating Webhook</a>
   </li>
 </ul>
   </li>
@@ -286,35 +283,14 @@
   <li class="nav-item" data-depth="0">
 <ul class="nav-list">
   <li class="nav-item" data-depth="1">
-    <button class="nav-item-toggle"></button>
     <a class="nav-link" href="../recommended-reading/recommended-reading.html">Recommended Reading</a>
-<ul class="nav-list">
-  <li class="nav-item" data-depth="2">
-    <a class="nav-link" href="../recommended-reading/programming-kubernetes-hausenblas-schimanski.html">Recommended Reading: Programming Kubernetes</a>
-  </li>
-  <li class="nav-item" data-depth="2">
-    <a class="nav-link" href="../recommended-reading/kubernetes-operators-dobies-wood.html">Kubernetes Operators: Automating the Orchestration Platform</a>
-  </li>
-  <li class="nav-item" data-depth="2">
-    <a class="nav-link" href="../recommended-reading/cncf-operator-whitepaper.html">CNCF Operator Whitepaper</a>
-  </li>
-</ul>
   </li>
 </ul>
   </li>
   <li class="nav-item" data-depth="0">
 <ul class="nav-list">
   <li class="nav-item" data-depth="1">
-    <button class="nav-item-toggle"></button>
     <a class="nav-link" href="../suggested-reading/suggested-reading.html">Suggested Reading</a>
-<ul class="nav-list">
-  <li class="nav-item" data-depth="2">
-    <a class="nav-link" href="../suggested-reading/kubernetes-security-and-observability-creane-gupta.html">Kubernetes Security and Observability</a>
-  </li>
-  <li class="nav-item" data-depth="2">
-    <a class="nav-link" href="../suggested-reading/designing-distributed-systems-burns.html">Designing Distributed Systems: Foundations for Kubernetes Controllers</a>
-  </li>
-</ul>
   </li>
 </ul>
   </li>
@@ -366,28 +342,32 @@
 <h1 class="page">Exercises</h1>
 <div class="paragraph">
 <p>These hands-on labs reinforce the concepts covered in the modules.
-Each exercise builds a small but complete program that you can run against a Kubernetes cluster.</p>
+Each exercise builds a small but complete program that you run on the lab bastion against a local Kubernetes cluster.</p>
 </div>
 <div class="paragraph">
-<p>All exercises require access to a running OpenShift cluster.
-If you do not already have one, follow <a href="../LABENV/index.html" class="xref page">Lab Environment</a> to request a demo cluster and configure your <code>KUBECONFIG</code>.</p>
+<p>All exercises run on the <strong>bastion virtual machine</strong> provided with the lab.
+You install the toolchain (Go, <code>kubectl</code>, Kind) and spin up a single-node Kubernetes cluster with Kind once, in <a href="setup.html" class="xref page">Setup</a>, then work through the exercises in order.
+Before you start, follow <a href="../LABENV/index.html" class="xref page">Lab Environment</a> to request the RHEL VM and log in.</p>
 </div>
 <div class="ulist">
 <ul>
 <li>
-<p><a href="1-build-a-controller-using-client-go-from-scratch.html" class="xref page">Exercise 1: Build a Controller Using client-go</a>&#8201;&#8212;&#8201;Wire up the client-go pipeline from scratch</p>
+<p><a href="setup.html" class="xref page">Setup: Toolchain and Kubernetes Cluster</a>&#8201;&#8212;&#8201;Install the toolchain and create your Kind cluster</p>
 </li>
 <li>
-<p><a href="2-implement-optimistic-locking-and-leader-election-via-lease.html" class="xref page">Exercise 2: Leader Election via Lease</a>&#8201;&#8212;&#8201;Add leader election to your controller</p>
+<p><a href="1-1-build-a-controller-using-client-go-from-scratch.html" class="xref page">Exercise 1.1: Build a Controller Using client-go</a>&#8201;&#8212;&#8201;Wire up the client-go pipeline from scratch</p>
 </li>
 <li>
-<p><a href="3-develop-a-custom-validating-webhook-for-container-registry-enforcement.html" class="xref page">Exercise 3: Validating Webhook for Registry Enforcement</a>&#8201;&#8212;&#8201;Build and deploy a validating admission webhook</p>
+<p><a href="1-2-implement-optimistic-locking-and-leader-election-via-lease.html" class="xref page">Exercise 1.2: Leader Election via Lease</a>&#8201;&#8212;&#8201;Add leader election to your controller</p>
+</li>
+<li>
+<p><a href="2-develop-a-custom-validating-webhook-for-container-registry-enforcement.html" class="xref page">Exercise 2: Validating Webhook for Registry Enforcement</a>&#8201;&#8212;&#8201;Build and deploy a validating admission webhook</p>
 </li>
 </ul>
 </div>
 <nav class="pagination">
   <span class="prev"><a href="../42-ubiquitous-topics/alternative-control-planes-and-form-factors.html">Alternative Control Planes and Form Factors</a></span>
-  <span class="next"><a href="1-build-a-controller-using-client-go-from-scratch.html">Exercise 1: Build a Controller</a></span>
+  <span class="next"><a href="setup.html">Setup</a></span>
 </nav>
 </article>
   </div>
