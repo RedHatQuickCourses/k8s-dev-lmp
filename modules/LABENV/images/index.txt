@@ -1,0 +1,13 @@
+To get started with the hands-on exercises in this learning path, you will be using a bastion virtual machine running Red Hat Enterprise Linux, or RHEL. This virtual machine is your primary workspace; you will handle all tasks, such as editing files, installing tools, building code, and running kubectl, directly from this environment. Because everything takes place inside the VM, there is no need to install any software on your personal laptop.
+
+Initially, the VM starts as a plain RHEL host. In the upcoming setup exercises, you will install the necessary toolchain—including Go, kubectl, and Kind—and create a single-node Kubernetes cluster that runs directly on that virtual machine.
+
+To begin, you need to request your RHEL virtual machine from the Red Hat Demo Platform. First, visit the RHEL VM sandbox catalog item on the Red Hat Demo Platform website. Click the "Order" button, accept the default settings, and submit your request. Provisioning usually takes a few minutes; you can monitor the status either through the notification email you receive or by checking the "Services" page in the catalog. Once the status shows that the VM is "ready," the catalog will display your specific connection details, including an SSH command.
+
+Once your VM is provisioned, you can log in to the bastion host. Copy the SSH command provided in your provisioning details and run it from your local terminal. It will look something like "ssh lab-user@rhel.example.opentlc.com," though your specific host name and credentials will differ.
+
+It is important to remember to always use the exact host name and credentials provided in your unique provisioning details page, rather than using the generic example shown here. 
+
+Once you are connected, your shell prompt will appear as "lab-user@rhel." You will notice that your "lab-user" account is configured with passwordless sudo access, which you will use during the setup phase to install your packages. 
+
+You are now ready to move on to the setup exercises, where we will install the toolchain and create your Kubernetes cluster.

@@ -1,0 +1,7 @@
+Welcome to this module, where we will cover the fundamental building blocks that power every Kubernetes operator and controller.
+
+We begin by examining the architecture of client-go, the official Go client library. We will look at its core components, specifically the Reflector, DeltaFIFO, the Indexer, and the SharedInformerFactory, to understand how they form a pipeline from the Kubernetes API server directly to your controller logic.
+
+From there, we explore the Informer, Lister, and Workqueue pattern. This pattern is key because it decouples event delivery from the reconciliation process. We will also walk through the official sample-controller code, line by line, and discuss common production pitfalls that typically only surface when running at scale.
+
+It is important to note that these components form the foundation that controller-runtime—which we will cover in a later module—abstracts over. A solid understanding of this lower layer is essential for two main reasons: first, it helps you effectively debug operator issues; and second, it allows you to recognize when higher-level abstractions are providing a benefit versus when they might be hiding underlying problems.

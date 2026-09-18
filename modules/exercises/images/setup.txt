@@ -1,0 +1,21 @@
+In this session, we will prepare your development environment by installing the necessary toolchain and setting up a single-node Kubernetes cluster using Kind. You only need to perform these steps once, as all subsequent exercises will reuse this same cluster.
+
+Before we begin, ensure you have your Red Hat Enterprise Linux virtual machine ready and that you can access it via SSH. We also assume that the `lab-user` account has passwordless sudo privileges and that Podman is already installed to serve as the container provider for Kind. You can confirm Podman is ready by running `podman --version`.
+
+Now, let's move to the first step: installing the Go toolchain.
+
+You can install Go directly from the RHEL repositories by running the command `sudo dnf install -y go-toolset`. Once the installation finishes, verify it by running `go version`. You should see version 1.25 or higher installed on your system.
+
+Next, we will install `kubectl`, which is the command-line interface for interacting with your Kubernetes cluster. First, we need to add the official Kubernetes package repository. Copy and run the single command block provided in the instructions to create the repository configuration file. Once that is done, install `kubectl` by running `sudo dnf install -y kubectl`. After the installation, verify it by typing `kubectl version --client`. It is normal to see a warning about the server version since we haven't started the cluster yet.
+
+Moving to the third step, we will install Kind, or "Kubernetes in Docker." We will download the binary, make it executable, and move it to `/usr/local/bin`. Once you’ve done that, confirm the installation by running `kind version`. 
+
+Since we are using Podman, you need to inform Kind to use it as the container provider. Run the command `export KIND_EXPERIMENTAL_PROVIDER=podman`. A helpful tip here: add this export command to your `~/.bashrc` file. This ensures that the environment variable is automatically set in every new terminal session you open for future exercises.
+
+Now, let’s create the cluster. Because RHEL 10 uses `nftables` as its firewall backend, we must ensure Kind’s `kube-proxy` is configured to use native `nftables` mode. This is crucial for internal cluster networking, specifically for Services, to function correctly. Create a configuration file named `kind-config.yaml` in your home directory with the specified networking settings. Please note that if you skip this step, calls to your services will time out, which will interfere with the admission webhooks we’ll use later.
+
+With the configuration ready, create the cluster by running the `kind create cluster` command, naming it "dev" and specifying the Kubernetes version 1.32.0. This process will take a moment as it initializes the nodes, control plane, and networking.
+
+Finally, let’s verify that everything is working. Run `kubectl get nodes` to confirm that the node status is "Ready." Then, run `kubectl cluster-info` to verify the control plane and core services are running.
+
+Your environment is now fully configured and ready for the exercises. Keep in mind that the cluster will run in the background throughout the rest of your training. If you ever need to reset the environment, you can remove the cluster by running `kind delete cluster --name dev` and simply repeating the cluster creation step.

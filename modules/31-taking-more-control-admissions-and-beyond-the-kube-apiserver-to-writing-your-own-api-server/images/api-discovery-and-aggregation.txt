@@ -1,0 +1,21 @@
+Before a client can interact with the Kubernetes API, it needs to understand what resources are available and which operations they support. This is where the discovery API comes into play.
+
+Every Kubernetes cluster publishes discovery data at well-known endpoints. The `/api` endpoint lists the core API group, such as Pods, Services, and ConfigMaps. The `/apis` endpoint lists all named API groups, including apps, batch, and networking, as well as any custom groups. Furthermore, the `/apis/<group>/<version>` endpoint describes the specific resources available within that version, including their scope, supported verbs, and subresources.
+
+For each resource, the discovery response provides the name, namespacing details, and its group-version-kind. Additionally, full structural definitions are available through OpenAPI schema documents at `/openapi/v2` and `/openapi/v3`. Note that OpenAPI v3 is the preferred format because it provides a lossless representation of the API schema.
+
+Now, let's discuss a performance challenge known as the "discovery storm." 
+
+Traditionally, clients had to make one HTTP request per API group version to enumerate resources. In a cluster with many group versions—often 80 or more when using Custom Resource Definitions and aggregated servers—a client would need to make a large burst of requests just to build a complete picture of the API. This is the discovery storm. Historically, this caused significant performance issues, especially when clients like `kubectl` needed to refresh their cache, leading to throttling and potential staleness.
+
+To address this, Kubernetes introduced Aggregated Discovery, which has been stable since version 1.30. This approach collapses all discovery information into just two requests—one to `/api` and one to `/apis`—by using content negotiation. When a client requests this format using a specific HTTP header, the server returns an `APIGroupDiscoveryList` that contains every group, version, and resource in a single response. This also leverages ETag headers, allowing the server to return a "304 Not Modified" response if the data hasn't changed, which saves bandwidth. Clients using `client-go` version 1.26 and later use this automatically whenever the server supports it, with a transparent fallback to the older method for legacy clusters.
+
+Finally, let's look at the two mechanisms Kubernetes provides for adding custom resources: CustomResourceDefinitions, or CRDs, and aggregated API servers.
+
+CRDs are declarative, managed by the kube-apiserver using etcd, and support validation via OpenAPI v3 schemas and CEL expressions. They are best for most extension use cases.
+
+Aggregated API servers, on the other hand, require building a Go binary and allow for custom storage backends, arbitrary validation logic, and support for complex subresources or protocol buffers.
+
+It is important to remember that for the majority of use cases, CRDs are the right choice. You should only consider an aggregated API server if you specifically require a non-etcd storage backend, custom subresources beyond status and scale, or protocol buffer support. 
+
+For further learning, please consult the official Kubernetes documentation or the referenced enhancement proposals for aggregated discovery.

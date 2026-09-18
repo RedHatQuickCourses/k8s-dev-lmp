@@ -1,0 +1,23 @@
+When managing Kubernetes clusters, choosing the right approach for enforcing policies is critical. Let’s explore the differences between webhooks and policy engines, and look at the most common solutions available today.
+
+First, consider the difference between raw admission webhooks and policy engines. While raw admission webhooks are powerful, they are often operationally expensive. Each webhook requires you to write code, build and maintain a container image, manage a service, and handle TLS certificates. If you need to manage dozens of policies—such as ensuring all images come from approved registries or that all namespaces have a contact label—that overhead adds up very quickly. Policy engines address this by providing a declarative way to define policies using Custom Resource Definitions, or CRDs. With this approach, you deploy the engine once and express individual policies as Kubernetes objects rather than deploying new code for every rule.
+
+One of the most prominent solutions is OPA Gatekeeper. Gatekeeper integrates the Open Policy Agent with Kubernetes using a constraint framework centered on two types of custom resources. 
+
+The first is the ConstraintTemplate. This defines the policy logic using Rego, which is OPA’s query language, alongside a parameter schema. Templates are reusable, describing both the logic and the parameters that can be customized. 
+
+The second resource is the Constraint itself. A constraint instantiates a template with specific parameters and includes a match block that scopes enforcement to particular resource kinds.
+
+For example, you might create a template that requires specific labels to be present. You would then create a constraint that applies that template specifically to your namespaces, requiring an "owner" label.
+
+Gatekeeper offers two additional powerful features: Audit and Data Replication. Through its audit functionality, Gatekeeper periodically scans existing resources in your cluster to check them against enforced constraints. If it finds violations, it records them in the status field of the constraint object, which helps you identify misconfigurations that existed before your policy was put in place. 
+
+Additionally, for policies that require cross-resource visibility—such as ensuring globally unique hostnames across all your ingresses—Gatekeeper supports data replication. You can use a configuration custom resource to specify which resource types should be cached into OPA for use in your rules.
+
+A newer, built-in alternative is ValidatingAdmissionPolicy, which reached stable status in Kubernetes version 1.30. This uses the Common Expression Language, or CEL, for policy evaluation. 
+
+The primary advantage here is that these policies are evaluated directly inside the Kubernetes API server. This eliminates the need for external webhook deployments, TLS certificates, and the network latency of external calls. These CEL-based policies are an excellent choice for straightforward validation rules, such as checking label presence or verifying resource limits.
+
+To summarize, here is a quick tip to help you choose the right tool: Use Gatekeeper when you require complex, cross-resource policies, need to audit existing cluster resources, or require the full expressiveness of the Rego language. Use ValidatingAdmissionPolicy for simpler, latency-sensitive validations that benefit from running directly within the API server. 
+
+For further reading, you can consult the official Kubernetes documentation or the resources provided in the course references.

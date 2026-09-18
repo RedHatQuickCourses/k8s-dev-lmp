@@ -1,0 +1,9 @@
+In this module, we are going to explore the challenges of working in distributed systems, specifically when multiple controller replicas are managing shared resources. 
+
+Once you move to a distributed environment, issues like race conditions, stale caches, and split-brain scenarios are no longer just theoretical concepts; they become your daily operational reality. To help you manage these challenges, we will examine four essential layers of defense.
+
+First, you will learn how to structure your Reconcile loop to ensure every invocation is idempotent and fully tolerant of potentially stale data. 
+
+Next, we will cover the theory behind distributed locks and discuss why a naive approach to locking is insufficient for maintaining system correctness. 
+
+From there, you will learn how to implement Kubernetes-native leader election using Lease objects. Finally, we will explore controller sharding, which is a powerful strategy for scaling your reconciliation processes beyond the limitations of a single active replica.

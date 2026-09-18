@@ -1,0 +1,22 @@
+Leader election is a critical mechanism in Kubernetes that allows multiple controller replicas to coordinate their work. By using leader election, only one replica—the leader—actively reconciles resources at any given time, while standby replicas remain ready to take over if the leader becomes unresponsive.
+
+To understand how this works, we look at the role of the Lease object, which acts as the coordination mechanism. 
+
+The process follows a specific sequence:
+First, a Lease object is created in a designated namespace, typically the controller’s own namespace. 
+Second, multiple controller replicas attempt to acquire this lease by setting the holderIdentity to their own unique identifier. 
+Third, the Kubernetes API server uses optimistic concurrency control to ensure that only one replica succeeds; any others will receive a conflict error. 
+Fourth, the current leader periodically renews the lease by updating the renewTime. 
+Finally, if the leader fails to renew within the designated lease duration, the lease is considered expired, allowing another replica to step in and acquire it.
+
+It is important to note that the leaderelection package in client-go uses local timestamps for these determinations. It does not trust the renewTime value stored in the lease record itself, which makes the system tolerant to clock skew, provided that skew does not occur at an unbounded rate.
+
+When implementing this in Go, you will use the leaderelection package. This involves configuring a LeaseLock with your controller's identity and defining the LeaderElectionConfig. Key parameters include the LeaseDuration, which defines how long a non-leader waits after observing a renewal before attempting to acquire the lease; the RenewDeadline, which is the time limit for a leader to successfully renew before giving up; and the RetryPeriod, which dictates how frequently candidates attempt to acquire or renew the lease. In production environments, the kube-controller-manager uses defaults of 15 seconds, 10 seconds, and 2 seconds respectively for these values.
+
+To ensure your controller has the necessary permissions, your ServiceAccount must be granted access to Lease objects. Specifically, you need to create a Role that allows the get, create, and update verbs on the coordination.k8s.io API group. You then bind this Role to your controller's ServiceAccount using a RoleBinding in the namespace where the lease lives.
+
+For monitoring, the leaderelection package includes a HealthzAdaptor. This integrates with the standard slash-healthz endpoint. If a leader fails to renew its lease but has not yet exited, the health check will report the process as unhealthy. This is very useful because it allows your liveness probes to detect the issue and restart the stuck leader process.
+
+A useful tip for your learning path: for a hands-on exercise implementing this logic with Lease objects, be sure to consult the course materials for Exercise 1.2 on leader election.
+
+For additional study, you can refer to the Kubernetes-powered leader election guide or the official leaderelection package documentation, both of which are available through the links in the provided reference materials.

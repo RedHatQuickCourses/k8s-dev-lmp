@@ -1,0 +1,7 @@
+To further your learning, we have compiled a list of resources that provide additional depth on the topics covered in this course. While these readings are not required, they serve as valuable references that complement the modules you are studying.
+
+First, for those interested in Kubernetes Security and Observability by Brendan Creane and Amit Gupta, this book acts as a practical guide to implementing robust security and effective monitoring. It covers essential topics such as network policies, role-based access control design, runtime security, and observability patterns. This text is an excellent companion to our module on cluster hardening, networking, and authentication.
+
+Second, if you want to explore the architecture of distributed systems, we recommend Designing Distributed Systems by Brendan Burns. This book explores common patterns, including sidecar, ambassador, and adapter, and demonstrates how they are implemented within a Kubernetes environment. It provides a strong conceptual foundation for the distributed challenges we discuss in this course, such as idempotency, leader election, and controller sharding. 
+
+We encourage you to consult these resources to deepen your understanding of these core concepts.

@@ -1,0 +1,37 @@
+The operator concept has been formalised through years of building controllers for stateful workloads. In this lesson, we will explore the precise definition of an operator, the maturity model used to gauge capabilities, the major frameworks available, and the design patterns that help maintain operators at scale.
+
+First, let’s define what an operator actually is. An operator is a Kubernetes extension that uses custom resources to manage applications and their components. More concretely, an operator encodes domain-specific operational knowledge—such as installation sequences, upgrade migrations, backup procedures, and failure recovery—into software that runs inside your cluster.
+
+An operator combines three essential elements. First, one or more Custom Resource Definitions, or CRDs, which let users declare the desired state of an application using Kubernetes-native YAML. Second, a controller that watches those custom resources and continuously reconciles the real world with the declared intent. And third, the domain knowledge itself, representing the operational runbook that a human expert would otherwise execute by hand. 
+
+It is important to understand that the distinction between a plain controller and an operator is that domain knowledge. A controller that simply creates a Pod when a custom resource appears is just a controller. An operator, however, is one that knows how to perform complex tasks, such as a zero-downtime database migration during an upgrade.
+
+To help teams plan their development, we use a five-level maturity model to describe what an operator can do at each stage. 
+
+At Level one, we have Basic Install, which focuses on automated application provisioning and configuration. 
+Level two, Seamless Upgrades, adds the ability to perform patch and minor version upgrades, including dependency updates and custom migration steps. 
+Level three, Full Lifecycle, introduces backup, restore, and failure recovery so the application can survive data-loss scenarios. 
+Level four, Deep Insights, allows for metrics, alerts, log processing, and workload analysis to be surfaced through the operator's status. 
+Finally, Level five, Auto Pilot, provides horizontal and vertical scaling, auto-configuration tuning, and anomaly detection with no human input. 
+
+Most open-source operators ship at Level one or two. Reaching Level three requires deep knowledge of the application's storage and consistency model, while Levels four and five provide the sophisticated observability and automation needed for complex stateful systems like databases and message brokers.
+
+Next, let’s look at the common operator frameworks. Each makes different trade-offs regarding language choice and abstraction levels.
+
+Kubebuilder is the upstream Go-based framework maintained by the Kubernetes project. It follows a convention-over-configuration approach, where developers define the logic within a Reconcile method.
+
+The Operator SDK builds on Kubebuilder and adds integration with the Operator Lifecycle Manager for packaging and dependency resolution. Beyond Go, the SDK supports Ansible-based operators, where logic lives in playbooks, and Helm-based operators, which map custom resources to Helm chart releases.
+
+Kopf, or the Kubernetes Operator Pythonic Framework, is an excellent choice for teams that prefer using Python. It uses decorators to trigger reconciliation logic when resources are created or on a timer.
+
+Alternatively, Metacontroller takes a different approach by running as a single controller in the cluster and delegating reconciliation to user-supplied webhooks. This means no custom binary needs to be compiled, and the webhook can even run as a serverless function.
+
+Finally, the community has converged on several design patterns to keep operators focused and composable.
+
+First, follow the "One CRD per Controller" pattern. Each controller should handle exactly one custom resource type. This keeps your loops simple and makes unit testing straightforward. 
+
+Second, aim for a "Single Type per Operator." An operator should manage one type of application. If you have a stack with a frontend, an API gateway, and a database, it is best to build three separate operators rather than one monolithic one. This allows each to be versioned and tested independently.
+
+Third, consider the "Operator of Operators" pattern. When you need to coordinate multiple applications, a meta-operator can manage the lifecycle of subordinate operators. The user interacts with one top-level resource, and the meta-operator delegates the actual work to the component-specific operators.
+
+A useful tip when getting started: choose a framework based on the language your team already knows. If you need OLM integration, the Operator SDK is a natural choice. If you prefer to avoid compiling binaries, Metacontroller’s webhook model is a powerful alternative. For further reading, consult the CNCF Operator White Paper.

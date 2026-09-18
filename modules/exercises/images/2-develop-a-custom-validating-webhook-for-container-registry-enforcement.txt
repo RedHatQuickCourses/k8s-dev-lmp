@@ -1,0 +1,25 @@
+In this exercise, you will build and deploy a validating admission webhook. This component acts as a security gate, rejecting any Pods that attempt to pull container images from unauthorized registries. This hands-on task will reinforce the core concepts of admission control in Kubernetes.
+
+A webhook is essentially an HTTPS server with a single endpoint. The Kubernetes API server sends an admission request in JSON format, and your webhook replies with a JSON response that either allows or denies the action. You will write this server in Python using standard libraries, requiring no external Kubernetes SDKs.
+
+First, confirm you have completed the initial setup and your Kind cluster is running. You should see the control plane node marked as ready. Also, ensure that Python 3, Podman, and OpenSSL are available on your RHEL VM. 
+
+Keep in mind that since your webhook communicates over HTTPS, you must generate a valid TLS certificate. We will handle this using a shell script in the second step.
+
+To understand how admission webhooks function, consider this: whenever a Pod creation request is made, the API server pauses the request and sends an AdmissionReview document to your webhook. Your logic must extract the Pod information, make a decision based on the image registry, and post back an AdmissionReview. A critical requirement is that the UID in your response must match the UID from the incoming request; otherwise, the API server will reject your answer.
+
+Now, let's move to step one: writing the webhook server. Start by creating a working directory for this lab. Within that folder, create a file named `webhook.py`. This script implements the registry policy, constructs the required JSON response, and wraps the server in a TLS socket. Once you have created this file, perform a local sanity check. Save the sample JSON provided in the lab instructions as `sample.json` and run the script against it. Verify that the tool correctly identifies and denies an unauthorized image from Docker Hub.
+
+In step two, you will generate the necessary TLS certificates. Because the API server must trust your webhook, you need a self-signed certificate that includes the correct subject alternative names matching your in-cluster service DNS. Use the provided `generate-certs.sh` script to create these files. Once generated, create a new namespace named `image-webhook` and store the certificate and key in a Kubernetes Secret so the Pod can securely mount them.
+
+In step three, package your server into a container image. Create a Dockerfile that copies your Python script into a base image, then use Podman to build it. Since your local Kind cluster cannot access your host's Podman store, export the image to a tar archive and load it directly into the Kind node using the `kind load image-archive` command.
+
+Moving to step four, deploy your webhook. Apply the provided Deployment and Service manifests. Notice that the Deployment references the image you loaded into Kind and mounts the TLS secret we created earlier. Ensure the container argument correctly lists your approved registries—for this exercise, we will use `quay.io` and `gcr.io`. Wait for the rollout to complete before proceeding.
+
+In step five, register the webhook with the cluster. Apply the `ValidatingWebhookConfiguration` manifest. This tells the API server to send Pod creation and update requests to your service. Pay close attention to the `caBundle` field; the command provided in the manifest will inject the base64-encoded certificate automatically. 
+
+An important warning: we have set the failure policy to "Fail." This is a security best practice, but it means if your webhook is unreachable, Pods will be blocked. Additionally, we use a namespace selector to ensure the system namespaces are not affected, preventing you from accidentally locking yourself out of the cluster.
+
+Finally, in step six, test your configuration. Attempt to create a Pod using an image from `docker.io`. You should see an error message indicating that the request was denied. Then, try creating a Pod using an image from `quay.io`. It should succeed, confirming your policy is working as expected. You can verify these decisions by checking the logs of the webhook deployment.
+
+As you explore further, consider extending your webhook to inspect init containers or ephemeral containers, or perhaps applying the same policy to other workload types like Deployments or Jobs. If you encounter issues, remember to use `kubectl run --dry-run=server` to test your logic without creating live resources, and verify that your TLS certificates and CA bundles are properly aligned.

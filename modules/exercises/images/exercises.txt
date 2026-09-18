@@ -1,0 +1,15 @@
+Welcome to the hands-on lab exercises. These activities are designed to reinforce the concepts you have learned in the previous modules. Throughout these exercises, you will build small, complete programs that you will run on your lab bastion against a local Kubernetes cluster.
+
+All exercises take place on the bastion virtual machine provided for this lab. To get started, you will need to install the necessary toolchain, which includes Go, kubectl, and Kind. You will then use these to spin up a single-node Kubernetes cluster. Please note that you only need to perform this setup once. Before you begin, ensure you have followed the instructions in the Lab Environment guide to request your Red Hat Enterprise Linux virtual machine and log in.
+
+Once your environment is ready, please work through the exercises in the following order:
+
+First, complete the setup module to install the toolchain and create your Kind cluster. 
+
+Next, move on to building a controller from scratch, where you will wire up the client-go pipeline. 
+
+After that, you will implement optimistic locking and leader election using a lease to add robustness to your controller. 
+
+Finally, you will develop a custom validating webhook to enforce container registry policies. 
+
+Take your time as you move through these steps, as each one builds upon the foundation of the last.

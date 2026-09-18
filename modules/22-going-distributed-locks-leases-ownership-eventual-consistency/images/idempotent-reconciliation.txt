@@ -1,0 +1,38 @@
+A controller that cannot be safely re-run on the same input is a controller waiting to break. In this section, we will cover the structure, return semantics, and cache-awareness patterns required to build robust reconciliation logic.
+
+Let’s begin by looking at the structure of the Reconcile method. A well-designed Reconcile method follows a predictable, five-step flow that separates concerns and makes your logic easy to reason about:
+
+First, fetch the resource from the informer cache. If it is not found, it has been deleted, so you should return early. 
+
+Second, check for deletion. If the metadata deletion timestamp is set, run your finalizer logic to clean up external resources, remove the finalizer, and then return.
+
+Third, initialize the resource. This involves adding a finalizer if it is missing, setting default values, and initializing status conditions.
+
+Fourth, perform the core reconciliation. This is where you create, update, or delete owned child resources to match the desired state declared in the spec.
+
+Finally, update the status. Patch the status to reflect the outcome of your operations. Be sure to compare the current object against a deep copy taken before the reconciliation began to avoid unnecessary writes.
+
+Moving on to design, it is critical that you design for idempotency. Every call to Reconcile must produce the same outcome for the same input state, regardless of how many times it runs or what event triggered it. 
+
+Keep these three best practices in mind:
+First, do not depend on the triggering event. The reconciler receives only a name and a namespace, not the event type. Always treat every invocation as an instruction to make reality match the spec.
+
+Second, avoid unnecessary API calls. Compare the observed generation in the status against the metadata generation. If they match and no external drift is possible, skip reconciliation entirely.
+
+Third, make external calls conditional. If your controller provisions cloud resources, always check whether the resource already exists in the desired state before calling the provider API. A successful reconcile of an already up-to-date object should be fast and make zero external calls.
+
+Next, let's discuss Reconcile return values, which control how the system handles requeueing. 
+Returning an empty result with a nil error indicates success; the object will not be requeued unless a new event arrives. 
+If you return an error, the object is requeued using a rate-limited exponential backoff. 
+Returning an explicit requeue set to true is used to requeue without an error; use this sparingly, typically only when an operation is in progress but hasn't failed. 
+Finally, you can set a RequeueAfter duration for periodic reconciliation. This is useful for polling external state that does not generate Kubernetes events. 
+
+An important caution here: returning an error is the standard, preferred way to request a retry. Do not use Requeue set to true as a substitute for proper error handling.
+
+Finally, let’s examine the expectations pattern. Because controller-runtime reads from a local informer cache, there is a short window after a successful write where the cache has not yet observed the change. 
+
+If you create a Pod, but the cache has not seen it yet, the next reconcile will read the stale state, see zero Pods, and incorrectly attempt to create a duplicate. This is a common bug for any controller managing child resources.
+
+The solution is the expectations pattern, which tracks expected writes in memory. Before creating a child, the controller checks if expectations are satisfied, ensuring the cache has caught up. If not, it waits. After creating a child, the controller records the expectation. This pattern is used by core Kubernetes controllers and is essential for any controller managing a dynamic number of child resources.
+
+To learn more, please consult the resources linked in the documentation, including the official guide on writing controllers, information on Server-Side Apply, and common pitfalls for Kubernetes controllers.

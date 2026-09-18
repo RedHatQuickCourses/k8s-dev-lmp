@@ -1,0 +1,21 @@
+In this session, we will explore how controller-runtime and Kubebuilder simplify the process of building Kubernetes controllers.
+
+Previously, we built controllers by manually wiring up informers, listers, and work queues using client-go. Controller-runtime changes this by abstracting that machinery behind a single interface. By implementing a Reconcile method, the framework handles the complex tasks of event filtering, caching, leader election, and worker management for you. This approach dramatically reduces boilerplate code while maintaining the same level-triggered, eventually-consistent model we rely on in Kubernetes.
+
+Every controller-runtime controller is built around a Reconciler struct that embeds a client and a scheme. The Reconcile method is the heart of your controller. It receives a Request object that carries only a NamespacedName. 
+
+It is important to note that the request does not carry the object itself. Instead, you fetch the current state from the cache using the client’s Get method. This is a critical design choice, as it ensures your controller always acts on fresh data rather than potentially stale information passed through event handlers.
+
+Controllers running in-cluster require specific Role-Based Access Control, or RBAC, permissions. Kubebuilder makes this easy by allowing you to place marker comments directly above your Reconcile method. When you run the make manifests command, the controller-gen tool automatically reads these markers to produce your ClusterRole manifest files.
+
+Next, let’s look at the Builder pattern used to define controller behavior. The SetupWithManager method is where you declare exactly what resources your controller cares about. You use the For method to specify the primary resource the controller manages. Every time this resource is created, updated, or deleted, a reconciliation request is added to the queue. 
+
+You can use the Owns method for child resources. When you use this, changes to those child resources trigger a reconciliation of their parent. The framework also automatically handles OwnerReferences, which ensures proper garbage collection when the parent object is deleted. Finally, you can use the Watches method to react to changes in resources that are not owned by your primary object, such as ConfigMaps or Secrets.
+
+A quick word of caution: controller-runtime will automatically create informers for any resource type used in a Get or List operation, even if those resources aren't explicitly declared in your For, Owns, or Watches methods. If left unchecked, this can lead to performance issues because the cache warming process can block your worker goroutine. To prevent this, you can set ReaderFailOnMissingInformer to true on your manager to catch any accidental or implicit watches.
+
+Finally, you might be wondering how this relates to the Operator SDK. The Operator SDK actually uses Kubebuilder under the hood for Go-based operators. Because they share the same underlying controller-runtime library, the generated code is nearly identical. 
+
+The Operator SDK builds on the Kubebuilder baseline by adding features like integration with the Operator Lifecycle Manager for packaging and lifecycle management, the Scorecard tool for validating operator best practices, and support for building operators using Ansible or Helm, rather than just Go. For pure Go operators, the choice between the two tools is largely a matter of which specific ecosystem tools you prefer, as the core development experience remains the same.
+
+For further reading, please consult the Kubebuilder documentation and the Operator SDK resources available online.

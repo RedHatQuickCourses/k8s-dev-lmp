@@ -1,0 +1,27 @@
+When a request hits the Kubernetes API server, it follows a specific path through authentication and authorization before it can reach admission control and storage. Understanding these layers is critical for anyone building controllers or operators that need to interact with the API securely. For a deeper look at the full request lifecycle, please consult the referenced documentation on the API request lifecycle.
+
+Let’s start by looking at authentication: who are you?
+
+In Kubernetes, identity falls into two main categories. First, we have service accounts. These are managed by the Kubernetes API, bound to specific namespaces, and secured using either projected token volumes or Secrets. Every pod you run automatically receives a service account token mounted at a specific file path within the container. 
+
+Second, we have normal users. It is important to note that Kubernetes does not have a formal User object. Instead, identity is derived entirely from the authentication layer through client certificates, bearer tokens, or OIDC tokens.
+
+The API server processes authentication through a chain of plugins. The first plugin to successfully verify the request stops the process and creates a user information structure, known as a UserInfo struct, which contains the username, UID, groups, and any additional fields. Supported methods include X.509 client certificates, bearer tokens, OIDC tokens for human users, service account tokens for in-cluster workloads, and webhook token reviews for external authentication services. If no authenticator matches the request, it is labeled as anonymous, assigning it the system anonymous user and the system unauthenticated group.
+
+Once a user is authenticated, we move to the authorization phase: what are you allowed to do?
+
+Here, the API server consults a chain of authorizer modules. Each module can return a decision of "Allow," "Deny," or "No Opinion." An "Allow" or "Deny" decision stops the chain, while a "No Opinion" passes the request to the next module.
+
+The most common authorizer is Role-Based Access Control, or RBAC. Using Roles and ClusterRoles, you define sets of allowed actions on API resources. Bindings then map these roles to users, groups, or service accounts. Remember that RBAC is purely additive; it can grant permissions but never explicitly denies them.
+
+Next is the Node authorizer, which is specialized for kubelets. A kubelet authenticates as a specific node. The Node authorizer uses a resource graph to grant access only to the pods, secrets, configmaps, and volumes bound to that specific node. This is a vital security feature: it prevents a compromised node from accessing secrets belonging to pods on other nodes. If a request falls outside this graph, the Node authorizer returns "No Opinion," passing it to RBAC.
+
+Keep in mind that the command `kubectl auth can-i --list` only reports permissions granted via RBAC. It does not display rights granted by the Node authorizer, which can be misleading during security audits.
+
+For more complex requirements, Kubernetes also supports webhook authorization. This allows you to send a SubjectAccessReview to an external service, which can return an explicit "Deny," providing a level of control that RBAC cannot achieve on its own.
+
+Finally, there is an emerging approach called ReBAC, or Relation-Based Access Control. Inspired by Google’s Zanzibar research, this method models authorization as a graph with typed nodes and directed relationships. 
+
+Using prototypes like the kube-rebac-authorizer, this approach aims to replace traditional RBAC and Node authorizers with a single, graph-based engine. The advantages include the ability to express native deny rules, manage complex inheritance—such as automatically propagating permissions from a Deployment to its child Pods—and integrating external permission sources like cloud IAM roles directly into the Kubernetes authorization graph. While still experimental, ReBAC represents an exciting direction for fine-grained, graph-aware authorization in the Kubernetes ecosystem.
+
+For more information, please consult the official Kubernetes documentation on authentication, as well as the additional resources provided in the course materials.

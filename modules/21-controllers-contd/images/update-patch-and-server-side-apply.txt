@@ -1,0 +1,25 @@
+Kubernetes provides several different mechanisms for modifying API objects. Choosing the right one depends on your specific role—whether you are a user, a controller, or part of a CI/CD system—and, importantly, whether multiple actors are writing to the same object simultaneously.
+
+Let’s start with the traditional Update, which uses the HTTP PUT method. An Update replaces the entire object. In this workflow, the client must first perform a GET request to retrieve the current object, modify it locally, and then PUT the full object back. Kubernetes manages this using optimistic concurrency. The system checks the resourceVersion field on every PUT request, and if the resource has been modified since the initial GET, the server will reject the write with a 409 Conflict error. This is the simplest approach for resources that only have a single owner. However, the downside is that in systems with many concurrent actors, updates can frequently fail and require retries.
+
+Next, let's discuss Patch types. Unlike an Update, patches send only the specific changes, rather than the full object. Kubernetes supports three distinct patch formats.
+
+First is JSON Patch. This format uses a sequence of discrete operations like add, remove, replace, move, copy, and test, where each operation targets a specific path. This is the right choice when you need precise, surgical changes to specific paths.
+
+Second is JSON Merge Patch. This merges a partial object into the existing one. A key detail to remember here is that setting a field to null removes that field, and lists are replaced entirely rather than merged. This is ideal for simple field updates where list merging isn't required.
+
+Third is Strategic Merge Patch. This is a Kubernetes-specific format that uses special tags to merge lists intelligently. For instance, the containers list in a PodSpec is merged based on the name field. This is the default for client-side kubectl apply and is preferred when you need smart list merging on built-in types. Please note an important caution: Strategic Merge Patch is not supported for custom resources. For those, you should use JSON Merge Patch or Server-Side Apply.
+
+Now, let's look at Server-Side Apply, or SSA. This approach moves the merge algorithm from the client to the API server and introduces the concept of field ownership tracking. 
+
+When you use SSA, each actor—referred to as a field manager—sends a fully specified intent of the fields they care about. The API server records who owns which field in the metadata managedFields section. If two managers try to set the same field to different values, the server returns a conflict rather than silently overwriting the data. Additionally, no-op applies, where the object already matches your intent, do not trigger updates or watch events.
+
+Controllers typically use one of two patterns for SSA. The first is the Reconstructive pattern, where the controller builds the desired state from scratch and applies it. The server then computes the difference. This is the recommended approach for new controllers because it is less error-prone. The second is the Extract-Modify-Apply pattern, used when migrating existing controllers. Here, the controller retrieves the current apply configuration for its field manager, modifies it, and re-applies it, which avoids accidentally claiming ownership of fields it doesn't manage.
+
+Regarding conflict management, controllers should generally use the force option to resolve conflicts, as they are the primary authority for their fields. However, CI/CD systems should not force conflicts. They need to surface these errors to human operators to ensure that, for example, a manual hotfix isn't accidentally overwritten by an automated deployment.
+
+In summary, SSA is highly recommended for multi-controller resources where multiple actors write to the same object. For resources with a single owner, a traditional Update is often simpler.
+
+To recap our options: Use Update for full replacement with optimistic concurrency. Use JSON Patch for surgical path-based changes. Use JSON Merge Patch for simple partial updates, and Strategic Merge Patch for intelligent, Kubernetes-aware list merging. Finally, use Server-Side Apply for complex scenarios requiring field ownership and conflict detection.
+
+For further reading, please consult the official Kubernetes documentation or the referenced resources in our course materials.

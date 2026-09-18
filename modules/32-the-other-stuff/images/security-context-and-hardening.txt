@@ -1,0 +1,25 @@
+In this module, we will discuss security context and hardening in Kubernetes.
+
+A SecurityContext defines the privilege and access control settings for a pod or container. It serves as the primary mechanism for hardening your workloads at the pod specification level.
+
+Kubernetes supports security contexts at two distinct scopes: the pod level and the container level. At the pod level, defined in the spec's security context, settings apply to every container in that pod. This is where you typically configure fields like runAsUser, runAsGroup, fsGroup, and supplementalGroups. Conversely, the container-level security context is defined within the individual container specification. This allows you to override pod-level settings for specific containers, using fields such as allowPrivilegeEscalation, capabilities, readOnlyRootFilesystem, and seccompProfile. Keep in mind that when both levels specify the same field, the container-level value takes precedence.
+
+When configuring your security context, there are several key fields to understand. 
+First, runAsUser and runAsGroup set the user and group IDs for all processes in the container.
+The runAsNonRoot field is critical for security, as it rejects the pod at admission if the container image attempts to run as root, or user ID zero. 
+To further harden the environment, use readOnlyRootFilesystem to mount the container's root filesystem as read-only, which prevents unauthorized writes outside of explicitly mounted volumes. 
+The allowPrivilegeEscalation field controls whether a child process can gain more privileges than its parent; setting this to false applies the no_new_privs kernel flag. 
+You can also use capabilities to add or drop specific Linux privileges. A best practice for a hardened container is to drop all capabilities and then add back only those that are strictly necessary. 
+Finally, the seccompProfile selects a filter that restricts which system calls a process can make, with RuntimeDefault serving as the recommended baseline.
+
+Let's look at an example of a minimal hardened pod configuration. This pod spec follows a defense-in-depth strategy compatible with most workloads. It mandates that the container cannot run as root, cannot escalate privileges, and cannot write to its root filesystem. Furthermore, it restricts the container to the runtime’s default set of system calls. You can consult the provided documentation to view the specific YAML syntax for this configuration.
+
+While these controls are powerful, managing profiles manually across a cluster can be difficult. The Security Profiles Operator, or SPO, is a Kubernetes project that automates the lifecycle management of seccomp, SELinux, and AppArmor profiles. It uses custom resource definitions to distribute policies to nodes. Two features that make the SPO particularly useful are profile recording, which observes a running workload to generate a least-privilege profile automatically, and profile binding, which links a specific profile to a container image so it is applied automatically upon deployment.
+
+Finally, it is important to note that OpenShift extends these concepts with SecurityContextConstraints, or SCCs. These are cluster-scoped policies that determine which security contexts a pod is permitted to use. When a pod is created, an admission controller checks the pod's service account against available SCCs and will reject the pod if the requested context violates the constraints. 
+
+OpenShift includes several default SCCs. For example, restricted-v2 is the default for most workloads and enforces strong security defaults. The anyuid policy is available for legacy images that require root, while the privileged SCC provides unrestricted access to the host. 
+
+A critical warning: granting the privileged SCC to a workload effectively disables all pod-level security controls. You should only use the privileged SCC for infrastructure components that genuinely require host-level access, and you should always assign it through a dedicated service account.
+
+For further learning, you can visit the official Kubernetes documentation on configuring security contexts or explore the GitHub repository for the Security Profiles Operator.

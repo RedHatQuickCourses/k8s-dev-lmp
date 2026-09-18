@@ -1,0 +1,52 @@
+In this exercise, you will build a Kubernetes controller from scratch using the Go client-go library. By the end of this session, you will have a fully functional program that watches for Pod events, processes them through a rate-limiting workqueue, and logs their state. This implementation will demonstrate the complete data flow pipeline used in production-grade Kubernetes controllers.
+
+### Prerequisites
+
+Before we begin, ensure you have completed the initial setup: the Go toolchain and `kubectl` must be installed, and your Kind cluster should be running. You can confirm this by running `kubectl get nodes`. You should see the `dev-control-plane` node in a "Ready" state. Also, ensure you are logged in to the lab bastion virtual machine.
+
+### Step 1: Create the Project
+
+To get started, we need a workspace. Navigate to your home directory, create a new directory for the project, and initialize it as a Go module. Run these commands:
+
+First, change to your home directory: `cd ~`.
+Next, create the project directory and move into it: `mkdir k8s-controller-lab && cd k8s-controller-lab`.
+Finally, initialize the module: `go mod init k8s-controller-lab`.
+
+### Step 2: Add the Kubernetes Client Libraries
+
+Now, we need to pull in the `client-go` and `apimachinery` libraries. We will pin these to version 0.32 to ensure compatibility with your environment.
+
+Run: `go get k8s.io/client-go@v0.32`
+Then run: `go get k8s.io/apimachinery@v0.32`
+
+Keep in mind that this version is specifically chosen to align with the Go version currently installed in your lab environment.
+
+### Step 3: Write the Controller
+
+Now, create a file named `main.go`. This file will contain our complete controller logic. The code performs several key tasks: it builds a Kubernetes clientset, wires up a Pod informer to watch for changes, initializes a rate-limiting workqueue, warms the cache, and runs a worker loop that reconciles each Pod as events occur.
+
+An important note here: always call `cache.WaitForCacheSync` before processing items. If you attempt to start your reconcile loop before the cache is fully synchronized, your controller may miss existing resources.
+
+Also, remember that in this architecture, we enqueue object keys—not the objects themselves—in the event handlers. This ensures we always fetch the latest version of the object from the cache during the reconciliation process.
+
+### Step 4: Resolve Dependencies and Build
+
+With the code in place, let Go download any necessary transitive dependencies and clean up the module files. Run `go mod tidy`. Once that finishes, compile the program with `go build ./...`. Both commands should complete without any errors.
+
+### Step 5: Run the Controller
+
+Now, let's run the program. Use the command `go run main.go`. The controller will connect to your cluster, sync the cache, and log a reconciliation message for every existing Pod in your cluster. It will then continue to watch for new events.
+
+While the controller is running, open a second terminal on your bastion and create a test Pod by running: `kubectl run demo --image=registry.k8s.io/pause:3.9`.
+
+Back in your first terminal, you will see the controller automatically detect the new Pod and print reconciliation messages as it moves through its lifecycle phases. When you are finished observing, press `Ctrl+C` to stop the controller, and then clean up the demo Pod by running `kubectl delete pod demo`.
+
+### Going Further
+
+If you would like to explore further, consider these optional extensions:
+
+First, try detecting missing labels. In the `reconcile` function, check if the Pod labels are empty and log a warning if they are.
+
+Second, try watching your own Custom Resource. Define a Custom Resource Definition, or CRD, and modify the informer and lister to track your resource instead of standard Pods.
+
+Finally, consider the challenge of leader election. If you run two copies of the controller at the same time, you will notice both processing the same events. This duplication is a common challenge, and in our next exercise, we will implement optimistic locking and leader election to ensure only one instance is active at a time.

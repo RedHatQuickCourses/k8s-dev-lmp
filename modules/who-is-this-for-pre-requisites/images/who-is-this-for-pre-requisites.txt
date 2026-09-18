@@ -1,0 +1,11 @@
+Welcome to this learning path. Before we begin, let’s identify who this content is designed for.
+
+This curriculum is intended for technical professionals who already possess practical experience with containerized environments and Kubernetes, and who are now looking to move beyond basic usage into platform-level development.
+
+Specifically, this content is curated for three main groups:
+
+First, software engineers who need to extend Kubernetes functionality by building custom controllers, operators, or specialized API servers.
+
+Second, systems administrators, including site reliability engineers and platform engineers, who are responsible for managing, scaling, and hardening complex Kubernetes environments.
+
+And third, platform architects who are tasked with designing automated workflows or deploying alternative control plane architectures, such as HyperShift or kcp.

@@ -1,0 +1,27 @@
+In this appendix, we provide a collection of key terms and concepts essential to working with Kubernetes and controller development. You can download a PDF version of this course for your reference using the link provided in the course materials.
+
+Let’s define the fundamental concepts you will encounter throughout your work.
+
+First, let’s look at the core components of the Kubernetes control plane. The **API Server**, or `kube-apiserver`, is the central management component. It exposes the Kubernetes API, validates and configures data for API objects, and serves as the front end for the cluster's shared state. All cluster data is persisted in **etcd**, a distributed, consistent key-value store that uses the Raft consensus algorithm to ensure reliability.
+
+To extend the Kubernetes API, we use **CRDs**, or Custom Resource Definitions. This mechanism allows you to define new resource types without needing to build a custom API server, enabling the use of standard Kubernetes tooling. When managing these objects, you will often encounter **GVK**, which stands for Group, Version, and Kind—a tuple used to uniquely identify an object type. Similarly, **GVR**—Group, Version, Resource—is used for identifying API resource endpoints and constructing RESTful URLs.
+
+When working with Kubernetes resources, you will see two main sections: the **Spec**, which declares your desired state, and the **Status**, which reports the current observed state as determined by controllers.
+
+Speaking of automation, **Controllers** are control loops that watch the state of the cluster through the API server and take action to move the current state toward the desired state. The **Reconcile Loop** is the core pattern here; it processes requests for specific objects, compares their actual state to the desired state, and performs idempotent actions to bridge the gap. If you are building these in Go, the **controller-runtime** library provides high-level abstractions to simplify this process.
+
+For interacting with the cluster, we use **client-go**, the official Go client library. Key components within client-go include:
+*   The **Reflector**, which watches the API server and pushes changes into a **DeltaFIFO** queue.
+*   The **Informer**, which maintains an in-memory cache to reduce load on the API server.
+*   The **Lister**, which provides fast, low-latency reads directly from that local cache.
+*   The **SharedInformerFactory**, which allows multiple controllers to share the same watch connections.
+*   And the **Workqueue**, a rate-limited, de-duplicating queue that organizes events for processing by your controller's worker routines.
+
+You will also encounter several mechanisms for lifecycle and coordination. **Finalizers** are keys that prevent a resource from being deleted until specific cleanup logic is performed. **Leases** are used for distributed coordination, such as **Leader Election**, which ensures that only one replica of a controller acts as the leader at any given time.
+
+Finally, keep these technical concepts in mind:
+*   **Scheme** is the registry that maps Go types to their corresponding GVKs.
+*   **Server-Side Apply** is an API feature that tracks field ownership to enable safe concurrent updates by multiple controllers.
+*   **Optimistic Concurrency Control**, or OCC, is the strategy used to detect conflicting writes by checking the `resourceVersion` field.
+*   **Operators** represent a specific pattern of packaging operational knowledge into software to manage applications.
+*   And for those concerned with quality, **KAL**, or the Kubernetes API linter, is a tool that checks your Go struct definitions against official API conventions and best practices.

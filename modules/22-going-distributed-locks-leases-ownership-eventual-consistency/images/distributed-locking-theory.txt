@@ -1,0 +1,37 @@
+Distributed locks appear simple on the surface, but they often conceal subtle failure modes. In this section, we will explore why distributed locks are more complex than they initially seem, and what guarantees you can actually achieve.
+
+Let’s start by looking at why we use distributed locks. There are two primary reasons, each demanding a different level of rigor.
+
+First, there is efficiency. We use locks here to prevent duplicate, expensive work. For example, you wouldn't want two cron jobs running the same heavy batch computation at the same time. If the lock mechanism fails, the worst-case scenario is simply wasted compute.
+
+Second, there is correctness. This is for when you must prevent concurrent operations from corrupting shared state. For instance, two processes must never simultaneously modify the same file in object storage. If the locking mechanism fails here, the result could be data loss or system inconsistency. 
+
+If you are only concerned with efficiency, a simple single-node lock—such as using a Redis SET NX command—is sufficient. However, for correctness, you need much stronger guarantees.
+
+This brings us to an important question: why are these locks so difficult to implement? There are three main categories of failure that undermine naive distributed locking.
+
+The first is process pauses. A lock holder might be paused by garbage collection, an operating system context switch, or a page fault. During this pause, the lock might expire and be acquired by another process. The original process, however, won't know it has lost the lock when it finally resumes.
+
+The second factor is network delays. Messages between a client and the lock service can be delayed arbitrarily. It is entirely possible for a "lock acquired" response to arrive at the client only after that lock has already expired.
+
+Finally, we have clock skew. Nodes in a distributed system do not share a perfectly synchronized clock. Because of this, relying on time-based lock expiration, often called TTLs, becomes unreliable when clocks drift or experience jumps during NTP synchronization.
+
+Please keep in mind that these are not just edge cases. In production environments using garbage-collected runtimes like Java or Go, these failures occur regularly.
+
+The recommended solution for correctness-critical locking is the fencing token pattern. Here is how it works: the lock service issues a monotonically increasing number, called a fencing token, each time a lock is acquired. The client must include this token with every write request to the shared resource. The storage service then rejects any write that carries a token lower than the highest one it has already seen.
+
+This ensures that even if a stale lock holder wakes up after a pause, its writes will be rejected because its token is outdated. The storage service effectively acts as the final arbiter of ordering. For example, imagine Client One acquires a lock with token 34 and then pauses. Client Two acquires the lock with token 35 and performs a write; that is accepted. When Client One resumes and attempts to write with its old token of 34, the storage service will reject it because 35 has already been processed.
+
+Now, let's look at how this is applied in Kubernetes. The Lease resource in the coordination dot k8s dot io API group provides a lightweight coordination primitive built directly into Kubernetes. It serves three main use cases.
+
+First, node heartbeats. Each node renews a lease in the kube-node-lease namespace to signal it is still active. The control plane uses the renew time to detect unresponsive nodes.
+
+Second, leader election. Controllers use leases to elect a single active instance among multiple replicas. The holder sets a holder identity and periodically renews the lease.
+
+Third, API server identity. Each kube-apiserver instance maintains a lease in the kube-system namespace, which allows distributed features to discover and track active API servers.
+
+Custom workloads can also create their own lease objects for coordination. As a best practice, always name your leases in a way that is clearly linked to your product or component. To see these mechanisms in action, you can inspect the leases in your cluster by running "kubectl get leases" for the kube-node-lease or kube-system namespaces.
+
+Before we conclude, it is important to note that Kubernetes leader election via leases does not provide the fencing token guarantees we discussed earlier. Brief periods of dual leadership are possible, because a paused leader can resume alongside a newly elected one. For most controllers, this is acceptable because the reconciliation logic is designed to be idempotent. Additionally, the Kubernetes API server's conflict detection on stale resource versions provides an extra layer of safety against state regression.
+
+For further study, please consult the documentation links provided in the references section of this lesson.

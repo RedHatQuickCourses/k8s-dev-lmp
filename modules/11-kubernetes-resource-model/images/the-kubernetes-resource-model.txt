@@ -1,0 +1,21 @@
+Welcome to this lesson on the Kubernetes Resource Model. 
+
+To understand Kubernetes, we must first recognize that it is not just API-driven; it is fundamentally API-centric. At the core of the control plane sits the API server, which implements common functionality for all system APIs. Both user clients and the internal components that implement business logic—known as controllers—interact through these same APIs. Crucially, all persistent cluster state is stored within etcd.
+
+Because of this design, the line between being part of the system and being built on top of it is intentionally blurred. With extension mechanisms like Custom Resource Definitions and aggregated API servers, you can extend the number of resource types without modifying the core Kubernetes code. Any API that follows these standard patterns automatically works with existing tools and libraries, creating a highly efficient integration model.
+
+Now, let’s discuss declarative control. Kubernetes records user intent as the desired state within its API resources. This intent is carried out by asynchronous controllers. These controllers do not access etcd directly, nor do they communicate via private internal APIs; instead, they interact exclusively through the Kubernetes API.
+
+Controllers are designed to continuously strive to make the observed state match the desired state. They report their progress back to the API server asynchronously. Because both the desired and observed states are visible through the API, it serves as a central coordination point and shared state.
+
+It is important to note that controllers are level-based rather than edge-based. This means a controller operates correctly based on the current desired and observed state, regardless of whether it missed previous intermediate updates. This maximizes fault tolerance. However, controllers can also monitor changes via the watch API to minimize reaction latency, effectively gaining the benefits of an edge-triggered implementation.
+
+The Kubernetes resource model encodes several properties that reinforce the system’s resilience and extensibility. First, there are no hidden internal APIs; all APIs are visible, subject only to authorization. Second, Kubernetes does not support atomic cross-resource transactions. Desired state is updated immediately, but actuation is asynchronous and eventual. Third, there are no exclusive owners. Resources can be read and written by multiple parties, meaning controllers must constantly verify their assumptions. Fourth, status is reconstructable by observation, which helps avoid maintaining opaque internal state. Finally, object references use predictable, immutable names rather than URLs, which facilitates loose coupling and disaster recovery.
+
+When looking at the API topology, the URL structure is organized into groups, versions, namespaces, and resource types. All resources contain metadata, including labels for filtering and grouping, and annotations for configuration and checkpointing. Most resources are split into two main sections: the "spec," which defines the desired state, and the "status," which reflects the observed state. The status is updated via a specific subresource to allow for distinct authorization policies.
+
+Each API resource follows a consistent lifecycle during mutation. This sequence begins with authentication and authorization, followed by the application of defaults, conversion between versions, admission control, and validation. The process also ensures idempotence through immutable names, manages concurrency using resource versioning, and records changes through audit logging. 
+
+When a resource is deleted, additional behaviors may apply, such as graceful termination, the use of finalizers to block deletion until specific conditions are met, and garbage collection, where resources can be automatically cleaned up once their owners are deleted. For read operations, the system supports listing resources, filtering by labels, and watching for changes.
+
+For further information, you can consult the Kubernetes Resource Model documentation, or refer to the additional technical resources provided in your course materials regarding controller architecture and status conventions.

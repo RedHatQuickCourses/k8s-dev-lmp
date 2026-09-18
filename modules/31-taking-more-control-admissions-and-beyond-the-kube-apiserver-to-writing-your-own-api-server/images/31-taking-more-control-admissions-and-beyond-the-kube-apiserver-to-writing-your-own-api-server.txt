@@ -1,0 +1,7 @@
+In this module, we are going to dive deeper into the extension points of the Kubernetes API server. 
+
+We’ll begin by exploring admission control webhooks, which allow you to intercept and modify API requests before they are persisted to storage. From there, we will look at policy engines, which offer a powerful, declarative alternative to writing your own custom webhook logic.
+
+Next, we will cover API discovery and the aggregation layer. We’ll examine how clients enumerate the resources available to them and how you can integrate your own custom API servers directly into the Kubernetes control plane.
+
+Finally, we will discuss scenarios where custom resource definitions, or CRDs, aren't enough. We’ll look at how to build a custom API server backed by your own storage, rather than relying solely on etcd. By the end of this module, you will have a comprehensive understanding of the full spectrum of Kubernetes API-level extensibility.

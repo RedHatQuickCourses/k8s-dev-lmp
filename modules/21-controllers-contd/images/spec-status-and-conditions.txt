@@ -1,0 +1,30 @@
+In Kubernetes, API objects follow a standard convention to separate the user’s desired intent from the system’s observed reality. This is achieved using two primary top-level fields: the "spec" and the "status."
+
+The "spec," or specification, describes the desired state. This field is written by users and represents the complete description of intent, including any defaults or system-expanded values. 
+
+In contrast, the "status" describes the observed state of the resource. This is written by the controller responsible for managing that resource and reflects the most recent observations of the actual cluster state.
+
+These fields are separated into distinct subresources. This architecture supports specific Role-Based Access Control policies; for instance, you can grant a user full write access to the spec while restricting them to read-only access for the status. Conversely, controllers are granted read-only access to the spec and write access to the status. It is also important to note that standard PUT and POST requests ignore the status field to prevent accidental overwrites. To update the status, controllers must use the specific status subresource endpoint.
+
+A critical design principle here is that the system is level-based, not edge-based. This means that if a specification changes multiple times in quick succession, the controller is not required to reach every intermediate state before converging on the most recent one.
+
+To provide deeper insight into a resource’s state, we use "Conditions." Conditions act as a standard mechanism for controllers to report higher-level summaries, allowing other tools to monitor a resource without needing to understand its internal implementation details. 
+
+Each condition follows a standard schema, which includes the condition type, its current status—whether true, false, or unknown—a timestamp of the last transition, and a machine-readable reason combined with a human-readable message.
+
+When implementing conditions, keep these best practices in mind:
+First, apply conditions early. Even if the initial status is unknown, setting the condition shows that the controller is aware of the resource and beginning its work.
+Second, prefer positive polarity. Condition types like "Ready" or "Available" are much easier to reason about than negative ones.
+Third, use short, PascalCase identifiers for your condition types.
+Fourth, include a top-level summary condition, such as "Ready" or "Succeeded," to aggregate detailed information.
+Finally, favor conditions over the older "phase" field pattern, which is now deprecated because it is difficult to extend without breaking backward compatibility. 
+
+When declaring conditions in your Custom Resource Definition, ensure they are defined as a list using merge semantics on the "type" key to allow for proper patching.
+
+As you develop your controllers, be aware of a few common pitfalls regarding status reporting. 
+First, always report conditions. Silence is ambiguous; if no conditions are set, consumers cannot determine if the controller is still working or if there is an issue.
+Second, always set the "ObservedGeneration" field. This allows consumers to verify that the status they are reading matches the current version of the specification. A status of "Ready" is only meaningful if the observed generation matches the current metadata generation.
+Third, remember to re-fetch the resource after performing a status update. Kubernetes uses optimistic concurrency; after you update the status, the resource version changes. Attempting to use the old version will cause a conflict. Always perform a fresh "get" operation to keep your reconciliation loop in sync.
+Fourth, ensure that your status is always derivable from the current state of child resources rather than relying on previous status data. This ensures your controller remains accurate even after a restart.
+
+For more detailed information, you can consult the official Kubernetes API conventions documentation available on the Kubernetes community GitHub repository.
